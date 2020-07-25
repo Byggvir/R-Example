@@ -1,2 +1,2 @@
 # R-Example
-Examples for R scrips
+Examples for R scripts
