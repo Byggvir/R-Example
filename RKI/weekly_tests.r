@@ -26,7 +26,7 @@ data$PPP <- data$TP / data$Positiv
 
 options(scipen=10)
 
-png("rki_prevalence",width=1920,height=1080)
+png("rki_prevalence.png",width=1920,height=1080)
 
 par(mar=c(5.1, 10, 4.1, 10),las=1)
 
