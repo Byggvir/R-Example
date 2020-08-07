@@ -5,24 +5,37 @@
 #
 # 
 
-data <- read.csv("../data/rki_testungen.csv")
-data$proportion <- data$Positiv / data$Testungen 
+tests <- read.csv("../data/rki_testungen.csv")
+cases <- read.csv("../data/Germany.csv")
+
+l <- length(cases$Kw)
+
+cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:l-1])
+cases$incDeath <- c(0, cases$Deaths[2:l]-cases$Deaths[1:l-1])
+
+tests$proportion <- tests$Positiv / tests$Testungen 
 
 # Assumed test sensitivity and spezifity
 
 sens <- 0.999
-spez <- 0.997
+spez <- 0.998
 
 fp <- 1 - spez
 fn <- 1 - sens
 
-data$prevalence <- ( data$Positiv - data$Testungen * fp ) / ( data$Testungen * sens - data$Testungen * fp )
-data$TP <- data$Testungen * data$prevalence * sens
-data$TN <- data$Testungen * ( 1 - data$prevalence ) * sens
-data$FP <- data$Testungen * ( 1 - data$prevalence ) * fp
-data$FN <- data$Testungen * data$prevalence * fn
-data$Infected <- data$TP + data$FN
-data$PPP <- data$TP / data$Positiv
+tests$prevalence <- ( tests$Positiv - tests$Testungen * fp ) / ( tests$Testungen * sens - tests$Testungen * fp )
+tests$TP <- tests$Testungen * tests$prevalence * sens
+tests$TN <- tests$Testungen * ( 1 - tests$prevalence ) * sens
+tests$FP <- tests$Testungen * ( 1 - tests$prevalence ) * fp
+tests$FN <- tests$Testungen * tests$prevalence * fn
+tests$Infected <- tests$TP + tests$FN
+tests$PPP <- tests$TP / tests$Positiv
+
+Kw <- unique(tests$Kw)
+
+for ( i in Kw ) {
+  tests$New[tests$Kw ==i] <- sum(cases$incCases[cases$Kw==i])
+}
 
 options(scipen=10)
 
@@ -32,8 +45,8 @@ par(mar=c(5.1, 10, 4.1, 10),las=1)
 
 par(mfcol=c(1,2))
 
-plot( data$KW
-    , data$prevalence * 100
+plot( tests$Kw
+    , tests$prevalence * 100
     , ylim=c(0,10)
     , type="b"
     , lwd=2
@@ -42,11 +55,11 @@ plot( data$KW
     , ylab=""
     , yaxt="n"
     , main="Estimated Prevalence"
-    , sub="Sensitivity 99.9%; Specificity 99.7%"
+    , sub=paste("Sensitivity ", sens*100, "%; Specificity ", spez*100,"%")
     )
     
-lines(data$KW
-    , data$proportion * 100
+lines(tests$Kw
+    , tests$proportion * 100
     , type="b"
     , lwd=2
     , col="blue"
@@ -74,8 +87,8 @@ grid()
 
 par(new=TRUE)
 
-plot( data$KW
-    , data$PPP * 100
+plot( tests$Kw
+    , tests$PPP * 100
     , type="b"
     , lwd=2
     , col="orange"
@@ -99,8 +112,8 @@ mtext ( "Positive Predictive Power (PPP) [%]"
     )
 
 
-plot( data$KW
-    , data$Infected
+plot( tests$Kw
+    , tests$Infected
     , ylim=c(0,40000)
     , type="b"
     , col="green"
@@ -108,24 +121,29 @@ plot( data$KW
     , ylab=""
     , lwd=3
     , main="Estimated infected"
-    , sub="Sensitivity 99.9%; Specificity 99.7%"
+    , sub=paste("Sensitivity ", sens*100,"%; Specificity ", spez*100,"%")
     )
-lines(data$KW
-    , data$Positiv
+lines(tests$Kw
+    , tests$Positiv
     , type="b"
     , col="blue"
     )
 
-lines(data$KW
-    , data$FP
+lines(tests$Kw
+    , tests$FP
     , type="b"
     , col="red"
+    )
+lines(tests$Kw
+    , tests$New
+    , type="b"
+    , col="black"
     )
 
 legend (
     "topright"
-    , legend=c("Infected","Positive","False positive", "Tested")
-    , col=c("green","blue","red","orange")
+    , legend=c("Infected","Positive","False positive", "Tested", "New infected")
+    , col=c("green","blue","red","orange","black")
     , lty=1
     )
 grid()
@@ -134,8 +152,8 @@ title(ylab="Count", line=5)
 
 par(new=TRUE)
 
-plot( data$KW
-    , data$Testungen
+plot( tests$Kw
+    , tests$Testungen
     , ylim=c(0,800000)
     , type="b"
     , lwd=3
