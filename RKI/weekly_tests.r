@@ -33,9 +33,9 @@ tests$PPP <- tests$TP / tests$Positiv
 
 Kw <- unique(tests$Kw)
 
-for ( i in Kw ) {
-  tests$New[tests$Kw ==i] <- sum(cases$incCases[cases$Kw==i])
-}
+NewInfected <- aggregate(incCases~Kw,FUN=sum, data=cases)
+
+tests$New <- NewInfected$incCases[7:(length(Kw)+6)]
 
 options(scipen=10)
 
@@ -175,4 +175,62 @@ mtext ( "Number of tests"
     , las=0
     )
 
+dev.off()
+
+png("nit.png", width=1920,height=1080)
+
+par(mar=c(5.1, 10, 4.1, 10),las=1)
+
+par(mfcol=c(1,2))
+
+plot( tests$Kw
+    , tests$New/tests$Testungen * 100
+    , ylim=c(0,15)
+    , type="b"
+    , col="green"
+    , xlab="Calendar weeks"
+    , ylab="[%]"
+    , lwd=3
+    , main="Neu-Infizierte : Testungen"
+    , sub="Deutschland 10 bis 31 Kalenderwoche"
+    )
+lines(tests$Kw
+    , tests$proportion * 100
+    , type="b"
+    , lwd=2
+    , col="blue"
+    )
+legend (
+    "topright"
+    , legend=c("Neu-Infizierte","Positive Testungen")
+    , col=c("green","blue")
+    , lty=1
+    )
+grid()
+
+plot( tests$Kw[tests$Kw>19]
+    , tests$New[tests$Kw>19]/tests$Testungen[tests$Kw>19] * 100
+    , ylim=c(0,2)
+    , type="b"
+    , col="green"
+    , xlab="Calendar weeks"
+    , ylab="[%]"
+    , lwd=3
+    , main="Neu-Infizierte : Testungen"
+    , sub="Deutschland 20 bis 31 Kalenderwoche"
+    )
+    
+lines(tests$Kw[tests$Kw>19]
+    , tests$proportion[tests$Kw>19] * 100
+    , type="b"
+    , lwd=2
+    , col="blue"
+    )
+legend (
+    "topright"
+    , legend=c("Neu-Infizierte","Positive Testungen")
+    , col=c("green","blue")
+    , lty=1
+    )
+grid()    
 dev.off()

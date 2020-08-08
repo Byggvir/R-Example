@@ -7,6 +7,8 @@
 
 cases <- read.csv("../data/Germany.csv")
 
+png("Wochentag.png")
+
 ShortDayNames <- c(
       "Mo"
     , "Di"
@@ -20,20 +22,35 @@ ShortDayNames <- c(
 l <- length(cases$Kw)
 
 cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:l-1])
-cases$incDeath <- c(0, cases$Deaths[2:l]-cases$Deaths[1:l-1])
+cases$incDeaths <- c(0, cases$Deaths[2:l]-cases$Deaths[1:l-1])
 
-WTag <- data.frame ( 
-      Tag=0:6
-    , Name=ShortDayNames
-    , Cases=rep(0,7)
-    )
-
-
-for ( i in 0:6 ) {
-  WTag$Cases[WTag$Tag == i] <- sum(cases$incCases[cases$WTag == i])
-}
+WTag <- aggregate(cbind(incCases,incDeaths)~WTag, FUN=sum, data=cases)
 
 plot( 
-    WTag$Name
-    , WTag$Cases
-    , type="b")
+      0:6
+    , WTag$incCases/sum(WTag$incCases)*100
+    , type="b"
+    , col="blue"
+    , xaxt="n"
+    , ylim= c(0,30)
+    , xlab="Wochentag"
+    , ylab="Fälle pro Tag [%]"
+    , main="Anzahl der Fälle nach Wochentag"
+    )
+lines( 
+      0:6
+    , WTag$incDeaths/sum(WTag$incDeaths)*100
+    , type="b"
+    , col="black"
+    )
+axis(1
+    , at= 0:6
+    , labels=ShortDayNames
+    )
+legend( "topright"
+    , legend=c("Erkrankte","Gestorbene")
+    , col=c("blue", "black")
+    , lty=1
+    )
+    
+dev.off()
