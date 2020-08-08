@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Get times series for US death and confirmed cases
+
+TARGET="/home/thomas/git/R-Example/data/"
+TEMP=$(mktemp -d)
+
+GIT="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series"
+TYPES=(confirmed deaths)
+
+function Download {
+
+    for SUBSET in global
+    do
+        for DATA in confirmed deaths
+        do
+            wget -O "${TEMP}/${SUBSET}-${DATA}.csv" \
+                "$GIT/time_series_covid19_${DATA}_${SUBSET}.csv"
+
+        done
+
+    done
+}
+
+function US {
+
+    OFFSET=(11 12)
+
+    for i in 0 1
+    do
+        (   echo UID,day,count
+            cat "$TEMP/US-${TYPES[$i]}.csv" \
+            | sed -n  '1d; s#,"[^"]*"##; s#\(,[^,]*\)\{'${OFFSET[$i]}'\}##; h; :a; x ; s#^\([^,]*\),\([0-9]*\).*#\1,\2#p; g; s#^\([^,]*\),\([0-9]*\)#\1#; t a;' \
+            | awk -F ',' 'BEGIN { i=0;UID==0} {if ($1 == UID) {i=i+1;print ($1 "," i "," $2);} else { UID=$1;i=1; print($1 "," 0 "," 0); print ( $1 "," i"," $2 );}}'
+        ) > "US-${TYPES[$i]}.csv"
+    done
+}
+
+function Germany {
+
+    for DATA in confirmed deaths
+    do
+        ( grep Germany "$TEMP/global-${DATA}.csv" \
+        | tr ',' '\n' \
+        | sed '1,4 d' \
+        ) > "$TEMP/Germany-${DATA}.csv"
+    done
+    ( 
+        echo -e "Date,Kw,WTag,Cases,Deaths\n0,4,0,0,0\n1,4,1,0,0"
+        paste "$TEMP/Germany-${TYPES[0]}.csv" "$TEMP/Germany-${TYPES[1]}.csv" \
+        | awk -F ' ' 'BEGIN { i=2;k=4 } { print (i "," k "," i%7 "," $1 "," $2 ) ; i=i+1 ; if ( i%7==0) {k=k+1}}' 
+    ) > "Germany.csv"
+
+}
+
+pushd ${TARGET}
+
+Download
+# US
+Germany
+
+popd

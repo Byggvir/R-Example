@@ -1,13 +1,13 @@
 #!/usr/bin/env Rscript
 
-# Load statistics from RKI test report
-# Source https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-08-05-de.pdf?__blob=publicationFile
 #
-# 
+# Auswertung der Fallzahlen und Tote nach den Meldungen der John Hopkins University
+# Quelle: https://github.com/CSSEGISandData/COVID-19
+#
 
 cases <- read.csv("../data/Germany.csv")
 
-png("Wochentag.png")
+png("Wochentag.png",width=1920,height=1080)
 
 ShortDayNames <- c(
       "Mo"
@@ -24,6 +24,44 @@ l <- length(cases$Kw)
 cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:l-1])
 cases$incDeaths <- c(0, cases$Deaths[2:l]-cases$Deaths[1:l-1])
 
+cases$UpDown <- c(0, sign(cases$incCases[2:l]-cases$incCases[1:l-1]))
+
+UpDown <- table(cases$WTag[cases$Kw>9],cases$UpDown[cases$Kw>9])
+
+colnames(UpDown, do.NULL = FALSE)
+colnames(UpDown) <- c("Down","Up")
+
+par(mfcol=c(1,2))
+
+plot( 0:6
+    , UpDown[1:7,"Down"]
+    , type="b"
+    , col=c("green")
+    , ylim=c(0,22)
+    , xaxt="n"
+    , xlab="Wochentag"
+    , ylab="Anzahl"
+    , main="Änderungen gegenüber Vortag (Deutschland)"
+    , sub="Tageswert höher / niedirger als Vortag, seit Kalenderwoche 10"
+    )
+    
+lines( 0:6
+    , UpDown[1:7,"Up"]
+    , type="b"
+    , col=c("red")
+    )
+
+axis(1
+    , at= 0:6
+    , labels=ShortDayNames
+    )
+
+legend( "topright"
+    , legend=c("Höher als Vortag", "Niedriger als Vortag")
+    , col=c("red", "green")
+    , lty=1
+    )
+
 WTag <- aggregate(cbind(incCases,incDeaths)~WTag, FUN=sum, data=cases)
 
 plot( 
@@ -35,8 +73,10 @@ plot(
     , ylim= c(0,30)
     , xlab="Wochentag"
     , ylab="Fälle pro Tag [%]"
-    , main="Anzahl der Fälle nach Wochentag"
+    , main="Erkrankungen und Todesfälle (Deutschland)"
+    , sub="Verteilt auf Wochentage; Quelle: https://github.com/CSSEGISandData/COVID-19"
     )
+    
 lines( 
       0:6
     , WTag$incDeaths/sum(WTag$incDeaths)*100
@@ -52,5 +92,9 @@ legend( "topright"
     , col=c("blue", "black")
     , lty=1
     )
-    
+
+options(digits=3)
+print(WTag$incCases/sum(WTag$incCases))
+print(WTag$incDeaths/sum(WTag$incDeaths))
+
 dev.off()
