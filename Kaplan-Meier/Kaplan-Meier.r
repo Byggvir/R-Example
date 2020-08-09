@@ -1,4 +1,11 @@
-#!/usr/bin/r
+#!/usr/bin/env Rscript
+
+# Thomas Arend
+# (c) 2020 
+# GnuPL 3.0
+
+
+# Simulation of the survival times for a Kaplan-Meier example
 
 library("survival")
 library("survminer")
@@ -8,10 +15,8 @@ if(!exists("survivals", mode="function")) source("../common/Survival.r")
 
 png("Kaplan-Meier.png",width=1920,height=1080)
 
-n <-1000    # Number of patients 
+n <-50    # Number of patients 
 d <-14      # Maximum time of observation / end of study
-
-# Sim
 
 pats <- data.frame (
       time=c(survivals(0.1,n),survivals(0.05,n))
@@ -21,6 +26,8 @@ pats <- data.frame (
 
 pats$status[pats$time>d] <- 1
 pats$time[pats$time>d] <- d+1
+
+print(pats)
 
 fit <- survfit(Surv(time, status) ~ sex, data = pats)
 
@@ -42,4 +49,5 @@ ggsurvplot(fit
         )
         
 dev.off()
-print(summary(fit)$table)
+
+print(summary(fit))

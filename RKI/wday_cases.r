@@ -94,7 +94,7 @@ legend( "topright"
     )
 
 options(digits=3)
-print(WTag$incCases/sum(WTag$incCases))
-print(WTag$incDeaths/sum(WTag$incDeaths))
+
+print(c(WTag$incCases/sum(WTag$incCases),WTag$incDeaths/sum(WTag$incDeaths)))
 
 dev.off()
