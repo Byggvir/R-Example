@@ -51,7 +51,7 @@ barplot( daily$incCases
     #, col=colors[1]
     , main = paste("US daily new cases until ", reported) 
     , sub = paste("Date:", heute )
-    , xlab="Day",
+    , xlab="Day"
     , ylab="Count"
     )     
 
@@ -62,7 +62,7 @@ barplot( daily$incDeaths
     #, col=colors[1]
     , main = paste("US daily deaths until ", reported) 
     , sub = paste("Date:", heute )
-    , xlab="Day",
+    , xlab="Day"
     , ylab="Count"
     )     
 
@@ -73,8 +73,6 @@ dev.off()
 png("CasesDeaths-kw.png",width=3840,height=1080)
 
 op = par(mfcol=c(1,2))
-
-print(kwDeaths)
 
 plot(  kwCases
      , type="b"

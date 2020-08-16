@@ -33,6 +33,8 @@ tests$PPP <- tests$TP / tests$Positiv
 
 Kw <- unique(tests$Kw)
 
+lastKw <- max(Kw)
+
 NewInfected <- aggregate(incCases~Kw,FUN=sum, data=cases)
 
 tests$New <- NewInfected$incCases[7:(length(Kw)+6)]
@@ -192,8 +194,8 @@ plot( tests$Kw
     , ylab="[%]"
     , lwd=3
     , main="Neu-Infizierte : Testungen"
-    , sub="Deutschland 10 bis 31 Kalenderwoche"
-    )
+    , sub=paste("Deutschland 10 bis", lastKw, "Kalenderwoche")
+)
 lines(tests$Kw
     , tests$proportion * 100
     , type="b"
@@ -217,7 +219,7 @@ plot( tests$Kw[tests$Kw>19]
     , ylab="[%]"
     , lwd=3
     , main="Neu-Infizierte : Testungen"
-    , sub="Deutschland 20 bis 31 Kalenderwoche"
+    , sub=paste("Deutschland 20 bis", lastKw, "Kalenderwoche")
     )
     
 lines(tests$Kw[tests$Kw>19]

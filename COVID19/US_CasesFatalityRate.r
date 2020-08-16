@@ -10,8 +10,8 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-fconfirmed <- read.csv(file = 'confirmed.csv', header=TRUE, sep=",")
-fdeaths <- read.csv(file = 'deaths.csv')
+fconfirmed <- read.csv(file = '../data/US-confirmed.csv', header=TRUE, sep=",")
+fdeaths <- read.csv(file = '../data/US-deaths.csv')
 
 cd = data.frame(UID=fconfirmed$UID,date=fconfirmed$day,wday=(fconfirmed$day+2)%%7,confirmed=fconfirmed$count)
 
@@ -38,8 +38,6 @@ upordown    = data.frame(date=daily$date,wday=daily$wday,updown= c(0,sign(daily$
 
 message("Counts of ups or downs previous weekday [>0 more ups, <0 more downs]")
 
-print( aggregate(updown~wday,FUN=sum,data=upordown) )
-              
 options(digits=5)
 
 start <- 100
@@ -88,3 +86,4 @@ legend ( 120
     , cex = 2
     , lty = 1
 )
+dev.off()

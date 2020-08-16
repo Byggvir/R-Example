@@ -5,9 +5,18 @@
 # Quelle: https://github.com/CSSEGISandData/COVID-19
 #
 
-cases <- read.csv("../data/Germany.csv")
+args = commandArgs(trailingOnly=TRUE)
 
-png("Wochentag.png",width=1920,height=1080)
+if (length(args)==2) {
+  inputfile <- args[1]
+  country <- args[2]
+} else {
+    stop("Two arguments must be supplied (input file, contry).", call.=FALSE)
+}
+
+cases <- read.csv(inputfile)
+
+png(paste("Wochentag-",country,".png",sep=""),width=1920,height=1080)
 
 ShortDayNames <- c(
       "Mo"
@@ -32,6 +41,8 @@ colnames(UpDown, do.NULL = FALSE)
 colnames(UpDown) <- c("Down","Up")
 
 par(mfcol=c(1,2))
+options(digits=3)
+
 
 plot( 0:6
     , UpDown[1:7,"Down"]
@@ -41,7 +52,7 @@ plot( 0:6
     , xaxt="n"
     , xlab="Wochentag"
     , ylab="Anzahl"
-    , main="Änderungen gegenüber Vortag (Deutschland)"
+    , main=paste("Änderungen gegenüber Vortag (", country,")")
     , sub="Tageswert höher / niedirger als Vortag, seit Kalenderwoche 10"
     )
     
@@ -61,6 +72,7 @@ legend( "topright"
     , col=c("red", "green")
     , lty=1
     )
+grid()
 
 WTag <- aggregate(cbind(incCases,incDeaths)~WTag, FUN=sum, data=cases)
 
@@ -70,10 +82,10 @@ plot(
     , type="b"
     , col="blue"
     , xaxt="n"
-    , ylim= c(0,30)
+    , ylim= c(5,25)
     , xlab="Wochentag"
     , ylab="Fälle pro Tag [%]"
-    , main="Erkrankungen und Todesfälle (Deutschland)"
+    , main=paste("Erkrankungen und Todesfälle (",country,")")
     , sub="Verteilt auf Wochentage; Quelle: https://github.com/CSSEGISandData/COVID-19"
     )
     
@@ -83,6 +95,13 @@ lines(
     , type="b"
     , col="black"
     )
+
+abline( h = 100/7
+  , col = "black"
+  , lty = 3)
+
+text( 6,14, labels=100/7)
+
 axis(1
     , at= 0:6
     , labels=ShortDayNames
@@ -93,8 +112,9 @@ legend( "topright"
     , lty=1
     )
 
-options(digits=3)
+grid()
 
-print(c(WTag$incCases/sum(WTag$incCases),WTag$incDeaths/sum(WTag$incDeaths)))
+#print(WTag$incCases/sum(WTag$incCases))
+#print(WTag$incDeaths/sum(WTag$incDeaths))
 
 dev.off()

@@ -10,8 +10,8 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-fconfirmed <- read.csv(file = 'confirmed.csv', header=TRUE, sep=",")
-fdeaths <- read.csv(file = 'deaths.csv')
+fconfirmed <- read.csv(file = '../data/US-confirmed.csv', header=TRUE, sep=",")
+fdeaths <- read.csv(file = '../data/US-deaths.csv')
 
 cd = data.frame(UID=fconfirmed$UID,date=fconfirmed$day,wday=(fconfirmed$day+2)%%7,confirmed=fconfirmed$count)
 dd = data.frame(UID=fdeaths$UID,date=fdeaths$day,wday=(fdeaths$day+2)%%7,deaths=fdeaths$count)

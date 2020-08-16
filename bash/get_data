@@ -10,7 +10,7 @@ TYPES=(confirmed deaths)
 
 function Download {
 
-    for SUBSET in global
+    for SUBSET in US global
     do
         for DATA in confirmed deaths
         do
@@ -56,7 +56,7 @@ function Germany {
 pushd ${TARGET}
 
 Download
-# US
+US
 Germany
 
 popd
