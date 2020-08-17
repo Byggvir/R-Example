@@ -15,7 +15,7 @@ plot( data$age
     , data$female
     , type="l"
     , col="red"
-    , ylim=c(200000,800000),
+    , ylim=c(200000,800000)
     , xlab="Age [years]"
     , ylab="Number"
     , main="DEU female/male by age"
@@ -28,3 +28,5 @@ polygon(c(data$age,rev(data$age)),c(data$female,rev(data$male)),col="yellow",bor
 lines(data$age,data$male,type="l",col="blue",lwd=2)
 
 legend("bottom", inset=0.05, legend=c("Male","Female"),col=c("blue","red"),lty=1)
+
+dev.off()
