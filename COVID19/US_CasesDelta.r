@@ -11,7 +11,16 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-daily <- read.csv(file = '../data/us.csv', header=TRUE, sep=",")
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args)==2) {
+  inputfile <- args[1]
+  country <- args[2]
+} else {
+  stop("Two arguments must be supplied (input file, contry).", call.=FALSE)
+}
+
+daily <- read.csv(inputfile)
 
 reported <- format(as.Date("2020-01-22") + max(daily$Date), "%d %b %Y")
 
@@ -26,13 +35,17 @@ options(Outdec=".")
 
 colors=c("black","red","green","blue","orange","darkgreen","cyan")
 
-png("CasesDeathsDeltaUS.png" ,width=7000,height=5000)
-op = par(mfrow=c(5,7),oma=c(2,1,3,1))
+png( paste("CasesDeathsDelta",country,".png",sep="")
+  , width = 7000
+  , height = 5000
+  )
+
+op = par(mfrow=c(5,7),oma=c(8,5,5,5),mar=c(5,4,8,4))
 
 for ( daysback in c(1,7,14,21,28)) {
   
   updown <- data.frame(
-    date=daily$Date
+      date=daily$Date
     , wday=daily$WTag
     , deltaCases=c(rep(0,daysback),daily$incCases[(daysback+1):m]-daily$incCases[1:(m-daysback)])
     , deltaDeaths=c(rep(0,daysback),daily$incDeaths[(daysback+1):m]-daily$incDeaths[1:(m-daysback)])
@@ -44,11 +57,15 @@ for ( daysback in c(1,7,14,21,28)) {
           , updown$deltaCases[updown$date%%7==w]
           , type="b"
           , col=colors[w+1]
+          , lwd=3
           , xlab=paste("Wochentag ", wdays[w+1])
           , ylab="Anzahl Fälle"
           , ylim=lim
           , main=paste( "Vergleich mit t-", daysback, " Tage", sep='')
-          ,lwd=3
+          , cex.main = 3
+          , cex.sub = 2
+          , cex.lab = 2
+
           )
     abline(h=0, lty=3)
     
@@ -58,6 +75,5 @@ for ( daysback in c(1,7,14,21,28)) {
 
 
 }
-mtext("Wochentagsvergleich - Wochnetag mit Vortag, Tag der Vor- und Vorvorwochen", outer=TRUE,  cex=1,line=-1)
+mtext(paste("Wochentagsvergleich - Wochentag mit Vortag, Tag der Vor- und Vorvorwochen (" ,country, ")" ), outer=TRUE,  cex=5,line=-1)
 dev.off()
-

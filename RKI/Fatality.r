@@ -4,11 +4,12 @@ library(data.table)
 
 CFR <- read.csv("../data/DE_CFR.csv")
 
+print (CFR)
 png("DE_fatality.png", width = 1920, height = 1080)
 
 par(mar=c(10,10,10,10))
 
-plot( CFR$Altersgruppe
+plot( CFR$Age
     , CFR$Male
     , type = "b"
     , col = "blue"
@@ -23,7 +24,7 @@ plot( CFR$Altersgruppe
     )
 
 
-lines( CFR$Altersgruppe
+lines( CFR$Age
       , CFR$Female
       , type="b"
       , col = "red"

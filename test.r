@@ -1,12 +1,10 @@
 #!/usr/bin/r
 
-tests <- read.csv("data/rki_testungen.csv")
-cases <- read.csv("data/Germany.csv")
+require("readODS")
 
-l <- length(cases$Date)
-cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:l-1])
+s <- as.matrix(read_ods("data/SterbeFälleAlter.ods",sheet=2))
 
-Kw <- unique(tests$Kw)
-for ( i in Kw ) {
-  tests$New[tests$Kw ==i] <- sum(cases$incCases[cases$Kw==i])
-}
+barplot(s[,2:3]
+        , beside=TRUE
+)
+axis(1,at=1:23,labels = c(seq(0,100,10)," ",seq(0,100,10)))

@@ -156,7 +156,7 @@ par(new=TRUE)
 
 plot( tests$Kw
     , tests$Testungen
-    , ylim=c(0,800000)
+    , ylim=c(0,1000000)
     , type="b"
     , lwd=3
     , col="orange"

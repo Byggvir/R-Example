@@ -76,12 +76,12 @@ op = par(mfcol=c(1,2))
 
 plot(  kwCases
      , type="b"
-     , xlab = "Kalenerwoche"
+     , xlab = "Kaldenerwoche"
      , ylab = "Anzahl"
 )
 plot( kwDeaths
       , type="b"
-      , xlab = "Kalenerwoche"
+      , xlab = "Kaldenerwoche"
       , ylab = "Anzahl"
 )
 

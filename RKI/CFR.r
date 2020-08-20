@@ -1,8 +1,12 @@
 #!/usr/bin/env Rscript
 
-CFR <- read.csv("../data/DE_CFR.csv")
+require("readODS")
 
-png("DE_crf.png", width = 1920, height = 1080)
+CFR <- read_ods("data/SterbeFälleAlter.ods",sheet=2)
+
+reported <- "19.08.2020"
+
+png("CFR_DEU.png", width = 1920, height = 1080)
 
 par(mar=c(10,10,10,10))
 
@@ -30,7 +34,7 @@ text( x = bp
     
 )
 
-title(sub="Quelle RKI, Altersverteilung 32. Kw und Fallzahlen 13.08.2020",line = 5)
+title(sub=paste("Quelle RKI, Altersverteilung 33. Kw und Fallzahlen vom",reported),line = 5)
 
 grid()
 dev.off()

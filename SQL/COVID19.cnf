@@ -1,0 +1,6 @@
+[COVID19]
+user=rscript
+password=rscript
+host=127.0.0.1
+port=3306
+database=COVID19

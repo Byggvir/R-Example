@@ -1,7 +1,7 @@
-#R version 3.4.4 
+#!/usr/bin/env Rscript 
 # Plot hospitalized cases
 
-d <- read.csv2("stdin")
+d <- read.csv2("../data/Hospitalized.csv")
 d$sum <- d$YR0 + d$YR5  + d$YR18 + d$YR50 + d$YR65
 
 colors <- c("black", "green","blue", "orange", "darkred", "red")
@@ -56,4 +56,4 @@ legend (
     , text.font=4
     , bg='lightblue'
     )
-boxplot(d)
+
