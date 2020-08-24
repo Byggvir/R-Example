@@ -2,7 +2,9 @@
 
 require(data.table)
 
-png("CasesDeaths.png",width=3840,height=1080)
+setwd("~/git/R-Example")
+
+png("png/CasesDeaths.png",width=3840,height=1080)
 #pdf("Cases.pdf",paper="a4r",pointsize=0.1)
 #svg("CasesDeaths.svg",width=1920,height=1080)
 
@@ -12,8 +14,8 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-fconfirmed <- read.csv(file = '../data/US-confirmed.csv', header=TRUE, sep=",")
-fdeaths <- read.csv(file = '../data/US-deaths.csv')
+fconfirmed <- read.csv(file = 'data/US-confirmed.csv', header=TRUE, sep=",")
+fdeaths <- read.csv(file = 'data/US-deaths.csv')
 
 reported <- format(as.Date("2020-01-22") + max(fconfirmed$day), "%d %b %Y")
 

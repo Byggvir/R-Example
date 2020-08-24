@@ -5,7 +5,7 @@ library(data.table)
 data <- as.matrix(read.csv("../data/DEFalleAlterKw.csv"))
 dpop <- read.table(file("../data/DEPopulationAge.csv"), sep=";", header=TRUE)
 
-population <- sum(dpop$male)+sum(dpop$female)
+population <- sum(dpop$both)
 age59 <- sum(dpop$both[1:60])
 age80 <- sum(dpop$both[81:86])
 

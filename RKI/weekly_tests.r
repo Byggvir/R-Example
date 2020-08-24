@@ -5,8 +5,10 @@
 #
 # 
 
-tests <- read.csv("../data/rki_testungen.csv")
-cases <- read.csv("../data/Germany.csv")
+setwd("~/git/R-Example")
+
+tests <- read.csv("data/rki_testungen.csv")
+cases <- read.csv("data/Germany.csv")
 
 l <- length(cases$Kw)
 
@@ -41,7 +43,7 @@ tests$New <- NewInfected$incCases[7:(length(Kw)+6)]
 
 options(scipen=10)
 
-png("rki_prevalence.png",width=1920,height=1080)
+png("png/rki_prevalence.png",width=1920,height=1080)
 
 par(mar=c(5.1, 10, 4.1, 10),las=1)
 

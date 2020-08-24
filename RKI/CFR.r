@@ -2,11 +2,13 @@
 
 require("readODS")
 
+setwd("~/git/R-Example")
+
 CFR <- read_ods("data/SterbeFälleAlter.ods",sheet=2)
 
 reported <- "19.08.2020"
 
-png("CFR_DEU.png", width = 1920, height = 1080)
+png("png/CFR_DEU.png", width = 1920, height = 1080)
 
 par(mar=c(10,10,10,10))
 

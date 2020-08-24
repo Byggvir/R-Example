@@ -7,12 +7,15 @@
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)==2) {
-  inputfile <- args[1]
-  country <- args[2]
-} else {
-    stop("Two arguments must be supplied (input file, contry).", call.=FALSE)
-}
+#if (length(args)==2) {
+#  inputfile <- args[1]
+#  country <- args[2]
+#} else {
+#    stop("Two arguments must be supplied (input file, contry).", call.=FALSE)
+#}
+
+inputfile <- "/home/thomas/git/R-Example/data/Germany.csv"
+country <- "DEU"
 
 cases <- read.csv(inputfile)
 
@@ -38,11 +41,15 @@ cases$UpDown <- c(0, sign(cases$incCases[2:l]-cases$incCases[1:l-1]))
 UpDown <- table(cases$WTag[cases$Kw>9],cases$UpDown[cases$Kw>9])
 
 colnames(UpDown, do.NULL = FALSE)
-colnames(UpDown) <- c("Down","Up")
+
+if (length(colnames(UpDown))==2) {
+  colnames(UpDown) <- c("Down","Up")
+} else {  
+  colnames(UpDown) <- c("Down","Equal","Up")
+}
 
 par(mfcol=c(1,2))
 options(digits=3)
-
 
 plot( 0:6
     , UpDown[1:7,"Down"]
@@ -62,14 +69,22 @@ lines( 0:6
     , col=c("red")
     )
 
+if (length(colnames(UpDown))==3) {
+lines( 0:6
+       , UpDown[1:7,"Equal"]
+       , type="b"
+       , col=c("blue")
+)
+}
+
 axis(1
     , at= 0:6
     , labels=ShortDayNames
     )
 
 legend( "topright"
-    , legend=c("Höher als Vortag", "Niedriger als Vortag")
-    , col=c("red", "green")
+    , legend=c("Höher als Vortag", "Wie Vortag", "Niedriger als Vortag")
+    , col=c("red", "blue", "green")
     , lty=1
     )
 grid()
@@ -118,3 +133,4 @@ grid()
 #print(WTag$incDeaths/sum(WTag$incDeaths))
 
 dev.off()
+

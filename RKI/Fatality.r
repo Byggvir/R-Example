@@ -1,11 +1,13 @@
 #!/usr/bin/env Rscript
 
 library(data.table)
+require("readODS")
 
-CFR <- read.csv("../data/DE_CFR.csv")
+setwd("~/git/R-Example")
 
-print (CFR)
-png("DE_fatality.png", width = 1920, height = 1080)
+CFR <- read_ods("data/SterbeFälleAlter.ods",sheet=2)
+
+png("png/DE_fatality.png", width = 1920, height = 1080)
 
 par(mar=c(10,10,10,10))
 
