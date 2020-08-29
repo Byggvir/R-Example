@@ -4,9 +4,11 @@ require("readODS")
 
 setwd("~/git/R-Example")
 
-CFR <- read_ods("data/SterbeFälleAlter.ods",sheet=2)
+today <- Sys.Date()
+heute <- format(today, "%d %b %Y")
 
-reported <- "19.08.2020"
+CFR <- read_ods("data/SterbeFälleAlter.ods",sheet=2)
+Cases <- read_ods("data/SterbeFälleAlter.ods",sheet=3)
 
 png("png/CFR_DEU.png", width = 1920, height = 1080)
 
@@ -36,7 +38,7 @@ text( x = bp
     
 )
 
-title(sub=paste("Quelle RKI, Altersverteilung 33. Kw und Fallzahlen vom",reported),line = 5)
+title(sub=paste("Quelle RKI, Altersverteilung ", Kw , ". Kw und Todesfälle vom ", heute, sep = "" ) , line = 5)
 
 grid()
 dev.off()

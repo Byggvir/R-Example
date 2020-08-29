@@ -14,12 +14,12 @@ args = commandArgs(trailingOnly=TRUE)
 #    stop("Two arguments must be supplied (input file, contry).", call.=FALSE)
 #}
 
-inputfile <- "/home/thomas/git/R-Example/data/Germany.csv"
+inputfile <- "data/Germany.csv"
 country <- "DEU"
 
 cases <- read.csv(inputfile)
 
-png(paste("Wochentag-",country,".png",sep=""),width=1920,height=1080)
+png(paste("png/Wochentag-",country,".png",sep=""),width=1920,height=1080)
 
 ShortDayNames <- c(
       "Mo"

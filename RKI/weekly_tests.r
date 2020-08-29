@@ -17,10 +17,10 @@ cases$incDeath <- c(0, cases$Deaths[2:l]-cases$Deaths[1:l-1])
 
 tests$proportion <- tests$Positiv / tests$Testungen 
 
-# Assumed test sensitivity and spezifity
+# Assumed test sensitivity and specifity
 
-sens <- 0.999
-spez <- 0.998
+sens <- 0.9999
+spez <- 0.9995
 
 fp <- 1 - spez
 fn <- 1 - sens
@@ -79,11 +79,12 @@ legend (
     , lty=1
     )
 
-axis( side=2
-    , col="blue" 
-    , tick=TRUE,    
-    , col.axis="blue"
+axis( side = 2
+      , col = "blue" 
+    , tick = TRUE
+    , col.axis = "blue"
 )
+
 title(ylab="Prevalence [%]", col.lab="green", las=0)
 title(ylab="Proportion positive tested [%]", line=1, col.lab="blue", las=0)
 
@@ -108,11 +109,12 @@ axis( side=4
     , col.axis="orange"
     , tick=TRUE
 )
+
 mtext ( "Positive Predictive Power (PPP) [%]"
-    , side=4
-    , col="orange"
-    , line=3,
-    , las=0
+    , side = 4
+    , col = "orange"
+    , line = 3
+    , las = 0
     )
 
 
@@ -173,15 +175,15 @@ axis( side=4
     , tick=TRUE
     )
 mtext ( "Number of tests"
-    , col="orange"
-    , side=4
-    , line=5,
-    , las=0
+    , col = "orange"
+    , side = 4
+    , line = 5
+    , las = 0
     )
 
 dev.off()
 
-png("nit.png", width=1920,height=1080)
+png("png/nit.png", width=1920,height=1080)
 
 par(mar=c(5.1, 10, 4.1, 10),las=1)
 
@@ -236,5 +238,6 @@ legend (
     , col=c("green","blue")
     , lty=1
     )
-grid()    
+grid()
+
 dev.off()

@@ -34,6 +34,10 @@ function US {
             | awk -F ',' 'BEGIN { i=0;UID==0} {if ($1 == UID) {i=i+1;print ($1 "," i "," $2);} else { UID=$1;i=1; print($1 "," 0 "," 0); print ( $1 "," i"," $2 );}}'
         ) > "US-${TYPES[$i]}.csv"
     done
+    sudo rm -f /tmp/us.csv us.csv 
+    mysql -u thomas -p -b < ~/git/R-Example/SQL/US_cases.sql
+    sudo mv /tmp/us.csv .
+
 }
 
 function Germany {
@@ -60,3 +64,20 @@ US
 Germany
 
 popd
+pushd ~/git/R-Example/COVID19
+
+for r in *.r
+do
+	echo -e "--- $r ---"
+	Rscript $r
+done
+popd
+pushd ~/git/R-Example/RKI
+
+for r in *.r
+do
+	echo -e "--- $r ---"
+	Rscript $r
+done
+popd
+

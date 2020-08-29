@@ -3,8 +3,12 @@
 library(tidyverse)
 library(scales)
 
+today <- Sys.Date()
+heute <- format(today, "%d %b %Y")
+
 setwd("~/git/R-Example")
-png(filename = "png/prognose_deths.png"
+
+png(filename = "png/prognose_deaths.png"
     , width = 1920
     , height = 1080
     )
@@ -60,5 +64,6 @@ text( 3
      , cex = 5
      , adj = 0
      )
+mtext(paste("Stand:",heute),side=3,adj=1, cex = 2, line = 1)
 
 dev.off()

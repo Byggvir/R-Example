@@ -2,14 +2,14 @@
 
 library(data.table)
 
-data <- as.matrix(read.csv("../data/DEFalleAlterKw.csv"))
-dpop <- read.table(file("../data/DEPopulationAge.csv"), sep=";", header=TRUE)
+data <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
+dpop <- read.table(file("data/DEPopulationAge.csv"), sep=";", header=TRUE)
 
 population <- sum(dpop$both)
 age59 <- sum(dpop$both[1:60])
 age80 <- sum(dpop$both[81:86])
 
-png("DEFalleAlterKw.png", width = 3840, height = 2160)
+png("png/DEFalleAlterKw.png", width = 3840, height = 2160)
 
 par(mar=c(5,5,8,5), mfrow = c(2,5))
 

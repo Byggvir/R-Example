@@ -40,7 +40,7 @@ barplot( daily$incCases # [fromto]
     , main = paste("Daily cases DE ", reported) 
     , sub = ""
     , xlab=""
-    , col=c("red", rep("blue",6)) 
+    , col=c(rep("blue",6),"red") 
     , ylab="Anzahl"
     , names.arg = Tage # [fromto]
     , las = 2
