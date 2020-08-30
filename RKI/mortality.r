@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 
-library(tidyverse)
+#library(tidyverse)
 library(scales)
 
 today <- Sys.Date()
-heute <- format(today, "%d %b %Y")
+heute <- format(today - 1, "%d %b %Y")
 
 setwd("~/git/R-Example")
 
@@ -31,8 +31,8 @@ CFRyear <- data.frame(
 )
 
 deaths <- data.frame (
-    age = population$age
-  , ageband = population$ageband
+    age = Population$age
+  , ageband = Population$ageband
   , deaths = CFRyear$Deaths[Population$ageband+1]
 )
 
@@ -76,6 +76,13 @@ text( 0
       , adj = 0
 )
 
+mtext( paste( "Gestorbene gem. RKI vom", heute )
+       , side = 1
+       , adj = 1
+       , cex = 2
+       , line = 5
+)
+
 bp2 <- barplot( CFRyear$Cases / CFRyear$Population * 100000
                , col = "blue"
                , xlab="Altersgruppe"
@@ -110,9 +117,20 @@ text( 0
                , sep = "" )
       , cex = 3
       , adj = 0
-)
+      )
 
 
-mtext(paste("Stand:",heute),side=3,adj=1, cex = 2, line = 1)
+mtext( paste( "Stand:" , heute )
+       , side = 3
+       , adj = 1
+       , cex = 2
+       , line = 1
+       )
+mtext( paste( "Fälle gem. RKI der ", Kw, ". Kalenderwoche" , sep = "" )
+      , side = 1
+      , adj = 1
+      , cex = 2
+      , line = 5
+      )
 
 dev.off()

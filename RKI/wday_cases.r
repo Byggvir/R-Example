@@ -5,6 +5,8 @@
 # Quelle: https://github.com/CSSEGISandData/COVID-19
 #
 
+setwd("~/git/R-Example")
+
 args = commandArgs(trailingOnly=TRUE)
 
 #if (length(args)==2) {

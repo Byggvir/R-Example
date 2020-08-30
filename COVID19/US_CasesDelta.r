@@ -2,9 +2,6 @@
 
 require(data.table)
 
-#pdf("Cases.pdf",paper="a4r",pointsize=0.1)
-#svg("CasesDeaths.svg",width=1920,height=1080)
-
 wdays <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 colors <-c( "red", "yellow", "green", "blue", "black" )
 
@@ -35,7 +32,7 @@ options(Outdec=".")
 
 colors=c("black","red","green","blue","orange","darkgreen","cyan")
 
-png( paste("CasesDeathsDelta",country,".png",sep="")
+png( paste("png/CasesDeathsDelta",country,".png",sep="")
   , width = 7000
   , height = 5000
   )

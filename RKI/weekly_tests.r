@@ -53,7 +53,7 @@ plot( tests$Kw
     , tests$prevalence * 100
     , ylim=c(0,10)
     , type="b"
-    , lwd=2
+    , lwd=5
     , col="green"
     , xlab="Calendar weeks"
     , ylab=""
