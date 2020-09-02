@@ -1,6 +1,10 @@
 #!/usr/bin/env Rscript
 
 library(data.table)
+library(readODS)
+
+setwd("~/git/R-Example")
+
 
 data <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
 dpop <- read.table(file("data/DEPopulationAge.csv"), sep=";", header=TRUE)

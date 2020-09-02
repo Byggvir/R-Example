@@ -9,30 +9,35 @@ op <- par(mfcol=c(2,1))
 
 DiceProb <- c(1/9,rep(1/6,4),2/9)
 
-w1 <- sample(1:6,100,replace=TRUE, prob = DiceProb)
-w2 <- sample(1:6,1000,replace=TRUE, prob = DiceProb)
+dice <- function (n, t) {
+  
+  w <- NA
+  w <- sample(1:6,n,replace=TRUE, prob = DiceProb)
+  s = sqrt(5/36/n)
 
-s = sqrt(5/36/100)
+  bp <- barplot( table(w)/n*100
+  , main = t
+  , xlab = "Augen %"
+  , ylab = "Würfe [%]"
+  , ylim = c(0,30)
+  )
 
-print (s)
+  text( x = bp 
+      , y = 0
+      , labels = table(w)
+      , pos = 3
+      , cex = 2
+      , col = "black"
+      
+  )
+  abline ( h = ( 1/6 - 1.96 * s ) * 100 )
+  abline ( h = ( 1/6 + 1.96 * s ) * 100 )
+  
+  rm (bp)
+  
+}
 
-barplot( table(w1)/100
-  , main="Test mit 100 Würfen"
-  , xlab = "Augen"
-  , ylim = c(0,0.3)
-)
-
-abline ( h = 1/6 -1.96*s)
-abline ( h = 1/6 +1.96*s)
-
-s = sqrt(5/36/1000)
-
-barplot( table(w2)/1000
-         , main= "Spiel mit 1.ooo Würfen"
-         , xlab = "Augen"
-         , ylim = c(0,0.3)
-         )
-abline ( h = 1/6 -1.96*s)
-abline ( h = 1/6 +1.96*s)
+dice(100, "Test mit 100 Würfen")
+dice(1000, "Spiel mit 1000 Würfen")
 
 dev.off()

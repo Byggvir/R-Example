@@ -1,7 +1,9 @@
 #!/usr/bin/env Rscript
 
 #library(tidyverse)
+
 library(scales)
+library(readODS)
 
 today <- Sys.Date()
 heute <- format(today - 1, "%d %b %Y")
@@ -18,6 +20,9 @@ par(mar=c(10,8,12,8), mfcol = c(2,1) )
 options(big.mark = ".", decimal.mark=",")
 
 CFR <- readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 2)
+Cases <- readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3)
+
+Kw <- max(Cases[,"Kw"])
 
 Population <- read.csv("data/DEPopulationAge.csv", sep=";")
 Population$ageband <- Population[,"age"] %/% 10
