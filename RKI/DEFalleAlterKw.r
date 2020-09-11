@@ -45,16 +45,16 @@ single_plot <- function(x, AG, sumAG) {
    
    options (digits = 3)
    
-   text( Kw
+   text( 30
          ,  sumAG/population*100 +0.5
          ,  paste("Anteil an Bevölkerung [",round(sumAG/population*100,1),"%]")
-         , cex = 3
+         , cex = 2
          , adj = 1
    )
    
    legend(
       "topright"
-      , legend = paste("Altersgruppe", AG)
+      , legend = paste("Altersgruppe", AG, "\nAnteil an Bevölkerung [",round(sumAG/population*100,1),"%]" )
       , col = "black"
       , lty = 1
       , cex = 5

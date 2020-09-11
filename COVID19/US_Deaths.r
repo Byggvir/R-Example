@@ -2,7 +2,9 @@
 
 require(data.table)
 
-png("Deaths.png",width=1920,height=1080)
+setwd("~/git/R-Example")
+
+png("png/Deaths.png",width=1920,height=1080)
 
 wdays <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 colors <-c( "red", "yellow", "green", "blue", "black" )
@@ -10,8 +12,8 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-fconfirmed <- read.csv(file = '../data/US-confirmed.csv', header=TRUE, sep=",")
-fdeaths <- read.csv(file = '../data/US-deaths.csv')
+fconfirmed <- read.csv(file = 'data/US-confirmed.csv', header=TRUE, sep=",")
+fdeaths <- read.csv(file = 'data/US-deaths.csv')
 
 cd = data.frame(UID=fconfirmed$UID,date=fconfirmed$day,wday=(fconfirmed$day+2)%%7,confirmed=fconfirmed$count)
 dd = data.frame(UID=fdeaths$UID,date=fdeaths$day,wday=(fdeaths$day+2)%%7,deaths=fdeaths$count)
@@ -41,7 +43,7 @@ barplot( daily$incDeaths
     #, col=colors[1]
     , main = "US Deaths per day" 
     , sub = paste("Date:", heute )
-    , xlab="Day",
+    , xlab="Day"
     , ylab="Count"
     )     
 

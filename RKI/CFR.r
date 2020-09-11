@@ -14,18 +14,69 @@ Cases <- read_ods("data/SterbeFälleAlter.ods",sheet=3)
 
 Kw <- max (Cases$Kw) 
     
-png("png/CFR_DEU.png", width = 1920, height = 1080)
+png( "png/CFR_DEU.png"
+     , width = 1920
+     , height = 1080
+     )
 
-par(mar=c(10,10,10,10))
-
+par( mfcol=c(3,1), 
+     mar=c(10,10,10,10))
 options(digits = 3,OutDec = ",")
 
-print(CFR)
+sCases <- sum(CFR$Cases)
 
-bp <- barplot( (CFR$Male+CFR$Female)/CFR$Cases *100
+bp <- barplot( CFR$Cases
+               , col = "red"
+               , xlab="Altersgruppe"
+               , ylab="Anzahl"
+               , ylim=c(0,max(CFR$Cases)*1.2)
+               , main="Fälle in Deutschland"
+               , cex.axis = 2
+               , cex.names = 2
+               , cex.main = 4
+               , cex.lab = 3
+               , names.arg = AgeGroups
+)
+
+text( x = bp 
+      , y = CFR$Cases
+      , labels = paste(CFR$Cases, " (", round(CFR$Cases/sCases*100,1), "%)", sep="")
+      , pos = 3
+      , cex = 2
+      , col = "red"
+      
+)
+
+
+sDeaths <- sum(CFR$Male) + sum(CFR$Female)
+
+bp <- barplot( (CFR$Male+CFR$Female)
+               , col = "red"
+               , xlab="Altersgruppe"
+               , ylab="Anzahl"
+               , ylim=c(0,max(CFR$Male+CFR$Female)*1.2)
+               , main="Todesfälle in Deutschland"
+               , cex.axis = 2
+               , cex.names = 2
+               , cex.main = 4
+               , cex.lab = 3
+               , names.arg = AgeGroups
+)
+
+
+text( x = bp 
+      , y = (CFR$Male+CFR$Female)
+      , labels = paste(CFR$Male+CFR$Female, " (", round((CFR$Male+CFR$Female)/sDeaths*100,1), "%)", sep="")
+      , pos = 3
+      , cex = 2
+      , col = "red"
+      
+)
+
+bp <- barplot( (CFR$Male+CFR$Female)/CFR$Cases * 100
     , col = "red"
     , xlab="Altersgruppe"
-    , ylab="Sterblichkeit [%]"
+    , ylab="[%]"
     , ylim=c(0,40)
     , main="Fallsterblichkeit COVID-19 in Deutschland"
     , cex.axis = 2
@@ -35,10 +86,10 @@ bp <- barplot( (CFR$Male+CFR$Female)/CFR$Cases *100
     , names.arg = AgeGroups
     )
 
+
 text( x = bp 
-    , y = (CFR$Male+CFR$Female)/CFR$Cases *100
-    , labels = paste(round((CFR$Male+CFR$Female)/CFR$Cases *100,digits = 2),"%")
-    , pos = 3
+    , y = (CFR$Male+CFR$Female)/CFR$Cases * 100 + 2
+    , labels = paste(round((CFR$Male+CFR$Female)/CFR$Cases * 100,1),"%", sep="")
     , cex = 2
     , col = "red"
     

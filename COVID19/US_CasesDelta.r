@@ -2,6 +2,8 @@
 
 require(data.table)
 
+setwd("~/git/R-Example")
+
 wdays <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 colors <-c( "red", "yellow", "green", "blue", "black" )
 
