@@ -9,13 +9,13 @@ setwd("~/git/R-Example")
 data <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
 dpop <- read.table(file("data/DEPopulationAge.csv"), sep=";", header=TRUE)
 
-AgeGroups <- c("60+","0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80+")
+AgeGroups <- c("50+","0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80+")
 
 Kw <- max(data[,"Kw"])
 
 population <- sum(dpop$both)
 
-age59 <- sum(dpop$both[1:60])
+age_60 <- sum(dpop$both[1:60])
 age80 <- sum(dpop$both[81:86])
 
 png("png/DEFalleAlterKw.png", width = 3840, height = 2160)
@@ -37,6 +37,7 @@ single_plot <- function(x, AG, sumAG) {
       , cex.main = 2
       , sub = "Quelle: Fallzahlen rki.de; Bevölkerung: destatis.de"
    )
+  
 
    abline (
       h = sumAG/population*100
@@ -61,11 +62,9 @@ single_plot <- function(x, AG, sumAG) {
    )
    
    grid()
-   
-   
 }
 
-single_plot(apply(data[,8:12], 1, FUN=sum) / apply(data[,2:12], 1, FUN=sum) , "60+", population - age59)
+single_plot(apply(data[,8:12], 1, FUN=sum) / apply(data[,2:12], 1, FUN=sum) , "60+", population - age_60)
 
 for (a in 2:9) {
    l <- ((a-2)*10+1)

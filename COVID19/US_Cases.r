@@ -72,7 +72,7 @@ grid()
 
 dev.off()
 
-png("CasesDeaths-kw.png",width=3840,height=1080)
+png("png/CasesDeaths-kw.png",width=3840,height=1080)
 
 op = par(mfcol=c(1,2))
 
