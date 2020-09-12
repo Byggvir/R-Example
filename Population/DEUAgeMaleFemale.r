@@ -5,11 +5,13 @@ require(graphics)
 #
 # Diagram with population of male and female of Germany
 #
+
+setwd("~/git/R-Example")
 options(scipen=10)
 
-png("DEPopulationAge.png",width=1920,height=1080)
+png("png/DEPopulationAge.png",width=1920,height=1080)
 
-data <- read.table(file("../data/DEPopulationAge.csv"), sep=";", header=TRUE)
+data <- read.table(file("data/DEPopulationAge.csv"), sep=";", header=TRUE)
 
 plot( data$age
     , data$female
