@@ -13,6 +13,8 @@ heute <- format(today, "%d %b %Y")
 fromto <- c(42:102)
 startdate <- as.Date("2020-01-20")
 
+rm(daily)
+
 daily <- read.csv ( "data/Germany.csv", header = TRUE)
 reported <- format(startdate + max(daily$Date), "%d %b %Y")
 
@@ -32,8 +34,8 @@ Tage <- daily$Date + startdate
 sel <- daily$WTag != 6
 
 Tage[sel] <- NA
+print(daily)
 
-    
 barplot( daily$incCases # [fromto]
     , ylim=c(0,(max(daily$incCases)%/%1000+1)*1000)
     #, col=colors[1]

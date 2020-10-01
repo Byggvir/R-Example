@@ -2,18 +2,13 @@
 
 library(rvest)
 
-all_tables <- read_html( "https://covid.cdc.gov/covid-data-tracker/") %>%
+all_tables <- read_html( "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Gesundheit/Todesursachen/Tabellen/sterbefaelle-unfaelle.html") %>%
   html_table(
       fill= TRUE
     , header= TRUE
     )
 
-print (all_tables)
-
-US <- read.csv("blob:https://covid.cdc.gov/3dca7c8a-2c10-4314-b2db-089e289b751c"
-               , header=TRUE
-               , sep = ","
-               , dec = "."
-               , fill = TRUE
-               )
-head (US)
+unfaelle <- all_tables[[1]][-drop,]
+colnames(unfaelle) <- all_tables[[1]][1,]
+drop <- c(1,2)
+print(unfaelle)

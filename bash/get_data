@@ -35,7 +35,7 @@ function US {
         ) > "US-${TYPES[$i]}.csv"
     done
     sudo rm -f /tmp/us.csv us.csv 
-    mysql -u thomas -p -b < ~/git/R-Example/SQL/US_cases.sql
+    mysql --user=rscript --password=rscript -b < ~/git/R-Example/SQL/US_cases.sql
     sudo mv /tmp/us.csv .
 
 }
