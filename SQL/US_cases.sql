@@ -1,8 +1,12 @@
 USE COVID19;
 
-CREATE TEMPORARY TABLE us_cases (UID BIGINT, date INT, count INT , INDEX (UID, date));
+DROP TABLE us_cases;
 
-CREATE TEMPORARY TABLE us_deaths (UID BIGINT, date INT, count INT , INDEX (UID, date));
+CREATE TABLE us_cases (UID BIGINT, date INT, count INT , INDEX (UID, date));
+
+DROP TABLE us_deaths;
+
+CREATE TABLE us_deaths (UID BIGINT, date INT, count INT , INDEX (UID, date));
 
 LOAD DATA LOCAL INFILE '/home/thomas/git/R-Example/data/US-confirmed.csv' 
     INTO TABLE us_cases 

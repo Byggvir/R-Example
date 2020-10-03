@@ -4,22 +4,15 @@
 # Auswertung der Fallzahlen und Tote nach den Meldungen der John Hopkins University
 # Quelle: https://github.com/CSSEGISandData/COVID-19
 #
+require(data.table)
+library(REST)
 
 setwd("~/git/R-Example")
+source("common/rki_download.r")
 
-args = commandArgs(trailingOnly=TRUE)
-
-#if (length(args)==2) {
-#  inputfile <- args[1]
-#  country <- args[2]
-#} else {
-#    stop("Two arguments must be supplied (input file, contry).", call.=FALSE)
-#}
-
-inputfile <- "data/Germany.csv"
 country <- "DEU"
 
-cases <- read.csv(inputfile)
+cases <- get_rki_kumtab()
 
 png(paste("png/Wochentag-",country,".png",sep=""),width=1920,height=1080)
 
@@ -33,12 +26,11 @@ ShortDayNames <- c(
     , "So"
     )
 
-l <- length(cases$Kw)
+l <- length(cases$Date)
 
-cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:l-1])
-cases$incDeaths <- c(0, cases$Deaths[2:l]-cases$Deaths[1:l-1])
+cases$UpDown <- c(0, sign(cases$incCases[2:l]-cases$incCases[1:(l-1)]))
 
-cases$UpDown <- c(0, sign(cases$incCases[2:l]-cases$incCases[1:l-1]))
+print(head(cases))
 
 UpDown <- table(cases$WTag[cases$Kw>9],cases$UpDown[cases$Kw>9])
 
@@ -50,14 +42,24 @@ if (length(colnames(UpDown))==2) {
   colnames(UpDown) <- c("Down","Equal","Up")
 }
 
-par(mfcol=c(1,2))
-options(digits=3)
+WTag <- aggregate(cbind(incCases,incDeaths)~WTag, FUN=sum, data=cases)
+
+KorrekturFaktor <- data.table (
+  WTag = 0:6
+  , Faktor = sum(WTag$incCases)/WTag$incCases/7
+)
+
+print(KorrekturFaktor)
+
+par( mfcol = c(1,2) )
+
+options( digits = 3 )
 
 plot( 0:6
     , UpDown[1:7,"Down"]
     , type="b"
     , col=c("green")
-    , ylim=c(0,22)
+    , ylim=c(0,40)
     , xaxt="n"
     , xlab="Wochentag"
     , ylab="Anzahl"
@@ -79,7 +81,7 @@ lines( 0:6
 )
 }
 
-axis(1
+axis( 1
     , at= 0:6
     , labels=ShortDayNames
     )
@@ -91,8 +93,6 @@ legend( "topright"
     )
 grid()
 
-WTag <- aggregate(cbind(incCases,incDeaths)~WTag, FUN=sum, data=cases)
-
 plot( 
       0:6
     , WTag$incCases/sum(WTag$incCases)*100
@@ -103,7 +103,7 @@ plot(
     , xlab="Wochentag"
     , ylab="Fälle pro Tag [%]"
     , main=paste("Erkrankungen und Todesfälle (",country,")")
-    , sub="Verteilt auf Wochentage; Quelle: https://github.com/CSSEGISandData/COVID-19"
+    , sub="Verteilt auf Wochentage; Quelle: RKI Kumulative Fälle"
     )
     
 lines( 
@@ -119,7 +119,7 @@ abline( h = 100/7
 
 text( 6,14, labels=100/7)
 
-axis(1
+axis( 1
     , at= 0:6
     , labels=ShortDayNames
     )
@@ -131,8 +131,4 @@ legend( "topright"
 
 grid()
 
-#print(WTag$incCases/sum(WTag$incCases))
-#print(WTag$incDeaths/sum(WTag$incDeaths))
-
 dev.off()
-

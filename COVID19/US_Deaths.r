@@ -27,8 +27,8 @@ n <- length(deaths$deaths)
 daily = data.frame( 
     date=cases$date,
     wday=(cases$date+2)%%7,
-    incCases=c(0,cases$confirmed[2:m]-cases$confirmed[1:m-1]),
-    incDeaths=c(0,deaths$deaths[2:n]-deaths$deaths[1:n-1])
+    incCases=c(0,cases$confirmed[2:m]-cases$confirmed[1:(m-1)]),
+    incDeaths=c(0,deaths$deaths[2:n]-deaths$deaths[1:(n-1)])
     )
 
 wdayCases   <-  aggregate(incCases~wday,FUN=sum,data=daily)

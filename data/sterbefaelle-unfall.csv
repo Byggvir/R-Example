@@ -1,0 +1,12 @@
+;Altersgruppe;Insgesamt;Arbeits-/Schulunfall;Verkehrsunfall;Häuslicher Unfall;Sport-/Spielunfall;Sonstiger Unfall
+3;unter 1 Jahr;23;0;7;13;0;3
+4;1 bis 5;70;0;19;23;4;24
+5;5 bis 15;109;1;50;10;16;32
+6;15 bis 25;663;20;458;27;18;140
+7;25 bis 35;775;42;381;68;20;264
+8;35 bis 45;822;34;297;88;7;396
+9;45 bis 55;1386;74;455;234;26;597
+10;55 bis 65;2039;95;547;559;32;806
+11;65 bis 75;2652;27;404;1050;33;1138
+12;75 bis 85;7806;9;585;3844;45;3323
+13;85 und älter;10827;1;217;6044;26;4539

@@ -1,11 +1,17 @@
 #!/usr/bin/env Rscript 
 # Plot hospitalized cases
 
-d <- read.csv2("../data/Hospitalized.csv")
+setwd("~/git/R-Example")
+
+d <- read.csv2("data/Hospitalized.csv")
+
 d$sum <- d$YR0 + d$YR5  + d$YR18 + d$YR50 + d$YR65
 
 colors <- c("black", "green","blue", "orange", "darkred", "red")
-
+png ("png/hospitalized.png"
+     , width = 1920
+     , height = 1080
+     )
 plot( d$week
     , d$sum
     , type="l"
@@ -57,3 +63,4 @@ legend (
     , bg='lightblue'
     )
 
+dev.off()

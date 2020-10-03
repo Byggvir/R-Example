@@ -25,8 +25,8 @@ reported <- format(as.Date("2020-01-22") + max(daily$Date), "%d %b %Y")
 
 m <- length(daily$Date)
 
-daily$incCases  <- c(0,daily$Cases[2:m]-daily$Cases[1:m-1])
-daily$incDeaths <- c(0,daily$deaths[2:m]-daily$deaths[1:m-1])
+daily$incCases  <- c(0,daily$Cases[2:m]-daily$Cases[1:(m-1)])
+daily$incDeaths <- c(0,daily$deaths[2:m]-daily$deaths[1:(m-1)])
 
 options(digits=7)
 options(scipen=7)

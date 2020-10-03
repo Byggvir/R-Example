@@ -2,7 +2,11 @@
 
 require(data.table)
 
-png("CaseFatalityRate.png",width=1920,height=1080)
+setwd("~/git/R-Example")
+
+png(  "png/CaseFatalityRate.png"
+    , width = 1920
+    , height = 1080)
 
 wdays <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 colors <-c( "red", "yellow", "green", "blue", "black" )
@@ -10,8 +14,8 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-fconfirmed <- read.csv(file = '../data/US-confirmed.csv', header=TRUE, sep=",")
-fdeaths <- read.csv(file = '../data/US-deaths.csv')
+fconfirmed <- read.csv(file = 'data/US-confirmed.csv', header=TRUE, sep=",")
+fdeaths <- read.csv(file = 'data/US-deaths.csv')
 
 cd = data.frame(UID=fconfirmed$UID,date=fconfirmed$day,wday=(fconfirmed$day+2)%%7,confirmed=fconfirmed$count)
 
@@ -27,14 +31,14 @@ n <- length(deaths$deaths)
 daily = data.frame( 
     date=cases$date,
     wday=(cases$date+2)%%7,
-    incCases=c(0,cases$confirmed[2:m]-cases$confirmed[1:m-1]),
-    incDeaths=c(0,deaths$deaths[2:n]-deaths$deaths[1:n-1])
+    incCases=c(0,cases$confirmed[2:m]-cases$confirmed[1:(m-1)]),
+    incDeaths=c(0,deaths$deaths[2:n]-deaths$deaths[1:(n-1)])
     )
 
 wdayCases   <-  aggregate(incCases~wday,FUN=sum,data=daily)
 wdayDeaths  <-  aggregate(incDeaths~wday,FUN=sum,data=daily)
 
-upordown    = data.frame(date=daily$date,wday=daily$wday,updown= c(0,sign(daily$incCases[2:m]-daily$incCases[1:m-1])))
+upordown    = data.frame(date=daily$date,wday=daily$wday,updown= c(0,sign(daily$incCases[2:m]-daily$incCases[1:(m-1)])))
 
 message("Counts of ups or downs previous weekday [>0 more ups, <0 more downs]")
 
@@ -50,7 +54,7 @@ plot( cases$date[start:m]
     #, col=colors[1]
     , main = "US Case Fatality Rate (CFR)" 
     , sub = paste("Date:", heute )
-    , xlab="Day",
+    , xlab="Day"
     , ylab="CFR [%]"
     )     
 grid()

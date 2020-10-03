@@ -4,16 +4,23 @@
 # Source https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-08-05-de.pdf?__blob=publicationFile
 #
 # 
+require(data.table)
+
+setwd("~/git/R-Example")
+source("common/rki_download.r")
+
+library(REST)
 
 setwd("~/git/R-Example")
 
 tests <- read.csv("data/rki_testungen.csv")
-cases <- read.csv("data/Germany.csv")
+# cases <- read.csv("data/Germany.csv")
+cases <- get_rki_kumtab()
 
 l <- length(cases$Kw)
 
-cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:l-1])
-cases$incDeath <- c(0, cases$Deaths[2:l]-cases$Deaths[1:l-1])
+cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:(l-1)])
+cases$incDeaths <- c(0, cases$Deaths[2:l]-cases$Deaths[1:(l-1)])
 
 tests$proportion <- tests$Positiv / tests$Testungen 
 
@@ -39,11 +46,11 @@ lastKw <- max(Kw)
 
 NewInfected <- aggregate(incCases~Kw,FUN=sum, data=cases)
 
-tests$New <- NewInfected$incCases[7:(length(Kw)+6)]
+tests$New <- NewInfected$incCases[1:(length(Kw))]
 
 options(scipen=10)
 
-png("png/rki_prevalence.png",width=1920,height=1080)
+png("png/RKI_prevalence.png",width=1920,height=1080)
 
 par(mar=c(5.1, 10, 4.1, 10),las=1)
 
@@ -239,5 +246,4 @@ legend (
     , lty=1
     )
 grid()
-
 dev.off()

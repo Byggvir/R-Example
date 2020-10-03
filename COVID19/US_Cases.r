@@ -4,7 +4,10 @@ require(data.table)
 
 setwd("~/git/R-Example")
 
-png("png/CasesDeaths.png",width=3840,height=1080)
+png( "png/CasesDeaths.png"
+     , width = 3840
+     , height = 1080
+     )
 #pdf("Cases.pdf",paper="a4r",pointsize=0.1)
 #svg("CasesDeaths.svg",width=1920,height=1080)
 

@@ -7,12 +7,13 @@
 
 # Simulation of the survival times for a Cox regression example
 
+setwd("~/git/R-Example")
 
 library("survival")
 library("survminer")
 library("ggplot2")
 
-if(!exists("survivals", mode="function")) source("../common/Survival.r")
+if(!exists("survivals", mode="function")) source("common/Survival.r")
 
 n <-1000    # Number of patients 
 d <-14      # Maximum time of observation / end of study

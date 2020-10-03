@@ -7,11 +7,13 @@
 
 # Simulation of the survival times for a Kaplan-Meier example
 
+setwd("~/git/R-Example")
+
 library("survival")
 library("survminer")
 library("ggplot2")
 
-if(!exists("survivals", mode="function")) source("../common/Survival.r")
+if(!exists("survivals", mode="function")) source("common/Survival.r")
 
 png("Kaplan-Meier.png",width=1920,height=1080)
 
