@@ -4,13 +4,18 @@
 # Source https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-08-05-de.pdf?__blob=publicationFile
 #
 # 
+library(REST)
 require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
 
-library(REST)
-
+options( 
+  digits=7
+  , scipen=7
+  , Outdec="."
+  , max.print = 3000
+)
 setwd("~/git/R-Example")
 
 tests <- read.csv("data/rki_testungen.csv")

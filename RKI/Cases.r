@@ -34,7 +34,6 @@ Tage <- daily$Date + startdate
 sel <- daily$WTag != 6
 
 Tage[sel] <- NA
-print(daily)
 
 barplot( daily$incCases # [fromto]
     , ylim=c(0,(max(daily$incCases)%/%1000+1)*1000)

@@ -98,4 +98,5 @@ text( x = bp
 title(sub=paste("Quelle RKI, Altersverteilung ", Kw , ". Kw und Todesfälle vom ", heute, sep = "" ) , line = 5)
 
 grid()
+
 dev.off()

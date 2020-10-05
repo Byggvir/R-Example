@@ -25,7 +25,7 @@ get_rki_kumtab <- function () {
   download.file(URL, destfile = dfile )
 
   daily <- read.xlsx2( dfile
-                     , 2
+                     , 1
                      , header=FALSE
                      , startRow = 4
                      , endRow = 4 + d
@@ -40,15 +40,15 @@ get_rki_kumtab <- function () {
   
   
   m <- length(daily$Cases)
+  
   daily$Kw <- 0:(m-1)%/%7+9
   daily$WTag <- 0:(m-1)%%7
-  
   
   daily$incCases <- c(0,daily$Cases[2:m]-daily$Cases[1:(m-1)])
   daily$incDeaths <- c(0,daily$Deaths[2:m]-daily$Deaths[1:(m-1)])
 
-  if (is.na(daily$Cases[m])) { m <- m-1 }
-
+  while( is.na(daily$Cases[m])) { m <- m-1}
+  
   return(daily[1:m,])
 
 }
