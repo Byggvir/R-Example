@@ -1,0 +1,31 @@
+#!/bin/bash
+
+URL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahlen_Kum_Tab.xlsx?__blob=publicationFile"
+TEMP=$(mktemp -d)
+#TEMP="/tmp/rki"
+DEST="$TEMP/rki.xlsx"
+CSV="$TEMP/rki"
+SQL="$TEMP/rki.sql"
+
+curl --output "$DEST" --url "$URL"
+
+ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$DEST" "${CSV}%n.csv"
+
+( cat <<EOF
+USE COVID19;
+DROP TABLE IF EXISTS rki;
+CREATE TABLE rki (day DATE primary key, cases BIGINT, deaths BIGINT);
+INSERT INTO rki VALUES ("2020-02-25",0,0);
+EOF
+sed '/^"/ s#^"[^"]*",#,#' "${CSV}1.csv" \
+| sed '1,3d; s#"[^"]*",##; s#,,#,0,#g; s#,,#,#g'   \
+| awk -F ',' 'BEGIN {i=1}; {if ($2>0) print("INSERT INTO rki VALUES (ADDDATE(\"2020-02-25\"," i ")," $2 "," $5 ");" );i=i+1}'
+) > "$SQL"
+
+mysql --user=rscript --password=rscript < "$SQL"
+
+mysql --user=rscript --password=rscript < "../SQL/RKI_import.sql"
+
+pushd $HOME/git/R-Example/data
+sudo mv /tmp/RKI_nach_{Tag,Kw}.csv .
+popd
