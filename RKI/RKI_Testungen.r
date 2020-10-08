@@ -19,7 +19,7 @@ options(
 setwd("~/git/R-Example")
 
 tests <- read.csv("data/rki_testungen.csv")
-cases <- get_rki_kumtab()
+cases <- get_rki_tag_csv()
 
 l <- length(cases$Kw)
 
@@ -54,57 +54,57 @@ tests$New <- NewInfected$incCases[1:(length(Kw))]
 
 options(scipen=10)
 
-png("png/RKI_prevalence.png",width=1920,height=1080)
+png("png/RKI_Testungen.png",width=1920,height=1080)
 
 par(mar=c(5.1, 10, 4.1, 10),las=1)
 
-par(mfcol=c(1,2))
-
-plot( tests$Kw
-    , tests$prevalence * 100
-    , ylim = c(0,10)
-    , type = "b"
-    , lwd = 5
-    , col = "green"
-    , xlab = "Calendar weeks"
-    , ylab = ""
-    , yaxt = "n"
-    , main = "Estimated Prevalence"
-    , sub = paste("Sensitivity ", sens*100, "%; Specificity ", spez*100,"%")
-    , cex.main = 3
-    , cex.sub = 1
-    )
-    
-lines(tests$Kw
-    , tests$proportion * 100
-    , type="b"
-    , lwd=2
-    , col="blue"
-    )
-
-legend (
-    "topright"
-    , legend=c("Prevalence","Proportion of positive", "Positive predictive power")
-    , col=c(
-          "green"
-        , "blue"
-        , "orange")
-    , lty=1
-    )
-
-axis( side = 2
-      , col = "blue" 
-    , tick = TRUE
-    , col.axis = "blue"
-)
-
-title(ylab="Prevalence [%]", col.lab="green", las=0)
-title(ylab="Proportion positive tested [%]", line=1, col.lab="blue", las=0)
-
-grid()
-
-par(new=TRUE)
-
+# par(mfcol=c(1,2))
+# 
+# plot( tests$Kw
+#     , tests$prevalence * 100
+#     , ylim = c(0,10)
+#     , type = "b"
+#     , lwd = 5
+#     , col = "green"
+#     , xlab = "Calendar weeks"
+#     , ylab = ""
+#     , yaxt = "n"
+#     , main = "Testungen"
+#     , sub = paste("Sensitivity ", sens*100, "%; Specificity ", spez*100,"%")
+#     , cex.main = 3
+#     , cex.sub = 1
+#     )
+#     
+# lines(tests$Kw
+#     , tests$proportion * 100
+#     , type="b"
+#     , lwd=2
+#     , col="blue"
+#     )
+# 
+# legend (
+#     "topright"
+#     , legend=c("Prevalence","Proportion of positive", "Positive predictive power")
+#     , col=c(
+#           "green"
+#         , "blue"
+#         , "orange")
+#     , lty=1
+#     )
+# 
+# axis( side = 2
+#       , col = "blue" 
+#     , tick = TRUE
+#     , col.axis = "blue"
+# )
+# 
+# title(ylab="Prevalence [%]", col.lab="green", las=0)
+# title(ylab="Proportion positive tested [%]", line=1, col.lab="blue", las=0)
+# 
+# grid()
+# 
+# par(new=TRUE)
+# 
 plot( tests$Kw
     , tests$PPP * 100
     , type="b"
