@@ -74,4 +74,16 @@ get_rki_sql <- function (sql="select * from rki;") {
   return(dbRows)
 }
 
-print(get_rki_sql())
+get_rki_tag_csv <- function () {
+  
+  t <- read.csv("data/RKI_nach_Tag.csv", header = TRUE, colClasses = c("Date","integer","integer","integer","integer","integer","integer"))
+  return(t)
+}
+
+get_rki_kw_csv <- function () {
+  
+  t <- read.csv("data/RKI_nach_Kw.csv", header = TRUE)
+  return(t)
+  
+}
+
