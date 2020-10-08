@@ -1,10 +1,10 @@
 USE COVID19;
 
-DROP TABLE us_cases;
+DROP TABLE IF EXISTS us_cases;
 
 CREATE TABLE us_cases (UID BIGINT, date INT, count INT , INDEX (UID, date));
 
-DROP TABLE us_deaths;
+DROP TABLE IF EXISTS us_deaths;
 
 CREATE TABLE us_deaths (UID BIGINT, date INT, count INT , INDEX (UID, date));
 

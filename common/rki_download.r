@@ -2,11 +2,11 @@
 # Download cumulative cases and deaths from rki.de
 #
 
-
 library(xlsx)
 library(REST)
 library(RCurl)
 library(lubridate)
+library(RMariaDB)
 
 get_rki_kumtab <- function () {
   
@@ -25,7 +25,7 @@ get_rki_kumtab <- function () {
   download.file(URL, destfile = dfile )
 
   daily <- read.xlsx2( dfile
-                     , 1
+                     , 2
                      , header=FALSE
                      , startRow = 4
                      , endRow = 4 + d
@@ -52,3 +52,26 @@ get_rki_kumtab <- function () {
   return(daily[1:m,])
 
 }
+
+get_rki_sql <- function (sql="select * from rki;") {
+  
+  rmariadb.settingsfile <- "/home/thomas/git/R-Example/SQL/COVID19.cnf"
+  
+  rmariadb.db <- "COVID19"
+  
+  COVID19DB <- dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group=rmariadb.db)
+  
+  rsQuery <- dbSendQuery(COVID19DB, sql)
+  
+  dbRows<-dbFetch(rsQuery)
+  
+  # Clear the result.
+  
+  dbClearResult(rsQuery)
+  
+  dbDisconnect(COVID19DB)
+
+  return(dbRows)
+}
+
+print(get_rki_sql())

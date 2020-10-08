@@ -9,7 +9,7 @@ require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
-
+par(family = "sans")
 options( 
   digits=7
   , scipen=7
@@ -19,7 +19,6 @@ options(
 setwd("~/git/R-Example")
 
 tests <- read.csv("data/rki_testungen.csv")
-# cases <- read.csv("data/Germany.csv")
 cases <- get_rki_kumtab()
 
 l <- length(cases$Kw)
@@ -63,15 +62,17 @@ par(mfcol=c(1,2))
 
 plot( tests$Kw
     , tests$prevalence * 100
-    , ylim=c(0,10)
-    , type="b"
-    , lwd=5
-    , col="green"
-    , xlab="Calendar weeks"
-    , ylab=""
-    , yaxt="n"
-    , main="Estimated Prevalence"
-    , sub=paste("Sensitivity ", sens*100, "%; Specificity ", spez*100,"%")
+    , ylim = c(0,10)
+    , type = "b"
+    , lwd = 5
+    , col = "green"
+    , xlab = "Calendar weeks"
+    , ylab = ""
+    , yaxt = "n"
+    , main = "Estimated Prevalence"
+    , sub = paste("Sensitivity ", sens*100, "%; Specificity ", spez*100,"%")
+    , cex.main = 3
+    , cex.sub = 1
     )
     
 lines(tests$Kw
@@ -140,7 +141,9 @@ plot( tests$Kw
     , lwd=3
     , main="Estimated infected"
     , sub=paste("Sensitivity ", sens*100,"%; Specificity ", spez*100,"%")
-    )
+    , cex.main = 3
+    , cex.sub = 1
+)
 lines(tests$Kw
     , tests$Positiv
     , type="b"
