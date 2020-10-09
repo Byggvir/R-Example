@@ -81,6 +81,7 @@ cat "$TEMP/global-${DATA}.csv" \
 pushd ${TARGET}
 
 Download
+global_data
 US
 Germany
 
