@@ -8,6 +8,13 @@ library(RCurl)
 library(lubridate)
 library(RMariaDB)
 
+# Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
+# die mittels Btach Job heruntergelden und aufbereitet wurden.
+
+# Hier: 
+# Download der Tablle der kummulativen Fälle vom RKI und 
+# aufbereiten der schlecht formatierten Daten
+
 get_rki_kumtab <- function () {
   
   today <- Sys.Date()
@@ -53,6 +60,13 @@ get_rki_kumtab <- function () {
 
 }
 
+# Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
+# die mittels Btach Job heruntergelden und aufbereitet wurden.
+
+# Hier: Einlesen aus der MariaDB und aufberieten mittels SQL
+# Bug: Die Schnittstelle enthält eien Bug. 
+# Komplexe Anfagen führen zu korrupten Daten
+
 get_rki_sql <- function (sql="select * from rki;") {
   
   rmariadb.settingsfile <- "/home/thomas/git/R-Example/SQL/COVID19.cnf"
@@ -74,11 +88,21 @@ get_rki_sql <- function (sql="select * from rki;") {
   return(dbRows)
 }
 
+# Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
+# die mittels Btach Job heruntergelden und aufbereitet wurden.
+
+# Hier: Tägliche Fälle.
+
 get_rki_tag_csv <- function () {
   
-  t <- read.csv("data/RKI_nach_Tag.csv", header = TRUE, colClasses = c("Date","integer","integer","integer","integer","integer","integer"))
+  t <- read.csv("data/RKI_nach_Tag.csv", header = TRUE, colClasses = c("Date","integer","integer","integer","integer","integer","integer","integer"))
   return(t)
 }
+
+# Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
+# die mittels Btach Job heruntergelden und aufbereitet wurden.
+
+# Hier: Wöchentliche Fälle.
 
 get_rki_kw_csv <- function () {
   
