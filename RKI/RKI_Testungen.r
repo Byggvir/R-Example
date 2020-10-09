@@ -23,8 +23,8 @@ cases <- get_rki_tag_csv()
 
 l <- length(cases$Kw)
 
-cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:(l-1)])
-cases$incDeaths <- c(0, cases$Deaths[2:l]-cases$Deaths[1:(l-1)])
+# cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:(l-1)])
+# cases$incDeaths <- c(0, cases$Deaths[2:l]-cases$Deaths[1:(l-1)])
 
 tests$proportion <- tests$Positiv / tests$Testungen 
 
@@ -50,7 +50,7 @@ lastKw <- max(Kw)
 
 NewInfected <- aggregate(incCases~Kw,FUN=sum, data=cases)
 
-tests$New <- NewInfected$incCases[1:(length(Kw))]
+tests$New <- NewInfected$incCases[2:(length(Kw)+1)]
 
 options(scipen=10)
 
@@ -139,7 +139,7 @@ plot( tests$Kw
     , xlab="Calendar weeks"
     , ylab=""
     , lwd=3
-    , main="Estimated infected"
+    , main="Testungen"
     , sub=paste("Sensitivity ", sens*100,"%; Specificity ", spez*100,"%")
     , cex.main = 3
     , cex.sub = 1
@@ -163,7 +163,7 @@ lines(tests$Kw
 
 legend (
     "topright"
-    , legend=c("Infected","Positive","False positive", "Tested", "New infected")
+    , legend=c("Infected","Positive","False positive", "Testes", "New infected")
     , col=c("green","blue","red","orange","black")
     , lty=1
     )
@@ -253,5 +253,70 @@ legend (
     , col=c("green","blue")
     , lty=1
     )
+grid()
+
+AbKw <- 27
+
+png(paste("png/RKI_TestungenRel",AbKw,".png",sep=""),width=1920,height=1080)
+
+
+par(mar=c(5.1, 10, 4.1, 10),las=1)
+
+ymax <-round(max(c(tests$New[tests$Kw>=AbKw]/tests$New[tests$Kw==AbKw]
+      ,tests$Positiv[tests$Kw>=AbKw]/tests$Positiv[tests$Kw==AbKw]
+      ,tests$Testungen[tests$Kw>=AbKw]/tests$Testungen[tests$Kw==AbKw]))+0.5,0)*100
+
+l1 <- plot( tests$Kw[tests$Kw>=AbKw]
+      , tests$New[tests$Kw>=AbKw]/tests$New[tests$Kw==AbKw] * 100
+      , ylim=c(0,ymax)
+      , type="b"
+      , col="red"
+      , xlab="Calendar weeks"
+      , ylab="[%]"
+      , lwd=3
+      , main="Neu-Infizierte, pos. und  ges. Testungen"
+      , sub=paste("Deutschland", AbKw,"bis", lastKw, "Kalenderwoche; Quelle: RKI")
+      , cex.main = 3
+)
+l2 <- lines( tests$Kw[tests$Kw>=AbKw]
+       , tests$Positiv[tests$Kw>=AbKw]/tests$Positiv[tests$Kw==AbKw] * 100
+       , type="b"
+       , col="orange"
+)
+l3 <- lines( tests$Kw[tests$Kw>=AbKw]
+      , tests$Testungen[tests$Kw>=AbKw]/tests$Testungen[tests$Kw==AbKw] * 100
+      , type="b"
+      , col="blue"
+)
+text( tests$Kw[tests$Kw>=AbKw]
+     , ymax
+     , labels = round(tests$New[tests$Kw>=AbKw]/tests$New[tests$Kw==AbKw] * 100,1)
+     , cex = 1
+     , col = "red"
+     )
+text( tests$Kw[tests$Kw>=AbKw]
+     , ymax * 0.95
+     , labels = round(tests$Positiv[tests$Kw>=AbKw]/tests$Positiv[tests$Kw==AbKw] * 100,1)
+     , cex = 1
+     , col = "orange"
+)
+
+text( tests$Kw[tests$Kw>=AbKw]
+     , ymax * 0.9
+     , labels = round(tests$Testungen[tests$Kw>=AbKw]/tests$Testungen[tests$Kw==AbKw] * 100,1)
+     , cex = 1
+     , col = "blue"
+)
+
+
+legend (
+  "bottomright"
+  , inset = 0.05
+  , title = paste("Indize ",AbKw, ". Kw = 100%", sep ="")
+  , legend=c("Neu-Infizierte","positive Testungen", "gesamt Testungen")
+  , col=c("red","orange","blue")
+  , lty=1
+  , cex = 3
+)
 grid()
 dev.off()
