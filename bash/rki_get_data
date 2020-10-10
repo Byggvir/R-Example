@@ -7,6 +7,8 @@ DEST="$TEMP/rki.xlsx"
 CSV="$TEMP/rki"
 SQL="$TEMP/rki.sql"
 
+echo $TEMP
+
 curl --output "$DEST" --url "$URL"
 
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$DEST" "${CSV}%n.csv"
