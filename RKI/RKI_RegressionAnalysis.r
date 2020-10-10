@@ -6,6 +6,7 @@ library(REST)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("common/ta_regressionanalysis.r")
 
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
@@ -21,20 +22,32 @@ options(
 
 daily <- get_rki_tag_csv()
 
-StartDate <- daily$Date[1]
-EndDate <- as.Date("2020-05-31")
+# cases <-sum(daily$Cases[length(daily$Cases)])
+#
+# cf <- aggregate(incCases ~ WTag, FUN  = "sum", data = daily)
+# cf$p <- cases/cf$incCases/7
+#   
+# for (i in 1:7) {
+#   daily$incCases[daily$WTag == cf$WTag[i]] <- daily$incCases[daily$WTag == cf$WTag[i]] * cf$p[i]
+# }
 
-StartRegADate <- as.Date("2020-04-01")
+StartDate <- daily$Date[1]
+EndDate <- as.Date("2020-10-31")
+
+StartRegADate <- as.Date("2020-06-29")
 EndRegADate <- max(daily$Date)
-EndRegADate <- as.Date("2020-04-30")
+#EndRegADate <- as.Date("2020-04-30")
 
 zr <- daily$Date >= StartRegADate & daily$Date <= EndRegADate
 FromTo <- daily$Date[zr] - StartRegADate
 
 ra <- lm(log(daily$incCases[zr]) ~ FromTo)
-a <- ci[1,2]
-b <- ci[2,1]
+ci <- confint(ra,level = 0.95)
 
+a <- c( ci[1,1], ra$coefficients[1] , ci[1,2])
+b <-  c( ci[2,1], ra$coefficients[2] , ci[2,2])
+
+xlim <- c(StartRegADate,EndDate)
 ylim <- c(  0
             , ( max(
               c(   exp(a)
@@ -43,15 +56,7 @@ ylim <- c(  0
             ) %/% 1000 + 1 ) * 1000
 )
 
-
-a <- ra$coefficients[1]
-b <- ra$coefficients[2]
-ci <- confint(ra)
-
-
-xlim <- c(StartRegADate,EndDate)
-
-png(  "png/RKI_PrognoseB.png"
+png(  "png/RKI_PrognoseC.png"
       , width = 1920
       , height = 1080
 )
@@ -74,86 +79,19 @@ t <- title (
   , cex.main = 4
   )
 
-grid()
 zr <- daily$Date >= EndRegADate
 lines ( daily$Date[zr]
         , daily$incCases[zr]
         , col = "gray"
         , lwd = 3
 )
+grid()
 
-par (new = TRUE)
+plotregression(a, b, xlim= c(0, as.numeric(EndDate - StartRegADate)) )
 
-curve( exp(a+b*x)
-       , from = 0
-       , to = as.numeric(EndDate - StartRegADate)
-       
-       , col="orange"
-       , axes = FALSE
-       , xlab = ""
-       , ylab = ""
-       , xlim = c(0,EndDate - StartRegADate)
-       , ylim = ylim
-       , lwd = 3
-)
-text( as.numeric(EndDate-StartRegADate) 
-     , exp(a+b*as.numeric(EndDate-StartRegADate))
-     , round(exp(a+b*as.numeric(EndDate-StartRegADate)),0)
-     , col = "orange"
-     , adj = 0
-     , cex = 1
-     )
+lr <- ifelse (b[2] > 0 ,"topleft", "topright")
 
-par ( new = TRUE )
-
-a <- ci[1,2]
-b <- ci[2,2]
-
-curve( exp(a+b*x)
-       , from = 0
-       , to = as.numeric(EndDate - StartRegADate)
-       , col="red"
-       , axes = FALSE
-       , xlab = ""
-       , ylab = ""
-       , xlim = c(0,EndDate - StartRegADate)
-       , ylim = ylim
-       , lwd = 3
-)
-text( as.numeric(EndDate-StartRegADate) 
-      , exp(a+b*as.numeric(EndDate-StartRegADate))
-      , round(exp(a+b*as.numeric(EndDate-StartRegADate)),0)
-      , col = "red"
-      , adj = 0
-      , cex = 1
-)
-
-par ( new = TRUE )
-
-a <- ci[1,1]
-b <- ci[2,1]
-
-curve( exp(a+b*x)
-       , from = 0
-       , to = as.numeric(EndDate - StartRegADate)
-       
-       , col="green"
-       , axes = FALSE
-       , xlab = ""
-       , ylab = ""
-       , xlim = c(0,EndDate - StartRegADate)
-       , ylim = ylim
-       , lwd = 3
-)
-text( as.numeric(EndDate-StartRegADate)
-      , exp(a+b*as.numeric(EndDate-StartRegADate))
-      , round(exp(a+b*as.numeric(EndDate-StartRegADate)),0)
-      , col = "green"
-      , adj = 0 
-      , cex = 1
-)
-
-legend ( "bottomleft"
+legend ( lr
          , legend = c( 
            "Fälle innerhalb der RA"
            , "Fälle nach der RA"
@@ -170,7 +108,7 @@ legend ( "bottomleft"
          )
          , lwd = 2
          , cex = 2
-         , inset = 0.02
+         , inset = 0.05
 )
 
 legend( 
@@ -179,7 +117,5 @@ legend(
   , title = "Tägliche Steigerung CI 95%"
   , paste(round((exp(ci[2,1])-1)*100,1),"% <", round((exp(ra$coefficients[2])-1)*100,2),"% <",round((exp(ci[2,2])-1)*100,1),"%") 
   , cex = 3)
-
-grid()
 
 dev.off()

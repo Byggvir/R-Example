@@ -2,22 +2,42 @@
 
 require(data.table)
 library(REST)
+# library(ggpubr)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
 
+# ----
+
+plotregression <- function( a , b, mycol = c("green","orange","red")) {
+  
+  for (i in 1:3 ) {
+    par (new = TRUE)    
+    curve( exp(a[i]+b[i]*x)
+           , from = 0
+           , to = as.numeric(EndDate - StartRegADate)
+           , col = mycol[i]
+           , axes = FALSE
+           , xlab = ""
+           , ylab = ""
+           , xlim = c(0,EndDate - StartRegADate)
+           , ylim = ylim
+           , lwd = 3
+    )
+    text( as.numeric(EndDate-StartRegADate) 
+          , exp(a[i]+b[i]*as.numeric(EndDate-StartRegADate))
+          , round(exp(a[i]+b[i]*as.numeric(EndDate-StartRegADate)),0)
+          , col = mycol[i]
+          , adj = 0
+          , cex = 1
+    )
+    
+  }
+  
+}
+# ----
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
-startdate <- as.Date("2020-02-24")
-enddate <- as.Date("2020-12-31")
-                     
-png(  "png/RKI_regression.png"
-    , width = 1920
-    , height = 1080
-    )
-par ( mar = c(10,5,10,5))
-
-par( mfcol = c(1,2) )
 
 options( 
   digits=7
@@ -26,113 +46,104 @@ options(
   , max.print = 3000
 )
 
-daily <- get_rki_kumtab()
+# Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI
 
-m <- length(daily[,1])
-# while( is.na(daily$Cases[m])) { m <- m-1}
+daily <- get_rki_tag_csv()
 
-zr <- 130:m
-z <- length(zr)
+# cases <-sum(daily$Cases[length(daily$Cases)])
+#
+# cf <- aggregate(incCases ~ WTag, FUN  = "sum", data = daily)
+# cf$p <- cases/cf$incCases/7
+#   
+# for (i in 1:7) {
+#   daily$incCases[daily$WTag == cf$WTag[i]] <- daily$incCases[daily$WTag == cf$WTag[i]] * cf$p[i]
+# }
 
-pylim <- c(min(daily$incCases[zr]),max(daily$incCases[zr]))
-pylim <- c(0,(max(daily$incCases[zr])%/%1000+1)*1000)
+StartDate <- daily$Date[1]
+EndDate <- as.Date("2020-10-31")
 
+StartRegADate <- as.Date("2020-06-29")
+EndRegADate <- max(daily$Date)
+#EndRegADate <- as.Date("2020-04-30")
 
-ra <- lm(log(daily$incCases[zr]) ~ daily$Date[zr])
+zr <- daily$Date >= StartRegADate & daily$Date <= EndRegADate
+FromTo <- daily$Date[zr] - StartRegADate
 
-print(summary(ra))
-# fehler <- confint(ra)
+ra <- lm(log(daily$incCases[zr]) ~ FromTo)
+ci <- confint(ra,level = 0.95)
 
-Tage <- data.frame(
-   nr = 1:(enddate-today)
+a <- c( ci[1,1], ra$coefficients[1] , ci[1,2])
+b <-  c( ci[2,1], ra$coefficients[2] , ci[2,2])
+
+xlim <- c(StartRegADate,EndDate)
+ylim <- c(  0
+            , ( max(
+              c(   exp(a)
+                   , exp(a+b*as.numeric(EndDate-StartRegADate))
+              ) 
+            ) %/% 1000 + 1 ) * 1000
 )
 
-Tage$Date <- as.Date(Tage$nr+today-1)
+png(  "png/JHU_RegressionAnalysis.png"
+      , width = 1920
+      , height = 1080
+)
+par ( mar = c(10,5,10,5))
 
 plot(daily$Date[zr]
-  , daily$incCases[zr]
-  , main = ""
-  , sub = paste("Vom", daily$Date[zr[1]], "bis", daily$Date[zr[z]] )
-  , xlab = "Datum"
-  , ylab = "Täglichen Fälle"
-  , ylim = pylim
-  , type = "l"
-  , lwd = 3
-)
-
-title ( 
-    main = "Tägliche Fälle DE"
-  , cex.main = 4)
-
-grid()
-
-par (new = TRUE)
-
-a <- ra$coefficients[1]
-b <- ra$coefficients[2]
-
-curve( exp(a+b*x)
-       , from = as.numeric(daily$Date[zr[1]])
-       , to = as.numeric(daily$Date[zr[z]])
-       , col="green"
-       , axes = FALSE
-       , xlab = ""
-       , ylab = ""
-       , ylim = pylim
-       , lwd = 3
-)
-
-legend ( "top"
-         , legend = c( 
-               "Fälle"
-#            , "Lineare Regression" 
-             , "Exponentielle Regression"
-             )
-         , col = c(
-               "black"
-#            , "red"
-             , "green"
-             )
-         , lwd = 2
-         , cex = 3
-)
-
-pylim <- c(0,(exp(a+b*as.numeric(enddate))%/%1000+1)*1000)
-
-plot( Tage$Date
-     , rep(0,1,enddate-today)
+     , daily$incCases[zr]
      , main = ""
-     , sub = paste("Vom", as.character(today), "bis", as.character(enddate) )
+     , sub = paste("Vom", StartRegADate, "bis", EndRegADate )
      , xlab = "Datum"
      , ylab = "Täglichen Fälle"
-     , ylim = pylim
+     , ylim = ylim
      , type = "l"
-     , lwd = 0
-#     , xaxt = "n"
-
+     , lwd = 3
+     , xlim = xlim
 )
 
-grid()
+t <- title ( 
+  main = "Tägliche Fälle DE mit exponentieller Prognose "
+  , cex.main = 4
+)
 
-title ( 
-  main = "Prognose tägliche Fälle DE"
-  , cex.main = 4)
-
-a <- ra$coefficients[1]
-b <- ra$coefficients[2]
-
-par( new = TRUE )
-curve(  exp(a+b*x)
-        , from = as.numeric(today)
-        , to = as.numeric(enddate)
-        , col="green"
-        , axes = FALSE
-        , xlab = ""
-        , ylab = ""
-        , ylim = c(0,exp(a+b*as.numeric(enddate)))
+zr <- daily$Date >= EndRegADate
+lines ( daily$Date[zr]
+        , daily$incCases[zr]
+        , col = "gray"
         , lwd = 3
 )
+grid()
 
-# print(daily)
+plotregression(a,b)
+
+lr <- ifelse (b[2] > 0 ,"topleft", "topright")
+
+legend ( lr
+         , legend = c( 
+           "Fälle innerhalb der RA"
+           , "Fälle nach der RA"
+           , "Obere Grenze CI 95%"
+           , "Mittelere exp. Regression"
+           , "Untere Grenze CI 95%"
+         )
+         , col = c(
+           "black"
+           , "gray"
+           , "red"
+           , "orange"
+           , "green"
+         )
+         , lwd = 2
+         , cex = 2
+         , inset = 0.05
+)
+
+legend( 
+  "top"
+  , inset = 0.02
+  , title = "Tägliche Steigerung CI 95%"
+  , paste(round((exp(ci[2,1])-1)*100,1),"% <", round((exp(ra$coefficients[2])-1)*100,2),"% <",round((exp(ci[2,2])-1)*100,1),"%") 
+  , cex = 3)
 
 dev.off()

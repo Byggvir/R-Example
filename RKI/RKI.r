@@ -19,7 +19,7 @@ options(
   , max.print = 3000
   )
 
-daily <- get_rki_kumtab()
+daily <- get_rki_tag_csv()
 m <- length(daily[,1])
 
 # WTag <- aggregate(cbind(incCases,incDeaths) ~ WTag, FUN=sum, data= daily[100:m,] )

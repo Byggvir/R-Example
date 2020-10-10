@@ -6,6 +6,9 @@ library(REST)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("common/ta_regressionanalysis.r")
+
+CI <- 0.95
 
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
@@ -17,16 +20,19 @@ options(
   , max.print = 3000
 )
 
+
 # Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI
 
 kw <- get_rki_kw_csv()
 
 StartKw <- kw$Kw[1]
-EndKw <- 52
-StartRegAKw <- 27
+# EndKw <- max(kw$Kw)
+EndKw <- 45
+StartRegAKw <- 36
 
 EndRegAKw <- max(kw$Kw[kw$Tage==7])
-#EndRegAKw <- 37
+
+for (EndRegAKw in 40) {
 
 m <- length(kw[,1])
 
@@ -37,21 +43,28 @@ z <- length(zr)
 
 FromTo <- kw$Kw[zr] - StartRegAKw
 
-ra <- lm(log(kw$Cases[zr]) ~ FromTo)
+ra1 <- lm(log(kw$Cases[zr]) ~ FromTo)
+ci1 <- confint(ra1,level = CI)
 
-a <- ra$coefficients[1]
-b <- ra$coefficients[2]
+a <- c( ci1[1,1], ra1$coefficients[1] , ci1[1,2])
+b <- c( ci1[2,1], ra1$coefficients[2] , ci1[2,2])
 
-ci <- confint(ra)
 xlim <- c(StartRegAKw,EndKw)
-ylim <- c(0,(exp(a+b*(EndKw - StartRegAKw))%/%1000+1)*1000)
+ylim <- c(  0
+            , ( max(
+              c(   exp(a)
+                   , exp(a+b*(EndKw - StartRegAKw))
+              ) 
+            ) %/% 1000 + 1 ) * 1000
+)
 
-png(  paste("png/RKI_regressionKw",EndRegAKw,".png", sep="")
+png(  paste("png/RKI_RegressionKw",StartRegAKw,"-",EndRegAKw,"-",EndKw,".png", sep="")
       , width = 1920
       , height = 1080
 )
 
 par ( mar = c(10,5,10,5))
+
 plot(kw$Kw[zr]
   , kw$Cases[zr]
   , main = ""
@@ -69,115 +82,87 @@ plot(kw$Kw[zr]
   , lwd = 3
 )
 
-zr <- kw$Kw >= EndRegAKw
+zr2 <- kw$Kw >= EndRegAKw
 
 par( new = TRUE)
 
-lines ( kw$Kw[zr]
-     , kw$Cases[zr]
+lines ( kw$Kw[zr2]
+     , kw$Cases[zr2]
      , col = "gray"
      , lwd = 3
 )
 
 t <- title ( 
-    main = "Wöchentliche CoViD-19 Fälle DE mit exponentieller Prognose "
-  , cex.main = 4
+    main = paste( "Wöchentliche CoViD-19 Fälle DE mit exponentieller Prognose bis Kw", EndKw)
+  , cex.main = 3
   )
 
 grid()
 
-par (new = TRUE)
+print(exp(a))
 
-curve( exp(a+b*x)
-       , from = 0
-       , to = EndKw - StartRegAKw
-       
-       , col="orange"
-       , axes = FALSE
-       , xlab = ""
-       , xlim = c(0,EndKw - StartRegAKw)
-       , ylab = ""
-       , ylim = ylim
-       , lwd = 3
-)
-text( EndKw - StartRegAKw
-     , exp(a+b*(EndKw - StartRegAKw))
-     , round(exp(a+b*(EndKw-StartRegAKw)),0)
-     , col = "blue"
-     , adj = 1 
-     , cex = 3
-     )
+plotregression(a, b, xlim= c( 0, EndKw - StartRegAKw ) )
 
-par ( new = TRUE )
+lr <- ifelse (b[2] > 0 ,"left", "right")
 
-a <- ci[1,2]
-b <- ci[2,2]
-
-curve( exp(a+b*x)
-       , from = 0
-       , to = EndKw - StartRegAKw
-       , col="red"
-       , axes = FALSE
-       , xlab = ""
-       , ylab = ""
-       , xlim = c(0,EndKw - StartRegAKw)
-       , ylim = ylim
-       , lwd = 3
-)
-
-par ( new = TRUE )
-
-a <- ci[1,1]
-b <- ci[2,1]
-
-curve( exp(a+b*x)
-       , from = 0
-       , to = EndKw - StartRegAKw
-       
-       , col="green"
-       , axes = FALSE
-       , xlab = ""
-       , ylab = ""
-       , xlim = c(0,EndKw - StartRegAKw)
-       , ylim = ylim
-       , lwd = 3
-)
-text( EndKw - StartRegAKw
-      , exp(a+b*(EndKw - StartRegAKw))
-      , round(exp(a+b*(EndKw-StartRegAKw)),0)
-      , col = "green"
-      , adj = 1 
-      , cex = 3
-)
-
-legend ( "bottomright"
+legend ( lr
          , legend = c( 
-               "Fälle innerhalb der RA"
-             , "Fälle nach der RA"
-             , "Obere Grenze CI 95%"
-             , "Mittelere exp. Regression"
-             , "Untere Grenze CI 95%"
-             )
+           "Fälle innerhalb der RA"
+           , "Fälle nach der RA"
+           , paste("Obere Grenze CI ", CI*100, "%", sep="" )
+           , "Mittelere exp. Regression"
+           , paste("Untere Grenze CI  ", CI*100, "%", sep="" )
+         )
          , col = c(
-               "black"
-             , "gray"
-             , "red"
-             , "orange"
-             , "green"
-             )
+           "black"
+           , "gray"
+           , "red"
+           , "orange"
+           , "green"
+         )
          , lwd = 2
          , cex = 2
          , inset = 0.02
 )
 
 legend( 
-  "topleft"
+  "top"
   , inset = 0.02
-  , title = "Wöchentliche Steigerung CI 95%"
-  , paste(round((exp(ci[2,1])-1)*100,1),"% <", round((exp(ra$coefficients[2])-1)*100),"% <",round((exp(ci[2,2])-1)*100,1),"%") 
-  , cex = 3)
+  , title = paste("Wöchentliche Steigerung CI ", CI*100, "%", sep="" )
+  , paste(round((exp(b[1])-1)*100,1),"% <", round((exp(b[2])-1)*100),"% <",round((exp(b[3])-1)*100,1),"%" ) 
+  , cex = 3
+  )
 
-grid()
+# --- Lineare Regesssion
+
+
+# ra2 <- lm(kw$Cases[zr] ~ FromTo)
+# ci2 <- confint(ra2,level = CI )
+# 
+# a <- c( ci2[1,1], ra2$coefficients[1] , ci2[1,2])
+# b <- c( ci2[2,1], ra2$coefficients[2] , ci2[2,2])
+# 
+# print(a)
+# 
+# linecol = c("green","orange","red")
+# 
+# for ( i in 1:3 ) {
+#   par ( new = TRUE )
+#   curve(  a[i] + b[i] * x
+#       , from = 0
+#       , to = EndKw - StartRegAKw
+#       , col = linecol[i]
+#       , xlab = ""
+#       , ylab = ""
+#       , xlim = c(0,EndKw - StartRegAKw)
+#       , ylim = ylim
+#       , lwd = 3
+#   )
+# }
+# 
+# print(summary(ra1))
+# print(summary(ra2))
 
 dev.off()
 
+}
