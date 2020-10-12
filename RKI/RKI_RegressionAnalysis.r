@@ -22,21 +22,23 @@ options(
 
 daily <- get_rki_tag_csv()
 
-# cases <-sum(daily$Cases[length(daily$Cases)])
-#
-# cf <- aggregate(incCases ~ WTag, FUN  = "sum", data = daily)
-# cf$p <- cases/cf$incCases/7
-#   
-# for (i in 1:7) {
-#   daily$incCases[daily$WTag == cf$WTag[i]] <- daily$incCases[daily$WTag == cf$WTag[i]] * cf$p[i]
-# }
+runingaverage <- function () {
+  
+  cases <-sum(daily$Cases[length(daily$Cases)])
+  cf <- aggregate(incCases ~ WTag, FUN  = "sum", data = daily)
+  cf$p <- cases/cf$incCases/7
+
+  for (i in 1:7) {
+    daily$incCases[daily$WTag == cf$WTag[i]] <- daily$incCases[daily$WTag == cf$WTag[i]] * cf$p[i]
+  }
+}
 
 StartDate <- daily$Date[1]
-EndDate <- as.Date("2020-10-31")
+#EndDate <- as.Date("2020-12-31")
+EndDate <- daily$Date[length(daily$Date)] + 28
 
 StartRegADate <- as.Date("2020-06-29")
 EndRegADate <- max(daily$Date)
-#EndRegADate <- as.Date("2020-04-30")
 
 zr <- daily$Date >= StartRegADate & daily$Date <= EndRegADate
 FromTo <- daily$Date[zr] - StartRegADate
@@ -56,7 +58,15 @@ ylim <- c(  0
             ) %/% 1000 + 1 ) * 1000
 )
 
-png(  "png/RKI_PrognoseC.png"
+png( paste( "png/RKI_Prognose"
+            , "_"
+            , as.character(StartRegADate)
+            , "_"
+            , as.character(EndRegADate)
+            , "_"
+            , as.character(EndDate)
+            , ".png"
+            )
       , width = 1920
       , height = 1080
 )
@@ -72,22 +82,55 @@ plot(daily$Date[zr]
   , type = "l"
   , lwd = 3
   , xlim = xlim
+  , col = "black"
 )
 
 t <- title ( 
-    main = "Tägliche Fälle DE mit exponentieller Prognose "
+    main = paste( "Tägliche Fälle DE mit exponentieller Prognose bis", as.character(EndDate)) 
   , cex.main = 4
   )
 
+zr <- daily$Date >= StartRegADate & daily$Date <= EndRegADate
+
+lines ( daily$Date[zr]
+        , daily$incCases[zr]
+        , col = "black"
+        , lwd = 3
+)
+
 zr <- daily$Date >= EndRegADate
+
 lines ( daily$Date[zr]
         , daily$incCases[zr]
         , col = "gray"
         , lwd = 3
 )
+
+abline(
+  v = EndRegADate
+  , col = "blue"
+  , lwd = 3
+  , lty = 4
+)
+
+text ( EndRegADate -1
+       , 0
+       , "Zeitraum der Regressionsanalyse"
+       , adj = 1 
+       , cex = 3
+       , col = "blue"
+)
+
+text ( EndRegADate + 1
+       , 0
+       , "Zeitraum der Prognose"
+       , adj = 0
+       , cex = 3 
+       , col = "blue"
+)
 grid()
 
-plotregression(a, b, xlim= c(0, as.numeric(EndDate - StartRegADate)) )
+plotregression(a, b, xlim= c(0, as.numeric(EndDate - StartRegADate)), ylim = ylim )
 
 lr <- ifelse (b[2] > 0 ,"topleft", "topright")
 
@@ -109,6 +152,7 @@ legend ( lr
          , lwd = 2
          , cex = 2
          , inset = 0.05
+         , lty = c(1,1,3,3,3)
 )
 
 legend( 

@@ -2,7 +2,6 @@
 
 require(data.table)
 library(REST)
-# library(ggpubr)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
@@ -20,22 +19,19 @@ options(
   , max.print = 3000
 )
 
-
 # Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI
 
 kw <- get_rki_kw_csv()
 
 StartKw <- kw$Kw[1]
-# EndKw <- max(kw$Kw)
-EndKw <- 45
-StartRegAKw <- 36
+EndKw <- max(kw$Kw) + 3
 
-EndRegAKw <- max(kw$Kw[kw$Tage==7])
+StartRegAKw <- 27
 
-for (EndRegAKw in 40) {
+m <- max(kw$Kw[kw$Tage==7])
 
-m <- length(kw[,1])
-
+for (EndRegAKw in 35:m) {
+  
 zr <- kw$Kw >= StartRegAKw & kw$Tage==7 &kw$Kw <= EndRegAKw
 z <- length(zr)
 
@@ -43,7 +39,7 @@ z <- length(zr)
 
 FromTo <- kw$Kw[zr] - StartRegAKw
 
-ra1 <- lm(log(kw$Cases[zr]) ~ FromTo)
+ra1 <- lm(log(kw$Cases[zr]/7) ~ FromTo)
 ci1 <- confint(ra1,level = CI)
 
 a <- c( ci1[1,1], ra1$coefficients[1] , ci1[1,2])
@@ -66,16 +62,16 @@ png(  paste("png/RKI_RegressionKw",StartRegAKw,"-",EndRegAKw,"-",EndKw,".png", s
 par ( mar = c(10,5,10,5))
 
 plot(kw$Kw[zr]
-  , kw$Cases[zr]
+  , kw$Cases[zr] / 7
   , main = ""
-  , sub = paste("Regession auf der Basis der Fallzahlen des RKI von "
+  , sub = paste("Regession auf der Basis der Fallzahlen des RKI von der "
                 , StartRegAKw
-                , ". Kw bis "
+                , ". bis zur "
                 , EndRegAKw
-                , ".Kw 2020"
+                , ". Kw 2020"
                 , sep="")
   , xlab = "Woche"
-  , ylab = "Wöchentliche Fallzahlen"
+  , ylab = "Fallzahl pro Tag"
   , xlim = xlim
   , ylim = ylim
   , type = "l"
@@ -84,16 +80,51 @@ plot(kw$Kw[zr]
 
 zr2 <- kw$Kw >= EndRegAKw
 
-par( new = TRUE)
-
 lines ( kw$Kw[zr2]
-     , kw$Cases[zr2]
-     , col = "gray"
-     , lwd = 3
+        , kw$Cases[zr2]/7
+        , col = "gray"
+        , lwd = 3
+)
+
+zr3 <- kw$Kw >= StartRegAKw
+
+lines ( kw$Kw[zr3]
+        , kw$WMin[zr3]
+        , col = "green"
+        , lwd = 3
+)
+
+lines ( kw$Kw[zr3]
+        , kw$WMax[zr3]
+        , col = "red"
+        , lwd = 3
+)
+
+abline(
+  v = EndRegAKw
+  , col = "blue"
+  , lwd = 3
+  , lty = 4
+)
+
+text ( EndRegAKw - 0.1
+       , 0
+       , "Zeitraum der Regressionsanalyse"
+       , adj = 1 
+       , cex = 3
+       , col = "blue"
+)
+
+text ( EndRegAKw + 0.1
+       , 0
+       , "Zeitraum der Prognose"
+       , adj = 0
+       , cex = 3 
+       , col = "blue"
 )
 
 t <- title ( 
-    main = paste( "Wöchentliche CoViD-19 Fälle DE mit exponentieller Prognose bis Kw", EndKw)
+    main = paste( "Mittlere CoViD-19 Fälle je Tag nach Kalenderwoche mit Prognose bis Kw", EndKw)
   , cex.main = 3
   )
 
@@ -101,28 +132,34 @@ grid()
 
 print(exp(a))
 
-plotregression(a, b, xlim= c( 0, EndKw - StartRegAKw ) )
+plotregression(a, b, xlim= c( 0, EndKw - StartRegAKw ), ylim = ylim)
 
 lr <- ifelse (b[2] > 0 ,"left", "right")
 
 legend ( lr
          , legend = c( 
-           "Fälle innerhalb der RA"
-           , "Fälle nach der RA"
+             "Mittlere Fallzahl pro Tag in der Kw"
+           , "... nach Regressionsanalyse"
+           , "Maximale Fallzahl in Kw"
+           , "Minimale Fallzahl in Kw"
            , paste("Obere Grenze CI ", CI*100, "%", sep="" )
-           , "Mittelere exp. Regression"
+           , "Schätzung durchscnittliche Fallzahl pro Tag"
            , paste("Untere Grenze CI  ", CI*100, "%", sep="" )
          )
          , col = c(
            "black"
            , "gray"
            , "red"
+           , "green"
+           , "red"
            , "orange"
            , "green"
          )
          , lwd = 2
-         , cex = 2
+         , cex = 1.5
          , inset = 0.02
+         , lty = c(1,1,1,1,3,3,3)
+
 )
 
 legend( 
@@ -136,7 +173,7 @@ legend(
 # --- Lineare Regesssion
 
 
-# ra2 <- lm(kw$Cases[zr] ~ FromTo)
+# ra2 <- lm(kw$Cases[zr]/7 ~ FromTo)
 # ci2 <- confint(ra2,level = CI )
 # 
 # a <- c( ci2[1,1], ra2$coefficients[1] , ci2[1,2])
@@ -159,9 +196,7 @@ legend(
 #       , lwd = 3
 #   )
 # }
-# 
-# print(summary(ra1))
-# print(summary(ra2))
+
 
 dev.off()
 
