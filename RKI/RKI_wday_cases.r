@@ -12,9 +12,9 @@ source("common/rki_download.r")
 
 country <- "DEU"
 
-cases <- get_rki_kumtab()
+cases <- get_rki_tag_csv()
 
-png(paste("png/Wochentag-",country,".png",sep=""),width=1920,height=1080)
+png(paste("png/RKI_Wochentag-",country,".png",sep=""),width=1920,height=1080)
 
 ShortDayNames <- c(
       "Mo"
@@ -51,7 +51,9 @@ KorrekturFaktor <- data.table (
 
 print(KorrekturFaktor)
 
-par( mfcol = c(1,2) )
+par( 
+  mar = c(10,6,10,6)
+  , mfcol = c(1,2) )
 
 options( digits = 3 )
 
@@ -93,31 +95,53 @@ legend( "topright"
     )
 grid()
 
+copyright_rki()
+
+WTagCases <- WTag$incCases/sum(WTag$incCases) * 100
+WTagDeaths <- WTag$incDeaths/sum(WTag$incDeaths) * 100
+
 plot( 
       0:6
-    , WTag$incCases/sum(WTag$incCases)*100
+    , WTagCases
     , type="b"
     , col="blue"
     , xaxt="n"
-    , ylim= c(5,25)
+    , ylim= c(0,25)
     , xlab="Wochentag"
     , ylab="Fälle pro Tag [%]"
     , main=paste("Erkrankungen und Todesfälle (",country,")")
     , sub="Verteilt auf Wochentage; Quelle: RKI Kumulative Fälle"
     )
-    
+
+text(0:6
+     , WTagCases - 0.5
+     , paste(round(WTagCases,2),"%",sep="")
+     , adj = 0
+     , cex = 1.5
+     , col="blue"
+)    
+
 lines( 
       0:6
-    , WTag$incDeaths/sum(WTag$incDeaths)*100
+    , WTagDeaths
     , type="b"
     , col="black"
     )
 
+text(0:6
+     , WTagDeaths + 0.5
+     , paste(round(WTagDeaths,2),"%",sep="")
+     , adj = 0
+     , cex = 1.5
+     , col = "black"
+)  
 abline( h = 100/7
   , col = "black"
   , lty = 3)
 
-text( 6,14, labels=100/7)
+text( 6, 14
+      , labels = paste(round(100/7,2),"%", sep="")
+      )
 
 axis( 1
     , at= 0:6
