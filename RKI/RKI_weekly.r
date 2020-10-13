@@ -97,5 +97,6 @@ weekly <- aggregate(incDeaths ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <- c("Kw","Count")
 reganalysis(weekly, 29:31, main = "Wöchentliche Sterbefälle DE")
 
+copyright_rki()
 
 dev.off()
