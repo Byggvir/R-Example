@@ -15,6 +15,20 @@ library(RMariaDB)
 # Download der Tablle der kummulativen Fälle vom RKI und 
 # aufbereiten der schlecht formatierten Daten
 
+copyright_rki <- function () {
+
+  mtext( text = paste(   "Quelle: Robert Koch-Institut (RKI), dl-de/by-2-0"
+                       , "Diagramm: Thomas Arend, Rheinbach"
+                       , paste("Stand:", as.character(Sys.Date()))
+                       , sep ="\n"
+                       )
+        , side = 1
+        , adj = 0
+        , line  = 4
+        , outer = FALSE 
+        )
+}
+
 get_rki_kumtab <- function () {
   
   today <- Sys.Date()
