@@ -3,6 +3,7 @@
 require(data.table)
 
 setwd("~/git/R-Example")
+source("common/rki_download.r")
 
 png("png/CasesDeathsDE.png",width=1920,height=1080)
 
@@ -11,17 +12,17 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 fromto <- c(42:102)
-startdate <- as.Date("2020-01-20")
 
-rm(daily)
+options(show.error.messages = FALSE)
+try (  rm(daily)
+     , silent = TRUE
+     )
+options(show.error.messages = TRUE)
 
-daily <- read.csv ( "data/Germany.csv", header = TRUE)
-reported <- format(startdate + max(daily$Date), "%d %b %Y")
+daily <- get_rki_tag_csv ()
+startdate <- daily$Date[1]
 
-m <- length(daily$Date)
-
-daily$incCases <- c(0,daily$Cases[2:m]-daily$Cases[1:m-1])
-daily$incDeaths <- c(0,daily$Deaths[2:m]-daily$Deaths[1:m-1])
+reported <- format(daily$Date[length(daily$Date)], "%d %b %Y")
 
 options(digits=7)
 options(scipen=7)
@@ -29,10 +30,9 @@ options(Outdec=".")
 
 op = par(mar=c(10,5,5,5))
 
-Tage <- daily$Date + startdate
+Tage <- daily$Date
 
 sel <- daily$WTag != 6
-
 Tage[sel] <- NA
 
 barplot( daily$incCases # [fromto]
@@ -47,6 +47,8 @@ barplot( daily$incCases # [fromto]
     , las = 2
     )     
 title ( sub = paste("Date:", heute ), line= 3)
+
+copyright_rki()
 
 grid()
 
