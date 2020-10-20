@@ -5,12 +5,12 @@
 # The daily cases and deaths are in the second worksheet. We need only column 2 and 5.
 # The date  in column one is one day ahead in time.
 
+library(REST)
 require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
-
-library(REST)
+source("lib/copyright.r")
 
 options( 
   digits=7
@@ -80,7 +80,7 @@ reganalysis <- function (data, zr,  main = "Wöchentliche Fälle DE" ) {
 }
 # ----
 
-daily <- get_rki_kumtab()
+daily <- get_rki_tag_csv()
 
 zeitraum <- 1:4
 
@@ -97,6 +97,6 @@ weekly <- aggregate(incDeaths ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <- c("Kw","Count")
 reganalysis(weekly, 29:31, main = "Wöchentliche Sterbefälle DE")
 
-copyright_rki()
+copyright()
 
 dev.off()

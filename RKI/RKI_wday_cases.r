@@ -1,20 +1,38 @@
 #!/usr/bin/env Rscript
 
 #
-# Auswertung der Fallzahlen und Tote nach den Meldungen der John Hopkins University
-# Quelle: https://github.com/CSSEGISandData/COVID-19
+# Auswertung der Fallzahlen und Tote nach den Meldungen des Robert-Koch-Institutes
 #
+
 require(data.table)
 library(REST)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("lib/copyright.r")
+
+tendenz <- function (x) {
+  
+  r <- rep(0,length(x))
+           
+  for (i in 1:length(x)) {
+    if (x[i] > 0) r[i] <- 1
+    else if (x[i] < 0) r[i] <- -1
+    
+  }
+  return (r)
+  
+}
 
 country <- "DEU"
 
-cases <- get_rki_tag_csv()
+cases <- get_rki_sql()
+cases2 <- get_rki_tag_csv()
 
-png(paste("png/RKI_Wochentag-",country,".png",sep=""),width=1920,height=1080)
+png(  paste("png/RKI_Wochentag-",country,".png",sep="")
+    , width = 1920
+    , height = 1080
+    )
 
 ShortDayNames <- c(
       "Mo"
@@ -28,22 +46,28 @@ ShortDayNames <- c(
 
 l <- length(cases$Date)
 
-cases$UpDown <- c(0, sign(cases$incCases[2:l]-cases$incCases[1:(l-1)]))
+# cases$UpDown <- c(0, sign(cases$incCases[2:l]-cases$incCases[1:(l-1)]))
 
-print(head(cases))
+cases$UpDown <- c(0, tendenz(cases$incCases[2:l]-cases$incCases[1:(l-1)]))
 
 UpDown <- table(cases$WTag[cases$Kw>9],cases$UpDown[cases$Kw>9])
 
 colnames(UpDown, do.NULL = FALSE)
 
 if (length(colnames(UpDown))==2) {
+  
   colnames(UpDown) <- c("Down","Up")
-} else {  
+
+  } else {  
+  
   colnames(UpDown) <- c("Down","Equal","Up")
-}
+
+  }
 
 WTag <- aggregate(cbind(incCases,incDeaths)~WTag, FUN=sum, data=cases)
 
+colnames(WTag) <- c("WTag","incCases","incDeaths") 
+  
 KorrekturFaktor <- data.table (
   WTag = 0:6
   , Faktor = sum(WTag$incCases)/WTag$incCases/7
@@ -52,7 +76,7 @@ KorrekturFaktor <- data.table (
 print(KorrekturFaktor)
 
 par( 
-  mar = c(10,6,10,6)
+    mar = c(10,6,10,6)
   , mfcol = c(1,2) )
 
 options( digits = 3 )
@@ -76,11 +100,13 @@ lines( 0:6
     )
 
 if (length(colnames(UpDown))==3) {
-lines( 0:6
+
+  lines( 0:6
        , UpDown[1:7,"Equal"]
        , type="b"
        , col=c("blue")
-)
+       )
+  
 }
 
 axis( 1
@@ -93,9 +119,10 @@ legend( "topright"
     , col=c("red", "blue", "green")
     , lty=1
     )
+
 grid()
 
-copyright_rki()
+copyright()
 
 WTagCases <- WTag$incCases/sum(WTag$incCases) * 100
 WTagDeaths <- WTag$incDeaths/sum(WTag$incDeaths) * 100
@@ -110,13 +137,13 @@ plot(
     , xlab="Wochentag"
     , ylab="Fälle pro Tag [%]"
     , main=paste("Erkrankungen und Todesfälle (",country,")")
-    , sub="Verteilt auf Wochentage; Quelle: RKI Kumulative Fälle"
+    , sub="Meldedatum nach Wochentage"
     )
 
 text(0:6
      , WTagCases - 0.5
      , paste(round(WTagCases,2),"%",sep="")
-     , adj = 0
+     , adj = 0.5
      , cex = 1.5
      , col="blue"
 )    
@@ -131,10 +158,11 @@ lines(
 text(0:6
      , WTagDeaths + 0.5
      , paste(round(WTagDeaths,2),"%",sep="")
-     , adj = 0
+     , adj = 0.5
      , cex = 1.5
      , col = "black"
 )  
+
 abline( h = 100/7
   , col = "black"
   , lty = 3)
@@ -147,6 +175,7 @@ axis( 1
     , at= 0:6
     , labels=ShortDayNames
     )
+
 legend( "topright"
     , legend=c("Erkrankte","Gestorbene")
     , col=c("blue", "black")

@@ -9,6 +9,8 @@ require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("lib/copyright.r")
+
 par(family = "sans")
 options( 
   digits=7
@@ -16,15 +18,13 @@ options(
   , Outdec="."
   , max.print = 3000
 )
+
 setwd("~/git/R-Example")
 
 tests <- read.csv("data/rki_testungen.csv")
 cases <- get_rki_tag_csv()
 
 l <- length(cases$Kw)
-
-# cases$incCases <- c(0, cases$Cases[2:l]-cases$Cases[1:(l-1)])
-# cases$incDeaths <- c(0, cases$Deaths[2:l]-cases$Deaths[1:(l-1)])
 
 tests$proportion <- tests$Positiv / tests$Testungen 
 
@@ -56,7 +56,7 @@ options(scipen=10)
 
 png("png/RKI_Testungen.png",width=1920,height=1080)
 
-par(mar=c(5.1, 10, 4.1, 10),las=1)
+par( mar=c(10, 6, 10, 6))
 
 # par(mfcol=c(1,2))
 # 
@@ -105,6 +105,7 @@ par(mar=c(5.1, 10, 4.1, 10),las=1)
 # 
 # par(new=TRUE)
 # 
+
 plot( tests$Kw
     , tests$PPP * 100
     , type="b"
@@ -116,7 +117,7 @@ plot( tests$Kw
     , xlab=""
     , ylab=""
     )
-    
+
 axis( side=4
     , col="orange"
     , col.axis="orange"
@@ -129,7 +130,6 @@ mtext ( "Positive Predictive Power (PPP) [%]"
     , line = 3
     , las = 0
     )
-
 
 plot( tests$Kw
     , tests$Infected
@@ -144,6 +144,7 @@ plot( tests$Kw
     , cex.main = 3
     , cex.sub = 1
 )
+
 lines(tests$Kw
     , tests$Positiv
     , type="b"
@@ -155,6 +156,7 @@ lines(tests$Kw
     , type="b"
     , col="red"
     )
+
 lines(tests$Kw
     , tests$New
     , type="b"
@@ -167,6 +169,7 @@ legend (
     , col=c("green","blue","red","orange","black")
     , lty=1
     )
+
 grid()
 
 title(ylab="Count", line=5)
@@ -175,7 +178,7 @@ par(new=TRUE)
 
 plot( tests$Kw
     , tests$Testungen
-    , ylim=c(0,1200000)
+    , ylim=c(0,2000000)
     , type="b"
     , lwd=3
     , col="orange"
@@ -189,6 +192,7 @@ axis( side=4
     , col.axis="orange"
     , tick=TRUE
     )
+
 mtext ( "Number of tests"
     , col = "orange"
     , side = 4
@@ -196,9 +200,15 @@ mtext ( "Number of tests"
     , las = 0
     )
 
+copyright()
+
 dev.off()
 
-png("png/nit.png", width=1920,height=1080)
+# Ende RKI_Testungen.png
+
+# NeuInfizierte - testungen
+
+png("png/RKI_nit.png", width=1920,height=1080)
 
 par(mar=c(5.1, 10, 4.1, 10),las=1)
 
@@ -215,12 +225,14 @@ plot( tests$Kw
     , main="Neu-Infizierte : Testungen"
     , sub=paste("Deutschland 10 bis", lastKw, "Kalenderwoche")
 )
+
 lines(tests$Kw
     , tests$proportion * 100
     , type="b"
     , lwd=2
     , col="blue"
     )
+
 legend (
     "topright"
     , legend=c("Neu-Infizierte","Positive Testungen")
@@ -247,13 +259,23 @@ lines(tests$Kw[tests$Kw>19]
     , lwd=2
     , col="blue"
     )
+
 legend (
     "topright"
     , legend=c("Neu-Infizierte","Positive Testungen")
     , col=c("green","blue")
     , lty=1
     )
+
 grid()
+
+copyright()
+
+dev.off()
+
+# Ende Neuinfizierte - Testungen
+
+# Verhältnis der Testungen zu Neuinfizierten und positiven Testungen
 
 AbKw <- 27
 
@@ -278,22 +300,26 @@ l1 <- plot( tests$Kw[tests$Kw>=AbKw]
       , sub=paste("Deutschland", AbKw,"bis", lastKw, "Kalenderwoche; Quelle: RKI")
       , cex.main = 3
 )
+
 l2 <- lines( tests$Kw[tests$Kw>=AbKw]
        , tests$Positiv[tests$Kw>=AbKw]/tests$Positiv[tests$Kw==AbKw] * 100
        , type="b"
        , col="orange"
 )
+
 l3 <- lines( tests$Kw[tests$Kw>=AbKw]
       , tests$Testungen[tests$Kw>=AbKw]/tests$Testungen[tests$Kw==AbKw] * 100
       , type="b"
       , col="blue"
 )
+
 text( tests$Kw[tests$Kw>=AbKw]
      , ymax
      , labels = round(tests$New[tests$Kw>=AbKw]/tests$New[tests$Kw==AbKw] * 100,1)
      , cex = 1
      , col = "red"
      )
+
 text( tests$Kw[tests$Kw>=AbKw]
      , ymax * 0.95
      , labels = round(tests$Positiv[tests$Kw>=AbKw]/tests$Positiv[tests$Kw==AbKw] * 100,1)
@@ -308,7 +334,6 @@ text( tests$Kw[tests$Kw>=AbKw]
      , col = "blue"
 )
 
-
 legend (
   "bottomright"
   , inset = 0.05
@@ -319,4 +344,9 @@ legend (
   , cex = 3
 )
 grid()
+
+copyright()
+
 dev.off()
+# Ende relative Neuinfizerte, gesamt und positive Testungen 
+# Ende relative Neuiunfizierte, Testungen / positive Testungen

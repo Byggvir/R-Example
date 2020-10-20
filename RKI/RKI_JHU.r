@@ -3,7 +3,9 @@
 # Load statistics from RKI test report
 # Source https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-08-05-de.pdf?__blob=publicationFile
 #
-# 
+#
+
+library(REST)
 require(data.table)
 
 options( 
@@ -15,10 +17,7 @@ options(
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
-
-library(REST)
-
-setwd("~/git/R-Example")
+source("lib/copyright.r")
 
 JHU <- read.csv("data/Germany.csv")
 J <- length(JHU$Date)
@@ -26,7 +25,7 @@ J <- length(JHU$Date)
 JHU$incCases <- c(0, JHU$Cases[2:J]-JHU$Cases[1:(J-1)])
 JHU$incDeaths <- c(0, JHU$Deaths[2:J]-JHU$Deaths[1:(J-1)])
 
-RKI <- get_rki_kumtab()
+RKI <- get_rki_tag_csv()
 R <- length(RKI$Date)
 
 print(c(R,J))
@@ -60,6 +59,9 @@ legend("top"
        , cex = 4
        , lwd = 2
 )
+
+copyright(c("JHU","RKI","TAr"))
+
 grid()
 
 par ( new = TRUE )
