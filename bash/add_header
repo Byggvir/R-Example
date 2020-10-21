@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Add header to Rscript  in current directory"
+
+D=$(date +%F)
+for R in *.r
+do 
+    B=$(basename -s .r "$R")
+    sed -i.old '2i#\n#\n# Script: '$R'\n#\n# Stand: '$D'\n# (c) 2020 by Thomas Arend, Rheinbach\n# E-Mail: thomas@arend-rhb.de\n#\n\nMyScriptName <-"'$B'"\n' $R
+done 
+^

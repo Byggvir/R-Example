@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: CFR_USDE.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"CFR_USDE"
+
 
 library(data.table)
 library(utils)

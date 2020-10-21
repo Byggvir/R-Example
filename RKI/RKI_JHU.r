@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: RKI_JHU.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"RKI_JHU"
+
 
 # Load statistics from RKI test report
 # Source https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-08-05-de.pdf?__blob=publicationFile

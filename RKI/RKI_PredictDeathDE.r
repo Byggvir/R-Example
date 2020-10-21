@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: RKI_PredictDeathDE.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"RKI_PredictDeathDE"
+
 
 library(tidyverse)
 library(scales)

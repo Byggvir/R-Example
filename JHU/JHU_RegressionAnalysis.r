@@ -1,4 +1,15 @@
 #!usr/bin/env Rscript
+#
+#
+# Script: JHU_RegressionAnalysis.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"JHU_RegressionAnalysis"
+
 
 require(data.table)
 library(REST)

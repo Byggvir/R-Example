@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: DEFalleAlterKw.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"DEFalleAlterKw"
+
 
 library(data.table)
 library(readODS)

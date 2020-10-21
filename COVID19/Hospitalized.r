@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript 
+#
+#
+# Script: Hospitalized.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"Hospitalized"
+
 # Plot hospitalized cases
 
 setwd("~/git/R-Example")

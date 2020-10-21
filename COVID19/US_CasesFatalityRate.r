@@ -1,4 +1,15 @@
 #!/usr/bin/r
+#
+#
+# Script: US_CasesFatalityRate.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"US_CasesFatalityRate"
+
 
 require(data.table)
 

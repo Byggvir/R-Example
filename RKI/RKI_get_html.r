@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: RKI_get_html.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"RKI_get_html"
+
 
 library(data.table)
 library(rvest)

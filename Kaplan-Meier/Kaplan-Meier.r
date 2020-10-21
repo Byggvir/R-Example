@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: Kaplan-Meier.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"Kaplan-Meier"
+
 
 # Thomas Arend
 # (c) 2020 

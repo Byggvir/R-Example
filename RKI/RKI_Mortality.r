@@ -1,8 +1,25 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: RKI_Mortality.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"RKI_Mortality"
+
+
+# R script to plot the CoViD-19 mortality in DEU
+# Data is retrieved from Robert-Koch-Institut (RKI) and Bundesamt für Statistik
+#
+# (c) Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
 
 #library(tidyverse)
+#library(scales)
 
-library(scales)
 library(readODS)
 source('lib/copyright.r')
 
@@ -47,11 +64,11 @@ deaths <- data.frame (
 ylim <- c(0,ceiling(max(CFRyear$Deaths / CFRyear$Population)* 1000)*100)
 
 bp <- barplot( CFRyear$Deaths / CFRyear$Population * 100000
-               , col = "blue"
+               , col = "lightgrey"
                , xlab="Altersgruppe"
                , ylab="Anzahl"
                , ylim = ylim
-               , main = "COVID19: Gestorbene pro 100.000 (Gesamt) in DEU"
+               , main = "CoViD19 DEU: Gestorbene pro 100.000"
                , sub = ""
                , cex.axis = 2
                , cex.names = 2
@@ -96,11 +113,11 @@ mtext( paste( "Gestorbene gem. RKI vom", heute )
 ylim <- c(0,ceiling(max(CFRyear$Cases / CFRyear$Population)* 1000)*100)
 
 bp2 <- barplot( CFRyear$Cases / CFRyear$Population * 100000
-               , col = "blue"
+               , col = "lightblue"
                , xlab = "Altersgruppe"
                , ylab = "Anzahl"
                , ylim = ylim
-               , main = "COVID19: Fälle pro 100.000 (Gesamt) in DEU"
+               , main = "CoViD19 DEU: Fälle pro 100.000"
                , sub = ""
                , cex.axis = 2
                , cex.names = 2

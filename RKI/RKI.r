@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+#
+#
+# Script: RKI.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"RKI"
+
 
 # Reads the cumulative cases and death from rki.de
 # The Excel file is in a very poor format. Therefore we have to adjust the data.
