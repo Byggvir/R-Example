@@ -47,3 +47,11 @@ vignettes/*.pdf
 *.xls*
 *.doc*
 
+# Linux file system
+.Directory
+*/.Directory
+.directory
+*/.directory
+
+# Test files
+bash/test.sh
