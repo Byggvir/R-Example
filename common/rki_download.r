@@ -7,6 +7,7 @@ library(REST)
 library(RCurl)
 library(lubridate)
 library(RMariaDB)
+source("lib/copyright.r")
 
 # Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
 # die mittels Btach Job heruntergelden und aufbereitet wurden.
@@ -16,24 +17,18 @@ library(RMariaDB)
 # aufbereiten der schlecht formatierten Daten
 
 copyright_rki <- function () {
+  copyright()
+}
 
-  mtext( text = paste(   "Quelle: Robert Koch-Institut (RKI), dl-de/by-2-0"
-                       , "Diagramm: Thomas Arend, Rheinbach"
-                       , paste("Stand:", as.character(Sys.Date()))
-                       , sep ="\n"
-                       )
-        , side = 1
-        , adj = 0
-        , line  = 4
-        , outer = FALSE 
-        )
+copyright_jhu <- function () {
+  copyright(holders = c("JHU","TAr"))  
 }
 
 get_rki_kumtab <- function () {
   
   today <- Sys.Date()
   heute <- format(today, "%d %b %Y")
-  startdate <- as.Date("2020-02-24")
+  startdate <- as.Date("2020-02-25")
   reported <- heute
 
   d <- as.numeric(today-startdate) - 1
@@ -61,6 +56,7 @@ get_rki_kumtab <- function () {
   
   
   m <- length(daily$Cases)
+  while( is.na(daily$Cases[m])) { m <- m-1}
   
   daily$Kw <- 0:(m-1)%/%7+9
   daily$WTag <- 0:(m-1)%%7
@@ -68,7 +64,7 @@ get_rki_kumtab <- function () {
   daily$incCases <- c(0,daily$Cases[2:m]-daily$Cases[1:(m-1)])
   daily$incDeaths <- c(0,daily$Deaths[2:m]-daily$Deaths[1:(m-1)])
 
-  while( is.na(daily$Cases[m])) { m <- m-1}
+
   
   return(daily[1:m,])
 
@@ -81,18 +77,30 @@ get_rki_kumtab <- function () {
 # Bug: Die Schnittstelle enthält eien Bug. 
 # Komplexe Anfagen führen zu korrupten Daten
 
-get_rki_sql <- function (sql="select * from rki;") {
+get_rki_sql <- function (
+sql=' select 
+    t1.date as Date
+    , (@i:=@i+1) as Day
+    , WEEK(t1.date,3) as Kw
+    , WEEKDAY(t1.date) as WTag
+    , t1.cases as Cases
+    , t1.deaths as Deaths
+    , t1.cases-t2.cases as incCases
+    , t1.deaths-t2.deaths as incDeaths
+from rki as t1 
+inner join rki as t2 
+on t1.date=adddate(t2.date,1)
+where t1.cases > t2.cases;'
+, prepare="set @i := 1;") {
   
   rmariadb.settingsfile <- "/home/thomas/git/R-Example/SQL/COVID19.cnf"
   
   rmariadb.db <- "COVID19"
   
   COVID19DB <- dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group=rmariadb.db)
-  
+  dbExecute(COVID19DB, prepare)
   rsQuery <- dbSendQuery(COVID19DB, sql)
-  
   dbRows<-dbFetch(rsQuery)
-  
   # Clear the result.
   
   dbClearResult(rsQuery)
@@ -124,4 +132,3 @@ get_rki_kw_csv <- function () {
   return(t)
   
 }
-
