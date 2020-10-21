@@ -7,6 +7,7 @@ TEMP=$(mktemp -d)
 
 GIT="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series"
 TYPES=(confirmed deaths)
+TABLES=(jhucases jhudeaths)
 
 function Download {
 
@@ -29,7 +30,7 @@ function US {
     for i in 0 1
     do
         (   echo UID,day,count
-            cat "$TEMP/US-${TYPES[$i]}.csv" \
+            cat "$TEMP/US-${DATA}.csv" \
             | sed -n  '1d; s#,"[^"]*"##; s#\(,[^,]*\)\{'${OFFSET[$i]}'\}##; h; :a; x ; s#^\([^,]*\),\([0-9]*\).*#\1,\2#p; g; s#^\([^,]*\),\([0-9]*\)#\1#; t a;' \
             | awk -F ',' 'BEGIN { i=0;UID==0} {if ($1 == UID) {i=i+1;print ($1 "," i "," $2);} else { UID=$1;i=1; print($1 "," 0 "," 0); print ( $1 "," i"," $2 );}}'
         ) > "US-${TYPES[$i]}.csv"
@@ -40,40 +41,82 @@ function US {
 
 }
 
-function Germany {
-
-    for DATA in confirmed deaths
-    do
-        ( grep Germany "$TEMP/global-${DATA}.csv" \
-        | tr ',' '\n' \
-        | sed '1,4 d' \
-        ) > "$TEMP/Germany-${DATA}.csv"
-    done
-    ( 
-        echo -e "Date,Kw,WTag,Cases,Deaths\n0,4,0,0,0\n1,4,1,0,0"
-        paste "$TEMP/Germany-${TYPES[0]}.csv" "$TEMP/Germany-${TYPES[1]}.csv" \
-        | awk -F ' ' 'BEGIN { i=2;k=4 } { print (i "," k "," i%7 "," $1 "," $2 ) ; i=i+1 ; if ( i%7==0) {k=k+1}}' 
-    ) > "Germany.csv"
-
-}
-
 function global_data {
 
 (
 cat <<EOF
 USE COVID19;
-DROP TABLE IF EXISTS country;
-DROP TABLE IF EXISTS cases;
 
-CREATE TABLE country ( cid BIGINT primary key, name CHAR(255), INDEX (name));
-CREATE TABLE cases ( cid BIGINT , day DATE, count BIGINT, INDEX (cid, day));
+DROP TABLE IF EXISTS jhucountry;
+
+CREATE TABLE jhucountry ( 
+      cid BIGINT primary key
+    , Province_State CHAR(255)
+    , Country_Region CHAR(255)
+    , Latitude DOUBLE
+    , Longitude DOUBLE
+    , INDEX (cid)
+    );
+SET autocommit=0;
+LOCK TABLE jhucountry WRITE;
+EOF
+# Countries
+cat "${TEMP}/global-confirmed.csv" \
+| sed '1d; s#"\([^"]*\), *\([^"]*\)"#\2/\1#g; s#^\(\([^,]*,\)\{4\}\).*#\1#' \
+| awk -F ',' 'BEGIN {i=1;} { print("INSERT INTO jhucountry VALUES ( " i ",\"" $1 "\",\"" $2 "\"," $3 ","$4 ");"); i=i+1; }'
+cat <<EOF
+COMMIT;
+UNLOCK TABLES;
+EOF
+) | mysql --user=rscript --password=rscript
+
+for i in 0 1
+do
+(
+cat <<EOF
+USE COVID19;
+DROP TABLE IF EXISTS ${TABLES[$i]};
+
+CREATE TABLE ${TABLES[$i]} ( cid BIGINT , reported DATE, count BIGINT, INDEX (cid, reported));
+
+SET autocommit=0;
+LOCK TABLE ${TABLES[$i]} WRITE;
+EOF
+cat "${TEMP}/global-${TYPES[$i]}.csv" \
+| sed '1d; s#"\([^"]*\), *\([^"]*\)"#\2/\1#g;' \
+| sed 's#^\([^,]*\),\([^,]*\),\([^,]*,\)\{2\}#-\n#; s#\([^,]*\),#\1\n#g' \
+| sed 's#/$##' \
+| awk 'BEGIN {i=-1;j=0;} { if ($1=="-") { i=0; j=j+1; v=0} else { v=$1 };print("INSERT INTO '${TABLES[$i]}' VALUES (" j ", ADDDATE(\"2020-01-21\"," i ")," v ");") ; i=i+1; }'
+cat <<EOF
+COMMIT;
+UNLOCK TABLES;
+EOF
+) | mysql --user=rscript --password=rscript
+
+done
+
+(
+cat <<EOF
+USE COVID19;
+
+DROP TABLE IF EXISTS jhu;
+
+CREATE TABLE jhu as 
+SELECT 
+      a.cid as cid
+    , b.reported as reported
+    , b.count as cases
+    , c.count as deaths
+FROM jhucountry as a 
+INNER JOIN jhucases as b 
+    ON b.cid=a.cid 
+INNER JOIN jhudeaths as c 
+    ON 
+        a.cid = c.cid 
+        and b.reported = c.reported ;
+ALTER TABLE jhu ADD INDEX (cid, reported);
 
 EOF
-cat "$TEMP/global-${DATA}.csv" \
-| sed '1d; s#"\([^"]*\), *\([^"]*\)"#\2/\1#g;' \
-| sed 's#^\([^,]*\),\([^,]*\),\([^,]*\),\([^,]*\),#-\n\2/\1\n#; s#\([^,]*\),#\1\n#g' \
-| sed 's#/$##' \
-| awk 'BEGIN {i=0;j=0;l=""} { if ($1=="-") { i=1;l="" } else { if (i==1) { l=$1;j=j+1; print("INSERT INTO country VALUES ( " j ",\"" $l "\");") } else { print("INSERT INTO cases VALUES (" j", ADDDATE(\"2020-01-21\"," i ")," $1 ");") }; i=i+1; } }'
 ) | mysql --user=rscript --password=rscript
 
 }
@@ -83,24 +126,23 @@ pushd ${TARGET}
 Download
 global_data
 US
-Germany
-
+ 
 popd
+
 pushd ~/git/R-Example/COVID19
-
+ 
 for r in *.r
 do
 	echo -e "--- $r ---"
-	Rscript $r
+ 	Rscript $r
 done
 popd
 
-pushd ~/git/R-Example/RKI
-
+pushd ~/git/R-Example/JHU
+ 
 for r in *.r
 do
 	echo -e "--- $r ---"
-	Rscript $r
+ 	Rscript $r
 done
 popd
-
