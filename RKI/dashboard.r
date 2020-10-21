@@ -13,6 +13,7 @@ library(RCurl)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("lib/copyright.r")
 
 options( 
   digits=7
@@ -26,8 +27,7 @@ png(  "png/CasesDeathsDERKI.png"
       , height=1080
 )
 
-daily <- get_rki_kumtab()
-print(daily)
-# URL <- 'https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data'
-
+daily <- get_rki_tag_csv()
+# print(daily)
+copyright()
 dev.off()

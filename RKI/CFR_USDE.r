@@ -5,6 +5,7 @@ library(utils)
 require("readODS")
 
 setwd("~/git/R-Example")
+source("lib/copyright.r")
 
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
@@ -102,6 +103,8 @@ text( 0.5
       , 5
       , paste("Average CFR", sprintf("%0.1f",round(sum(stats$DEDeaths)/sum(stats$DECases) * 100, digits = 1)),"%")
       , cex = 2 )
+
+copyright(c("CDC","RKI","TAr"))
 
 dev.off()
 

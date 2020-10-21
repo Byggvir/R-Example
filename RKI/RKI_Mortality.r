@@ -4,13 +4,16 @@
 
 library(scales)
 library(readODS)
+source('lib/copyright.r')
+
+MyScriptName <- "RKI_Mortallity"
+
+setwd("~/git/R-Example")
 
 today <- Sys.Date()
 heute <- format(today - 1, "%d %b %Y")
 
-setwd("~/git/R-Example")
-
-png(filename = "png/mortalityDE.png"
+png(filename = paste("png/",MyScriptName, ".png" , sep ="") 
     , width = 1920
     , height = 1080
     )
@@ -41,11 +44,13 @@ deaths <- data.frame (
   , deaths = CFRyear$Deaths[Population$ageband+1]
 )
 
+ylim <- c(0,ceiling(max(CFRyear$Deaths / CFRyear$Population)* 1000)*100)
+
 bp <- barplot( CFRyear$Deaths / CFRyear$Population * 100000
                , col = "blue"
                , xlab="Altersgruppe"
                , ylab="Anzahl"
-               , ylim=c(0,200)
+               , ylim = ylim
                , main = "COVID19: Gestorbene pro 100.000 (Gesamt) in DEU"
                , sub = ""
                , cex.axis = 2
@@ -88,11 +93,13 @@ mtext( paste( "Gestorbene gem. RKI vom", heute )
        , line = 5
 )
 
+ylim <- c(0,ceiling(max(CFRyear$Cases / CFRyear$Population)* 1000)*100)
+
 bp2 <- barplot( CFRyear$Cases / CFRyear$Population * 100000
                , col = "blue"
-               , xlab="Altersgruppe"
-               , ylab="Anzahl"
-               , ylim=c(0,500)
+               , xlab = "Altersgruppe"
+               , ylab = "Anzahl"
+               , ylim = ylim
                , main = "COVID19: Fälle pro 100.000 (Gesamt) in DEU"
                , sub = ""
                , cex.axis = 2
@@ -111,7 +118,7 @@ text( x = bp2
       
 )
 text( 0
-      , 450
+      , ylim[2]*0.8
       , paste( "Durchschnit: ~", 
                prettyNum(
                  round(
@@ -137,5 +144,7 @@ mtext( paste( "Fälle gem. RKI der ", Kw, ". Kalenderwoche" , sep = "" )
       , cex = 2
       , line = 5
       )
+
+copyright()
 
 dev.off()

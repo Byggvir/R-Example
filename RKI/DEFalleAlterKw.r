@@ -2,9 +2,9 @@
 
 library(data.table)
 library(readODS)
-
 setwd("~/git/R-Example")
-
+source("common/rki_download.r")
+source("lib/copyright.r")
 
 data <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
 dpop <- read.table(file("data/DEPopulationAge.csv"), sep=";", header=TRUE)
@@ -74,5 +74,7 @@ for (a in 2:9) {
 }
 
 single_plot(apply(data[,10:12], 1, FUN=sum) / apply(data[,2:12], 1, FUN=sum), "80+", age80)
+
+copyright()
 
 dev.off()

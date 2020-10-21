@@ -6,7 +6,7 @@ setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("lib/copyright.r")
 
-png("png/RKI_CasesDeaths.png",width=1920,height=1080)
+png("png/RKI_Cases.png",width=1920,height=1080)
 
 colors <-c( "red", "yellow", "green", "blue", "black" )
 
@@ -22,7 +22,7 @@ options(digits=7)
 options(scipen=7)
 options(Outdec=".")
 
-op = par(mar=c(10,5,5,5))
+op = par(mar=c(10,5,10,5))
 
 Tage <- daily$Date
 

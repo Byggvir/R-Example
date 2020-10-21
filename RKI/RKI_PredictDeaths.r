@@ -5,6 +5,8 @@
 library(data.table)
 library(readr)
 library(readODS)
+library(gridExtra)
+library(grid)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
@@ -64,6 +66,7 @@ linetypes = c (1, 1, 1, 3, 3)
 
 single_plot <- function(data) {
   
+  mx <- max(data[length(data[,1]),1])
   my <- max(data[,2:5])
   plot(
      data[,1]
@@ -106,12 +109,23 @@ single_plot <- function(data) {
   )
   
   for (i in 3:5) {
-  lines( data[,1]+2
+    lines( data[,1]+2
         , data[,i]
         , col = linecolors[i]
         , lwd = 6
         , lty = linetypes[i]
-  )
+    )
+    for ( j in 1:3 ){ 
+      text( 
+        data[data[,1] > mx-j,1]+2
+        , data[data[,1] > mx-j,i]
+        , round(data[data[,1] > mx-j,i])
+        , col = linecolors[i]
+        , cex = 3
+        , adj = 1
+
+      )
+    }
   }
   legend ( 
     "top"
@@ -126,7 +140,7 @@ single_plot <- function(data) {
     , lwd = 4
     , cex = 4
   )
-
+  
 }
 
 lcaces <-length(cases[,1])
@@ -157,11 +171,43 @@ single_plot(prediction)
 
 grid()
 
+
+
 r <- prediction[,1]>=20
 
 single_plot(prediction[r,])
 
 grid()
+
+pl <- length(prediction[,1])
+
+ptab <- cbind(
+  prediction[(pl-5),1]:(prediction[pl,1]+2)
+  , c(prediction[(pl-5):pl,2],0,0)
+  , prediction[(pl-7):pl,3]
+  , prediction[(pl-7):pl,4]
+  , prediction[(pl-7):pl,5]
+)
+
+vp <- viewport(x=0.75,y=0.5,width=0.5,height = 0.6)
+
+tt <- ttheme_default(
+        base_size = 48
+        , core=list(
+          fg_params=list(fontface=c(rep("plain", 6), rep("bold.italic",2))
+                 )
+          )
+        )
+
+g <- tableGrob(
+      round(ptab)
+      , theme = tt
+      , cols = c("Kw", "Tote","Erwartet", "Min CI95%","Max CI95%" )
+      , vp = vp      
+      )
+
+grid.draw(g
+          , )
 
 copyright()
 

@@ -3,6 +3,7 @@
 require("readODS")
 
 setwd("~/git/R-Example")
+source("lib/copyright.r")
 
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
@@ -14,7 +15,7 @@ Cases <- read_ods("data/SterbeFälleAlter.ods",sheet=3)
 
 Kw <- max (Cases$Kw) 
     
-png( "png/CFR_DEU.png"
+png( "png/RKI_CFR.png"
      , width = 1920
      , height = 1080
      )
@@ -95,8 +96,11 @@ text( x = bp
     
 )
 
-title(sub=paste("Quelle RKI, Altersverteilung ", Kw , ". Kw und Todesfälle vom ", heute, sep = "" ) , line = 5)
+title( sub = paste("Altersverteilung ", Kw , ". Kw, erstellt am ", heute, sep = "" ) , line = 6
+       , cex.sub = 2)
 
 grid()
+
+copyright()
 
 dev.off()

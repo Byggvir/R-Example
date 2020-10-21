@@ -9,6 +9,7 @@ require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("lib/copyright.r")
 
 library(REST)
 
@@ -41,7 +42,7 @@ m <- length(daily[,1])
 #   daily$gCases[i] <- daily$incCases[i] * 0.2 + daily$gCases[i-1]*0.8
 # }
 
-png(  "png/CasesDeathsDERKI.png"
+png(  "png/RKI_CasesDeathsB.png"
     , width=1920
     , height=1080
     )
@@ -82,5 +83,7 @@ barplot( daily$incDeaths[1:m] # [fromto]
          , las = 2
 )
 title ( sub = paste("Source: rki.de; Created:", heute ), line= 3)
+
+copyright()
 
 dev.off()

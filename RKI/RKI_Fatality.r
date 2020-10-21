@@ -1,13 +1,21 @@
 #!/usr/bin/env Rscript
+#
+#
+#
+
 
 library(data.table)
 require("readODS")
 
 setwd("~/git/R-Example")
+source("lib/copyright.r")
+MyScriptName <- "RKI_Fatality"
 
 CFR <- read_ods("data/SterbeFälleAlter.ods",sheet=2)
 
-png("png/DE_fatality.png", width = 1920, height = 1080)
+png( paste("png/", MyScriptName,".png" , sep="")
+     , width = 1920
+     , height = 1080)
 
 par(mar=c(10,10,10,10))
 
@@ -52,4 +60,5 @@ legend( "topleft"
         )
 
 grid()
+copyright()
 dev.off()

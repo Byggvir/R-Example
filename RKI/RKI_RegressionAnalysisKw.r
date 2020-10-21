@@ -226,18 +226,6 @@ regression_analysis_kw <- function (
   dev.off()
 }  
 
-WTagAnteile <- WTagAnteil(  SQL = '
-    SELECT weekday(date) as WTag, sum(cases)/(select max(cases)-min(cases) from rki where week(date,3)>39 and week(date,3)<43) as Anteil
-    FROM (
-      SELECT t1.date as date, t1.cases - t2.cases as cases
-      FROM rki AS t1 
-      JOIN rki AS t2 
-      ON t1.date = adddate(t2.date,1)
-    ) AS t3
-    WHERE week(date,3)>39 and week(date,3)<43
-    GROUP BY WTag;
-')
-print(WTagAnteile)
 m <- max(kw$Kw[kw$Tage == 7])
          
 regression_analysis_kw(
@@ -247,10 +235,3 @@ regression_analysis_kw(
   , EndRegAKw = m
   , PrognoseKw <- m + 2
 )
-
-l <- length(daily[,1])
-options ( digits = 0)
-
-print(daily[l,7]/WTagAnteile[daily[l,4]+1,2]*WTagAnteile[,2])
-
-
