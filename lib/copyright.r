@@ -10,18 +10,34 @@ copyrights <- data.table (
   )
 )
 
-copyright <- function (holders = c( "RKI", "TAr" )) {
+copyright <- function ( holders = c( "RKI", "TAr" )
+                       , ScriptName = NA  ) {
   
   h <- pmatch(holders,copyrights$shortname)
   
   for (i in 1:length(h)) {
-    mtext ( text = copyrights$notice[h[i]]
-            , side = 1
-            , adj = 0
-            , line  = 3+i
-            , outer = FALSE 
+    mtext( text = copyrights$notice[h[i]]
+           , side = 1
+           , adj = 0
+           , line  = 3+i
+           , outer = FALSE 
     )
   }
+  
+  if (is.na(ScriptName))
+  { if (! is.na(MyScriptName))
+    { ScriptName <- MyScriptName
+  }
+    }
+  if (! is.na(ScriptName)) {
+    mtext( text = paste("Script", ScriptName)
+           , side = 1
+           , adj = 0
+           , line  = 4+length(h)
+           , outer = FALSE 
+  )
+    }
+
 }
 
 copyright_text <- function (holders = c( "RKI", "TAr" )) {
