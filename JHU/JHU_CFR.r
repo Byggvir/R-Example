@@ -1,8 +1,10 @@
 #!/usr/bin/env Rscript
 
+library(data.table)
 require("readODS")
 
 setwd("~/git/R-Example")
+source("lib/copyright.r")
 
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
@@ -159,6 +161,6 @@ text( x = bp
 )
 
 title(sub=paste("Quelle: CDC, Altersverteilung Covid-19 vom ", heute, "\nTotal popolation data.census.gov 2018", sep = "" ) , line = 5)
-
+copyright(c("CDC","TAr"))
 grid()
 dev.off()
