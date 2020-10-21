@@ -1,8 +1,8 @@
 library(RMariaDB)
 
-options(max.print = 2000)
+options(max.print = 10000000) 
 
-get_sql <- function (sql="select * from test limit 300;") {
+get_sql <- function (sql="select * from test limit 10000;") {
   
   rmariadb.settingsfile <- "/home/thomas/git/R-Example/SQL/COVID19.cnf"
   
@@ -22,5 +22,6 @@ get_sql <- function (sql="select * from test limit 300;") {
   
   return(dbRows)
 }
-
 print(get_sql())
+
+dput(get_sql(),file = '/tmp/dput.txt')

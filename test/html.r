@@ -8,7 +8,7 @@ all_tables <- read_html( "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/
     , header= TRUE
     )
 
+drop <- c(1,2)
 unfaelle <- all_tables[[1]][-drop,]
 colnames(unfaelle) <- all_tables[[1]][1,]
-drop <- c(1,2)
 print(unfaelle)

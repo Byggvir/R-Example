@@ -25,7 +25,7 @@ plot( data$age
     , lwd=2
     )
 
-polygon(c(data$age,rev(data$age)),c(data$female,rev(data$male)),col="yellow",border="red",lwd=2)
+#polygon(c(data$age,rev(data$age)),c(data$female,rev(data$male)),col="yellow",border="red",lwd=2)
 
 lines(data$age,data$male,type="l",col="blue",lwd=2)
 

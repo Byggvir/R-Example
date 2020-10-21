@@ -1,9 +1,12 @@
-png("SterbeFaelle2018.png",width=1920,height=1080)
+
+
+setwd("~/git/R-Example")
+png("png/SterbeFaelle2018.png",width=1920,height=1080)
 
 a<-0:100
 
-Einwohner <- read.csv(file = '12411-0006.csv')
-SterbeFaelle <- read.csv(file = 'SterbeFaelle2018.csv')
+Einwohner <- read.csv(file = 'SterbeFaelleDEU/12411-0006.csv')
+SterbeFaelle <- read.csv(file = 'SterbeFaelleDEU/SterbeFaelle2018.csv')
 
 plot(2018-SterbeFaelle$age,SterbeFaelle$female/sum(SterbeFaelle$female),type="l",col="red")
 lines(2018-SterbeFaelle$age,SterbeFaelle$male/sum(SterbeFaelle$male),type="l",col="blue")
