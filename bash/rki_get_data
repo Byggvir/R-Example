@@ -4,7 +4,9 @@ URL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahl
 TEMP=$(mktemp -d)
 #TEMP="/tmp/rki"
 DEST="$TEMP/rki.xlsx"
+TDEST="$TEMP/testungen.xlsx"
 CSV="$TEMP/rki"
+TCSV="$TEMP/testungen"
 SQL="$TEMP/rki.sql"
 GIT="$HOME/git/R-Example/"
 
@@ -17,6 +19,11 @@ ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$DEST" "${CSV}%n.csv"
 # 2. Replace invalid dates
 # 3. Reformat dates
 # 4. Create SQL statements
+
+TURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Testzahlen-gesamt.xlsx?__blob=publicationFile"
+curl --output "$TDEST" --url "$TURL"
+
+ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$TDEST" "${TCSV}%n.csv"
 
 function bund  {
 
@@ -109,6 +116,30 @@ mysql --user=rscript --password=rscript < "$SQL"
 
 }
 
+function testungen {
+
+(
+cat <<TESTEOF1
+USE COVID19 ;
+DROP TABLE IF EXISTS Testungen;
+
+CREATE TABLE Testungen (Kw INT, Testungen INT, Positiv INT, PRIMARY KEY (Kw));
+TESTEOF1
+
+cat "${TEMP}/testungen1.csv" \
+| sed '1d;$d; /Bis/ s#"Bis einschließlich KW10"#10#; s#,".*##' \
+| sed 's#^#INSERT INTO Testungen VALUES (#; s#$#);#'
+
+cat <<TESTEOF2
+COMMIT;
+UNLOCK TABLES;
+TESTEOF2
+) > "$SQL"
+
+mysql --user=rscript --password=rscript < "$SQL"
+
+}
+
 function run_r {
 pushd $HOME/git/R-Example/
 
@@ -124,6 +155,7 @@ sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
 popd
 }
 
-bund
-bundeslaender
-run_r
+#bund
+#bundeslaender
+testungen
+#run_r
