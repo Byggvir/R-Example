@@ -55,3 +55,6 @@ vignettes/*.pdf
 
 # Test files
 bash/test.sh
+
+# Backups
+*.old
