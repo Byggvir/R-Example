@@ -50,8 +50,8 @@ options(
 
 # Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI
 
-kw <- get_rki_sql(sql = SQL, prepare = "set @i:=1")
-daily <- get_rki_sql()
+kw <- sqlGetRKI(SQL = SQL, prepare = "set @i:=1")
+daily <- sqlGetRKI()
 
 regression_analysis_kw <- function (
   StartKw
@@ -186,6 +186,32 @@ regression_analysis_kw <- function (
                  xlim = c(0, PrognoseKw - StartRegAKw),
                  ylim = ylim)
   
+  for (x in EndRegAKw:PrognoseKw) {
+    
+
+  regression_label(
+                   x - StartRegAKw
+                 , a
+                 , b
+                 , xlim = c(0, PrognoseKw - StartRegAKw)
+                 , ylim = ylim)
+  
+  }
+  
+  regression_label(
+    data[length(data[,3]),3] - StartRegAKw
+    , a
+    , b
+    , xlim = c(0, PrognoseKw - StartRegAKw)
+    , ylim = ylim)
+  regression_label(
+    data[length(data[,3]),3] + 1 - StartRegAKw
+    , a
+    , b
+    , xlim = c(0, PrognoseKw - StartRegAKw)
+    , ylim = ylim)
+  
+  
   lr <- ifelse (b[2] > 0 , "left", "right")
   
   legend (
@@ -237,12 +263,26 @@ regression_analysis_kw <- function (
   dev.off()
 }  
 
-m <- max(kw$Kw[kw$Tage == 7])
-         
+
+lweek <- length(kw$Tage)
+mKw <- max(kw$Kw[kw$Tage == 7])
+
+sKw <- kw$Kw[1]
+eKw <- kw$Kw[length(kw$Kw)]
+sraKw <- kw$Kw[length(kw$Kw)] - 3
+eraKw <- mKw
+pKw <- mKw + 2
+
+if ( kw$Tage[lweek] < 7) {
+  kw$Kw[lweek] <- mKw + kw$Tage[lweek]/7
+}
+
+print(kw[lweek,])
+
 regression_analysis_kw(
-    StartKw = kw$Kw[1]
-  , EndKw = kw$Kw[length(kw$Kw)]
-  , StartRegAKw = kw$Kw[length(kw$Kw)] - 3
-  , EndRegAKw = m
-  , PrognoseKw <- m + 2
-)
+    StartKw = sKw
+  , EndKw = eKw
+  , StartRegAKw = sraKw
+  , EndRegAKw = eraKw
+  , PrognoseKw <- pKw
+  , data = kw)
