@@ -8,9 +8,6 @@ library(data.table)
 # E-Mail: thomas@arend-rhb.de
 #
 
-MyScriptName <-"copyright"
-
-
 copyrights <- data.table (
   shortname = c("CDC","JHU","RKI","TAr")
   , notice = c(
