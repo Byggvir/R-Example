@@ -10,16 +10,17 @@
 
 MyScriptName <-"RKI_Testungen"
 
-
 # Load statistics from RKI test report
 # Source https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-08-05-de.pdf?__blob=publicationFile
 #
-# 
+#
+
 library(REST)
 require(data.table)
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
+# source("common/rki_download.r")
+source("common/rki_sql.r")
 source("lib/copyright.r")
 
 par(family = "sans")
@@ -32,8 +33,8 @@ options(
 
 setwd("~/git/R-Example")
 
-tests <- read.csv("data/rki_testungen.csv")
-cases <- get_rki_tag_csv()
+tests <- sqlGetRKI(SQL = sqlTestungen)
+cases <- sqlGetRKI()
 
 l <- length(cases$Kw)
 
@@ -141,10 +142,10 @@ mtext ( "Positive Predictive Power (PPP) [%]"
     , line = 3
     , las = 0
     )
-
+ylim <- c(0,(ceiling(max(tests$Infected)/10000)+1)*10000)
 plot( tests$Kw
     , tests$Infected
-    , ylim=c(0,40000)
+    , ylim=ylim
     , type="b"
     , col="green"
     , xlab="Calendar weeks"
