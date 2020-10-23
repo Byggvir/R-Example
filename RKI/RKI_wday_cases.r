@@ -37,7 +37,7 @@ tendenz <- function (x) {
 
 country <- "DEU"
 
-cases <- get_rki_sql()
+cases <- sqlGetRKI()
 cases2 <- get_rki_tag_csv()
 
 png(  paste("png/RKI_Wochentag-",country,".png",sep="")

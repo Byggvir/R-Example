@@ -10,7 +10,6 @@
 
 MyScriptName <-"RKI_PrognoseWeek"
 
-
 require(data.table)
 library(REST)
 
@@ -23,21 +22,21 @@ source("lib/copyright.r")
 
 # Auswertung insgesamt
 
-daily <- get_rki_sql()
+daily <- sqlGetRKI()
 
 l <- length(daily[,1])
 
 options ( digits = 4)
 
 WTagAnteile <- WTagAnteil(  SQL = '
-    SELECT weekday(date) as WTag, sum(cases)/(select max(cases)-min(cases) from rki where week(date,3) > 39 and week(date,3) <43 ) as Anteil
+    SELECT weekday(date) as WTag, sum(cases)/(select max(cases)-min(cases) from rki where week(date,3) > 40 and week(date,3) <43 ) as Anteil
     FROM (
       SELECT t1.date as date, t1.cases - t2.cases as cases
       FROM rki AS t1 
       JOIN rki AS t2 
       ON t1.date = adddate(t2.date,1)
     ) AS t3
-    where week(date,3) > 39 and week(date,3) <43
+    where week(date,3) > 40 and week(date,3) <43
     GROUP BY WTag;
 ')
 

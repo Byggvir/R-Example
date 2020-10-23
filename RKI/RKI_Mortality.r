@@ -3,6 +3,9 @@
 #
 # Script: RKI_Mortality.r
 #
+# R script to plot the CoViD-19 mortality in DEU
+# Data is retrieved from Robert-Koch-Institut (RKI) and Bundesamt für Statistik
+#
 # Stand: 2020-10-21
 # (c) 2020 by Thomas Arend, Rheinbach
 # E-Mail: thomas@arend-rhb.de
@@ -10,22 +13,13 @@
 
 MyScriptName <-"RKI_Mortality"
 
-
-# R script to plot the CoViD-19 mortality in DEU
-# Data is retrieved from Robert-Koch-Institut (RKI) and Bundesamt für Statistik
-#
-# (c) Thomas Arend, Rheinbach
-# E-Mail: thomas@arend-rhb.de
-
 #library(tidyverse)
 #library(scales)
 
 library(readODS)
-source('lib/copyright.r')
-
-MyScriptName <- "RKI_Mortallity"
-
 setwd("~/git/R-Example")
+
+source('lib/copyright.r')
 
 today <- Sys.Date()
 heute <- format(today - 1, "%d %b %Y")
