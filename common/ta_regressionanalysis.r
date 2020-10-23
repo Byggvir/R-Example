@@ -22,8 +22,22 @@ plotregression <- function( a , b, xlim = c(0,1), ylim = c(0,3), linecol = c("gr
           , exp(a[i]+b[i]*xlim[2])
           , round(exp(a[i]+b[i]*xlim[2]),0)
           , col = linecol[i]
-          , adj = 0
+          , adj = 1
           , cex = 2
+    )
+    
+  }
+  
+}
+regression_label <- function( x , a , b, xlim = c(0,1), ylim = c(0,3), linecol = c("green","orange","red")) {
+  
+  for (i in 1:3 ) {
+    text( x
+          , exp(a[i]+b[i]*x)
+          , round(exp(a[i]+b[i]*x),0)
+          , col = linecol[i]
+          , adj = 0.5
+          , cex = 1
     )
     
   }
