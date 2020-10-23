@@ -7,7 +7,10 @@ library(REST)
 library(RCurl)
 library(lubridate)
 library(RMariaDB)
+
+setwd("~/git/R-Example")
 source("lib/copyright.r")
+source("common/rki_sql.r")
 
 # Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
 # die mittels Btach Job heruntergelden und aufbereitet wurden.
@@ -78,7 +81,7 @@ get_rki_kumtab <- function () {
 # Komplexe Anfagen führen zu korrupten Daten
 
 get_rki_sql <- function (
-sql=' select 
+sql = ' select 
     t1.date as Date
     , (@i:=@i+1) as Day
     , WEEK(t1.date,3) as Kw
@@ -91,27 +94,13 @@ from rki as t1
 inner join rki as t2 
 on t1.date=adddate(t2.date,1)
 where t1.cases > t2.cases;'
-, prepare="set @i := 1;") {
+, prepare="set @i := 1;" ) {
   
-  rmariadb.settingsfile <- "/home/thomas/git/R-Example/SQL/COVID19.cnf"
-  
-  rmariadb.db <- "COVID19"
-  
-  COVID19DB <- dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group=rmariadb.db)
-  dbExecute(COVID19DB, prepare)
-  rsQuery <- dbSendQuery(COVID19DB, sql)
-  dbRows<-dbFetch(rsQuery)
-  # Clear the result.
-  
-  dbClearResult(rsQuery)
-  
-  dbDisconnect(COVID19DB)
-
-  return(dbRows)
+  return(sqlGetRKI(SQL = sql, prepare = prepare))
 }
 
 # Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
-# die mittels Btach Job heruntergelden und aufbereitet wurden.
+# die mittels Batch Job heruntergelden und aufbereitet wurden.
 
 # Hier: Tägliche Fälle.
 
