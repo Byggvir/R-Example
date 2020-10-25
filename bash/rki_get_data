@@ -155,7 +155,7 @@ sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
 popd
 }
 
-#bund
-#bundeslaender
+bund
+bundeslaender
 testungen
-#run_r
+run_r

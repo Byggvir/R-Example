@@ -25,7 +25,7 @@ source("lib/copyright.r")
 
 options(digits=3)
 
-week_offset <- 0
+week_offset <- 2
 
 cumulate <- function(x) {
   

@@ -21,7 +21,7 @@ setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("lib/copyright.r")
 
-week_offset <- 0
+week_offset <- 3
 
 cumulate <- function(x) {
   
@@ -48,7 +48,7 @@ par(   mar = c(10,6,10,6)
      , mfrow = c(3,4)
      )
 
-single_plot <- function(deaths, cases, calweeks, AgeGroup) {
+single_plot <- function(deaths, cases, calweeks, AgeGroup, ylim=c(0,50) ) {
   
   plot(
     calweeks
@@ -58,7 +58,7 @@ single_plot <- function(deaths, cases, calweeks, AgeGroup) {
     , col = "black"
     , xlab = "Kalenderwoche"
     , ylab = "CFR [%]"
-    , ylim = c(0,50)
+    , ylim = ylim
     , main = paste("Kumulative CoViD-19 CFR nach Kw\nOffset Tote zu Fälle =", week_offset,"Wochen")
     , cex.main = 4
     , cex.lab = 3
@@ -68,24 +68,30 @@ single_plot <- function(deaths, cases, calweeks, AgeGroup) {
  axis(1,cex.axis=2 )  
  axis(2,cex.axis=2, las = 2 )
  lastweek <- length(calweeks)
+
+ options (digits = 3)
+ 
  text(
     calweeks[lastweek]
-   , deaths[lastweek]/cases[lastweek] * 100 + 6
-   , paste("CFR = ",format(round(deaths[lastweek]/cases[lastweek] * 100,2), nsmall = 2),"%",sep="")
+   , ylim[2]/10
+   , paste("CFR=", format(deaths[lastweek]/cases[lastweek] * 100, nsmall = 2),"%",
+           "\nmax=",format(max(deaths[cases>0]/cases[cases>0]) * 100, nsmall = 2),"%"
+           ,sep="")
    , adj = 1
    , cex = 5
+   , col= "blue"
  )
- options (digits = 3)
-  
-  legend(
+
+ legend(
     "top"
-    , legend = paste("Altersgruppe", AgeGroup)
+    , legend = paste("Altersgruppe", AgeGroup,sep=" ")
     , col = "black"
     , lty = 1
     , cex = 5
   )
   
-  grid()
+ grid()
+
 }
 
 zr1 <- (1 + week_offset):length(cases[,1])
@@ -108,18 +114,20 @@ for (a in 2:12) {
     , cases = cumulate(cases[zr1,a])
     , calweeks = cases[zr2,1]
     , AgeGroup = ag
+
   )
 # 
 }
 
-AGxPlus <- 8:12
+AGxPlus <- 2:12
 
 single_plot(
    deaths = cumulate(rowSums(deaths[zr1,AGxPlus]))
   , cases = cumulate(rowSums(cases[zr2,AGxPlus]))
   , calweeks = cases[zr1,1]
-  , AgeGroup = "70-"
-)
+  , AgeGroup = "Alle"
+  , ylim = c(0,10))
+
 copyright()
 
 dev.off()
