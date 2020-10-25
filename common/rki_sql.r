@@ -39,7 +39,6 @@ sqlGetRKI <- function (
 #--- Special SQL requests
 
 WTagAnteil <- function (
-) {
   SQL = '
     SELECT dayofweek(date) as WTag, sum(cases)/(select max(cases) from rki) as Anteil
     FROM (
@@ -51,7 +50,7 @@ WTagAnteil <- function (
     GROUP BY WTag
     ORDER BY WTag;
 '
-  
+){
 
   
   # rmariadb.settingsfile <- "/home/thomas/git/R-Example/SQL/COVID19.cnf"
