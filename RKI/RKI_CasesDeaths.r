@@ -15,6 +15,7 @@ require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("common/rki_sql.r")
 source("lib/copyright.r")
 
 png("png/RKI_Cases.png",width=1920,height=1080)
@@ -24,7 +25,7 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-daily <- get_rki_tag_csv ()
+daily <- sqlGetRKI()
 startdate <- daily$Date[1]
 
 reported <- format(daily$Date[length(daily$Date)], "%d %b %Y")
@@ -40,8 +41,8 @@ Tage <- daily$Date
 sel <- daily$WTag != 6
 Tage[sel] <- NA
 
-barplot( daily$incCases
-    , ylim=c(0,(max(daily$incCases)%/%1000+1)*1000)
+barplot( as.numeric(daily$incCases)
+    , ylim=c(0,(max(as.numeric(daily$incCases))%/%1000+1)*1000)
     #, col=colors[1]
     , main = paste("Daily cases DE ", reported) 
     , sub = ""

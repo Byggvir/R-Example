@@ -265,8 +265,8 @@ rkidata <- sqlGetRKI(SQL )
 
 eDate <- rkidata$Date[length(rkidata$Date)]
 
-for (j in c(0)) {
-for (i in c(27,34)) {
+for (j in c(0,7,14) ) {
+for (i in c(27)) {
   
   regression_analysis (
       StartDate = rkidata$Date[1]

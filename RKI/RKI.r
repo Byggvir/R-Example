@@ -20,8 +20,9 @@ require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("common/rki_sql.r")
 source("lib/copyright.r")
-
+       
 library(REST)
 
 options( 
@@ -31,7 +32,7 @@ options(
   , max.print = 3000
   )
 
-daily <- get_rki_tag_csv()
+daily <- sqlGetRKI()
 m <- length(daily[,1])
 
 # WTag <- aggregate(cbind(incCases,incDeaths) ~ WTag, FUN=sum, data= daily[100:m,] )
@@ -67,8 +68,14 @@ heute <- format(today, "%d %b %Y")
 startdate <- as.Date("2020-02-24")
 reported <- daily$Date[m]
 
-barplot( daily$incCases[1:m] # [fromto]
-         , ylim= c(0,(max(daily$incCases[1:m])%/%1000+1)*1000)
+
+barplot( as.numeric(daily$incCases[1:m]) # [fromto]
+         , ylim= c(0,
+                   ( max(
+                      as.numeric(daily$incCases[1:m])
+                      )%/%1000+1
+                     )*1000
+                   )
          #, col=colors[1]
          , main = paste("Daily cases DE from RKI until ", reported) 
          , sub = ""
@@ -82,8 +89,8 @@ title ( sub = paste("Source: rki.de; Created:", heute ), line= 3)
 
 grid()
 
-barplot( daily$incDeaths[1:m] # [fromto]
-         , ylim= c(0,(max(daily$incDeaths[1:m])%/%100+1)*100)
+barplot( as.numeric(daily$incDeaths[1:m]) # [fromto]
+         , ylim= c(0,(max(as.numeric(daily$incDeaths[1:m]))%/%100+1)*100)
          #, col=colors[1]
          , main = paste("Daily deaths DE from RKI until", reported) 
          , sub = ""
