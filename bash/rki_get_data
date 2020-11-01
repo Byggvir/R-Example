@@ -2,7 +2,7 @@
 
 URL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahlen_Kum_Tab.xlsx?__blob=publicationFile"
 TEMP=$(mktemp -d)
-#TEMP="/tmp/rki"
+#TEMP="/tmp/rki" ; [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
 DEST="$TEMP/rki.xlsx"
 TDEST="$TEMP/testungen.xlsx"
 CSV="$TEMP/rki"
@@ -14,18 +14,26 @@ curl --output "$DEST" --url "$URL"
 
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$DEST" "${CSV}%n.csv"
 
-# Create SQL import file 
-# 1. Delete header rows
-# 2. Replace invalid dates
-# 3. Reformat dates
-# 4. Create SQL statements
-
 TURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Testzahlen-gesamt.xlsx?__blob=publicationFile"
 curl --output "$TDEST" --url "$TURL"
 
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$TDEST" "${TCSV}%n.csv"
 
+
 function bund  {
+
+# Importieren der bundesweiten Zahlen aus der kumulativen Tabelle.
+
+
+#---
+# Create SQL import file 
+# 1. Delete header rows
+# 2. Replace invalid dates
+# 3. Reformat dates
+# 4. Create SQL statements
+#---
+if [ $(date "+%w") -lt 6 ]
+then
 
 ( cat <<EOF1
 USE COVID19;
@@ -55,8 +63,10 @@ FROM neu
 LEFT JOIN rki 
 ON rki.date = neu.date
 WHERE rki.date IS NULL;
+
 COMMIT;
 UNLOCK TABLES;
+
 SELECT * FROM rki 
 WHERE date > subdate(now(),10) ;
 EOF2
@@ -69,9 +79,13 @@ mysql --user=rscript --password=rscript < "$SQL"
 mysql --user=rscript --password=rscript < "$HOME/git/R-Example/SQL/RKI_Export.sql"
 
 sudo mv /tmp/RKI_nach* "$GIT/data/"
+fi
+
 } # Ende Bund
 
 function bundeslaender {
+
+# Importieren der Länderzahlen aus der kumulativen Tabelle.
 
 (
 cat <<EOF3
@@ -140,6 +154,92 @@ mysql --user=rscript --password=rscript < "$SQL"
 
 }
 
+function rki_dashboard {
+
+# Importieren der Zahlen aus der Tabelle für das RKI Dashboard
+
+URL="https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data"
+DEST="$TEMP/RKI-COVID19.csv"
+DESTA="$TEMP/A-RKI-COVID19.csv"
+
+DEBUG=OFF
+
+[ "$DEBUG" = "ON" ] && [ ! -e $DEST ] && curl --output "$DESTA" --url "$URL"
+
+( ( [ "$DEBUG" = "ON" ] && cat "$DESTA" ) || curl --url "$URL" ) \
+| sed 's#"\([0-9]\{2\}\)\.\([0-9]\{2\}\)\.\([0-9]\{4\}\).*"#\3-\2-\1#g; s# 00:00:00##g; s#/#-#g; s#,[^,]*$##' \
+| sed 's#LK Göttingen (alt)#LK Göttingen#' \
+> "$DEST"
+
+( cat <<EOF
+USE COVID19;
+
+DROP TABLE IF EXISTS RKIFaelle;
+
+CREATE TABLE IF NOT EXISTS RKIFaelle (
+    ObjectId INT
+    , IdBundesland INT
+    , Bundesland CHAR(32)
+    , Landkreis CHAR(64)
+    , Altersgruppe CHAR(7)
+    , Geschlecht CHAR(1)
+    , AnzahlFall INT
+    , AnzahlTodesfall INT
+    , Meldedatum DATE
+    , IdLandkreis INT
+    , Datenbestand DATE
+    , NeuerFall INT 
+    , NeuerTodesfall INT 
+    , Refdatum DATE
+    , NeuGenesen INT
+    , AnzahlGenesen INT 
+    , IstErkrankungsbeginn INT
+    , PRIMARY KEY(ObjectId, Datenbestand));
+    
+ALTER TABLE RKIFaelle ADD INDEX(IdBundesland);
+ALTER TABLE RKIFaelle ADD INDEX(IdLandkreis);
+ALTER TABLE RKIFaelle ADD INDEX(Meldedatum);
+ALTER TABLE RKIFaelle ADD INDEX(RefDatum);
+ALTER TABLE RKIFaelle ADD INDEX(Geschlecht);
+ALTER TABLE RKIFaelle ADD INDEX(Altersgruppe);
+
+LOAD DATA LOCAL INFILE '$DEST' 
+    INTO TABLE RKIFaelle 
+    FIELDS TERMINATED BY ',' 
+    IGNORE 1 ROWS;
+    
+DROP TABLE IF EXISTS Bundesland;
+
+CREATE TABLE Bundesland ( 
+    IdBundesland INT PRIMARY KEY
+    , Bundesland CHAR(32)
+    , INDEX (Bundesland));
+    
+DROP TABLE IF EXISTS Landkreis;
+
+CREATE TABLE Landkreis ( 
+    IdLandkreis INT PRIMARY KEY
+    , Landkreis CHAR(64)
+    , INDEX (Landkreis));
+    
+INSERT INTO Bundesland
+SELECT DISTINCT IdBundesland, Bundesland
+FROM RKIFaelle;
+    
+INSERT INTO Landkreis
+SELECT DISTINCT IdLandkreis, Landkreis
+FROM RKIFaelle;
+
+ALTER TABLE RKIFaelle DROP COLUMN Bundesland;
+ALTER TABLE RKIFaelle DROP COLUMN Landkreis;
+
+SELECT max(Meldedatum), max(Datenbestand) FROM RKIFaelle;  
+
+EOF
+) | mysql --user=rscript --password=rscript
+
+}
+
 function run_r {
 pushd $HOME/git/R-Example/
 
@@ -157,5 +257,6 @@ popd
 
 bund
 bundeslaender
+rki_dashboard
 testungen
 run_r

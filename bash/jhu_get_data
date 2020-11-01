@@ -50,7 +50,7 @@ USE COVID19;
 DROP TABLE IF EXISTS jhucountry;
 
 CREATE TABLE jhucountry ( 
-      cid BIGINT primary key
+      cid INT primary key
     , Province_State CHAR(255)
     , Country_Region CHAR(255)
     , Latitude DOUBLE
@@ -77,7 +77,7 @@ cat <<EOF
 USE COVID19;
 DROP TABLE IF EXISTS ${TABLES[$i]};
 
-CREATE TABLE ${TABLES[$i]} ( cid BIGINT , reported DATE, count BIGINT, INDEX (cid, reported));
+CREATE TABLE ${TABLES[$i]} ( cid INT , reported DATE, count BIGINT, INDEX (cid, reported));
 
 SET autocommit=0;
 LOCK TABLE ${TABLES[$i]} WRITE;
