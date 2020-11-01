@@ -10,9 +10,12 @@
 
 MyScriptName <-"RKI_RegressionAnalysisKw"
 
+library(tidyverse)
+library(lubridate)
+library(REST)
 
 require(data.table)
-library(REST)
+
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
@@ -271,7 +274,7 @@ sKw <- kw$Kw[1]
 eKw <- kw$Kw[length(kw$Kw)]
 sraKw <- kw$Kw[length(kw$Kw)] - 3
 eraKw <- mKw
-pKw <- mKw + 2
+pKw <- week(as.Date("2020-12-01")) # mKw + 4
 
 if ( kw$Tage[lweek] < 7) {
   kw$Kw[lweek] <- mKw + kw$Tage[lweek]/7

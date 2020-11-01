@@ -18,7 +18,9 @@ source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
 
-png("png/RKI_Cases.png",width=1920,height=1080)
+png("png/RKI_Cases.png"
+    , width=1920
+    , height=1080)
 
 colors <-c( "red", "yellow", "green", "blue", "black" )
 
@@ -51,7 +53,7 @@ barplot( as.numeric(daily$incCases)
     , ylab="Anzahl"
     , names.arg = Tage # [fromto]
     , las = 2
-    )     
+    )
 title ( sub = paste("Date:", heute ), line= 3)
 
 copyright()

@@ -30,7 +30,7 @@ options(
   , max.print = 3000
 )
 
-png(  "png/RKI_weekly.png"
+png(  paste("png/", MyScriptName, ".png", sep ="")
       , width=1920
       , height=1080
 )

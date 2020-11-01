@@ -21,7 +21,7 @@ setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("lib/copyright.r")
 
-week_offset <- 3
+week_offset <- 2
 
 cumulate <- function(x) {
   

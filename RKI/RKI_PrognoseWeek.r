@@ -15,10 +15,11 @@ library(REST)
 
 setwd("~/git/R-Example")
 
-source("common/rki_download.r")
+# source("common/rki_download.r")
 source("common/rki_sql.r")
 source("common/ta_regressionanalysis.r")
 source("lib/copyright.r")
+source("lib/myfunctions.r")
 
 # Auswertung insgesamt
 
@@ -31,20 +32,22 @@ options ( digits = 4)
 WTagAnteile <- WTagAnteil( 
 SQL = '
     SELECT dayofweek(date) as WTag, sum(cases)/
-              ( select max(cases) - min(cases) from rki where week(date,3) > 40 and week(date,3) <43 ) as Anteil
+              ( select max(cases) - min(cases) from rki where week(date,3) > 40 and week(date,3) <44 ) as Anteil
     FROM (
       SELECT t1.date as date, t1.cases - t2.cases as cases
       FROM rki AS t1
       JOIN rki AS t2
       ON t1.date = adddate(t2.date,1)
     ) AS t3
-    where week(date,3) > 40 and week(date,3) < 43
+    where week(date,3) > 40 and week(date,3) < 44
     GROUP BY WTag;
 '
 )
 
 print(WTagAnteile)
+
 casesperday <- round(daily[l,7]/WTagAnteile[daily[l,4]+1,2]*WTagAnteile[,2],0)
+
 print(c(casesperday,sum(casesperday),mean(casesperday)))
 
 #  Auswertung nach Wochentag und Wochen ab Kw 10
@@ -57,11 +60,11 @@ png('png/RKI_weekday.png'
     )
 par ( mar = c(10,10,10,10))
 
-
+ylim <- limbounds(weekdays[,6]) * 100
 boxplot(
-     (weekdays[,2]*100 ~ weekdays[,1])
-     , ylim = c(0,max(weekdays[,2]))*100
-     , main = "Rel. Verteilung der gemeldeten Fälle auf Wochentage ab Kw 10"  
+     (weekdays[,6]*100 ~ weekdays[,2])
+     , ylim = ylim
+     , main = "Verteilung der gemeldeten Fälle auf Wochentage ab Kw 10"  
      , sub = ""
      , xlab = ""
      , ylab = "[%]"
@@ -83,24 +86,27 @@ axis (1
       )
 grid()
 
-wtmean <-aggregate(WAnteil~WTag,FUN = mean, data=weekdays)
-wtsd <- aggregate(WAnteil~WTag,FUN = sd, data=weekdays)
+wtmean <-aggregate(WTagAnteil~WTag,FUN = mean, data=weekdays)
+wtsd <- aggregate(WTagAnteil~WTag,FUN = sd, data=weekdays)
 
 lines( wtmean[,1]+1
-      , wtmean[,2]
+      , wtmean[,2] * 100
       , type = 'l'
+      , lwd = 5
       , col = "orange"
       )
 
 lines( wtmean[,1]+1
-       , wtmean[,2]-2*wtsd[,2]
+       , ( wtmean[,2] - 2 * wtsd[,2] ) * 100
        , type = 'l'
+       , lwd = 5
        , col = "green"
 )
 
 lines( wtmean[,1]+1
-       , wtmean[,2]+2*wtsd[,2]
+       , ( wtmean[,2] + 2 * wtsd[,2] ) * 100
        , type = 'l'
+       , lwd = 5
        , col = "red"
 )
 

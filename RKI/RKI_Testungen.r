@@ -22,6 +22,7 @@ setwd("~/git/R-Example")
 # source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
+source("lib/myfunctions.r")
 
 par(family = "sans")
 options( 
@@ -143,7 +144,7 @@ mtext ( "Positive Predictive Power (PPP) [%]"
     , las = 0
     )
 
-ylim <- c(0,(ceiling(max(tests$Infected)/10000)+1)*10000)
+ylim <- limbounds(tests$Infected)
 
 plot( tests$Kw
     , tests$Infected
@@ -234,7 +235,7 @@ par( mar = c(5.1, 10, 4.1, 10)
 
 plot( tests$Kw
     , tests$New/tests$Testungen * 100
-    , ylim = c(0,15)
+    , ylim = limbounds(tests$New/tests$Testungen) * 100
     , type = "b"
     , col = "green"
     , xlab = "Calendar weeks"
@@ -261,7 +262,7 @@ grid()
 
 plot( tests$Kw[ tests$Kw > 19 ]
     , tests$New[ tests$Kw > 19 ]/tests$Testungen[ tests$Kw > 19 ] * 100
-    , ylim = c(0,2)
+    , ylim = limbounds(tests$New[ tests$Kw > 19 ]/tests$Testungen[ tests$Kw > 19 ]) *100
     , type = "b"
     , col = "green"
     , xlab = "Calendar weeks"
@@ -304,15 +305,13 @@ png(paste("png/", MyScriptName,"_Rel",AbKw,".png",sep = "")
 
 par(mar = c(5.1, 10, 4.1, 10),las = 1)
 
-ymax <-ceiling(max(
-          c(  tests$New[tests$Kw  >= AbKw]/tests$New[tests$Kw == AbKw]
-            , tests$Positiv[tests$Kw >= AbKw]/tests$Positiv[tests$Kw == AbKw]
-            , tests$Testungen[tests$Kw >= AbKw]/tests$Testungen[tests$Kw == AbKw])
-          )%%100 + 3 )*100
-
+ylim <- limbounds(c(  tests$New[tests$Kw  >= AbKw]/tests$New[tests$Kw == AbKw]
+                      , tests$Positiv[tests$Kw >= AbKw]/tests$Positiv[tests$Kw == AbKw]
+                      , tests$Testungen[tests$Kw >= AbKw]/tests$Testungen[tests$Kw == AbKw])) * 100
+                  
 l1 <- plot( tests$Kw[tests$Kw >= AbKw]
       , tests$New[tests$Kw >= AbKw]/tests$New[tests$Kw == AbKw] * 100
-      , ylim = c(0,ymax)
+      , ylim = ylim
       , type = "b"
       , col = "red"
       , xlab = "Calendar weeks"

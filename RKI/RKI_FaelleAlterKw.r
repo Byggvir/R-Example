@@ -8,11 +8,12 @@
 # E-Mail: thomas@arend-rhb.de
 #
 
-MyScriptName <-"DEFalleAlterKw"
+MyScriptName <-"RKI_FalleAlterKw"
 
 
 library(data.table)
 library(readODS)
+
 setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("lib/copyright.r")
@@ -29,7 +30,7 @@ population <- sum(dpop$both)
 age_60 <- sum(dpop$both[1:60])
 age80 <- sum(dpop$both[81:86])
 
-png("png/DEFalleAlterKw.png", width = 3840, height = 2160)
+png(paste( "png/", MyScriptName, ".png", sep=""), width = 3840, height = 2160)
 
 par(mar=c(5,5,8,5), mfrow = c(2,5))
 

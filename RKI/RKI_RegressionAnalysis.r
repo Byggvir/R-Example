@@ -8,7 +8,7 @@
 # E-Mail: thomas@arend-rhb.de
 #
 
-MyScriptName <-"RKI_RegressionAnalysis"
+MyScriptName <- "RKI_RegressionAnalysis"
 
 require(data.table)
 library(REST)
@@ -34,7 +34,7 @@ SQL <- '
 select 
     t1.date as Date
     , (@i:=@i+1) as Day
-    , WEEK(t1.date,3) as Kw
+    , week(t1.date,3) as Kw
     , dayofweek(t1.date) as WTag
     , t1.cases as Cases
     , t1.deaths as Deaths
@@ -48,7 +48,7 @@ where t1.cases > t2.cases;
 
 # Function execute a regression analysis 
 
-CI <- 0.80
+CI <- 0.95
 
 regression_analysis <- function (
   StartDate
@@ -89,6 +89,7 @@ regression_analysis <- function (
   colnames(K) <- c("WTag","Anteil")
   
   Kor <- aggregate(Anteil ~ WTag, FUN = mean, data = K)
+  print(Kor)
   
   PrognoseTab <- data.table (
     Date = (Tage + StartRegADate)
@@ -116,6 +117,7 @@ regression_analysis <- function (
   , width = 1920
   , height = 1080
   )
+
   par (   mar = c(10,5,10,5) 
           , bg = "lightyellow")
   
@@ -130,7 +132,9 @@ regression_analysis <- function (
        , lwd = 3
        , xlim = xlim
        , col = "black"
+
   )
+  
   
   t <- title ( 
     main = paste( "Tägliche Fälle DE mit exponentieller Prognose bis", as.character(PrognoseDate)) 
@@ -172,7 +176,7 @@ regression_analysis <- function (
          , 0
          , "Regressionsanalyse"
          , adj = 1 
-         , cex = 3
+         , cex = 2
          , col = "blue"
   )
   
@@ -180,22 +184,18 @@ regression_analysis <- function (
          , 0
          , "Prognose"
          , adj = 0
-         , cex = 3 
+         , cex = 2 
          , col = "blue"
   )
-  text ( EndRegADate + 1
-         , 0
-         , "Prognose"
-         , adj = 0
-         , cex = 3 
-         , col = "blue"
-  )
+  
   text ( EndRegADate + 1
          , ylim[2]/2
          , as.character(EndRegADate)
          , adj = 0
          , cex = 3 
          , col = "blue"
+         , las = 3
+
   )
   
   grid()
@@ -265,18 +265,40 @@ rkidata <- sqlGetRKI(SQL )
 
 eDate <- rkidata$Date[length(rkidata$Date)]
 
-for (j in c(0,7,14) ) {
-for (i in c(27)) {
+for (j in c(7,14,21,28) ) {
+for (i in c(34)) {
   
   regression_analysis (
       StartDate = rkidata$Date[1]
     , EndDate = eDate
-    , StartRegADate <- eDate - i - j
-    , EndRegADate <- eDate - j
-    , PrognoseDate = as.Date("2020-11-01")
+    , StartRegADate <- eDate - i
+    , EndRegADate <- eDate
+    , PrognoseDate = eDate + j # as.Date("2020-12-01")
     , data = rkidata
 
 )
+    
+} # End for i
+  
+} # End for j
 
-}
-}
+eDate <- as.Date("2020-10-01")
+
+regression_analysis (
+  StartDate = rkidata$Date[1]
+  , EndDate = eDate
+  , StartRegADate <- eDate - 20
+  , EndRegADate <- eDate
+  , PrognoseDate = rkidata$Date[length(rkidata$Date)] # as.Date("2020-12-01")
+  , data = rkidata
+)
+eDate <- as.Date("2020-09-01")
+
+regression_analysis (
+  StartDate = rkidata$Date[1]
+  , EndDate = eDate
+  , StartRegADate <- eDate - 20
+  , EndRegADate <- eDate
+  , PrognoseDate = rkidata$Date[length(rkidata$Date)] # as.Date("2020-12-01")
+  , data = rkidata
+)

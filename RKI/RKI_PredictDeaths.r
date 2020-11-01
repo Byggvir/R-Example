@@ -25,7 +25,7 @@ source("lib/copyright.r")
 
 options(digits=3)
 
-week_offset <- 2
+week_offset <- 3
 
 cumulate <- function(x) {
   
@@ -181,8 +181,6 @@ prediction <- cbind(
 single_plot(prediction)
 
 grid()
-
-
 
 r <- prediction[,1]>=20
 
