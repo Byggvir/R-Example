@@ -1,29 +1,62 @@
 #!/bin/bash
 
-URL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahlen_Kum_Tab.xlsx?__blob=publicationFile"
-TEMP=$(mktemp -d)
-#TEMP="/tmp/rki" ; [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+DEBUG=OFF
+
+# Color for output
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+blue=`tput setaf 4`
+reset=`tput sgr0`
+
+# List of download URL
+
+KUMTABURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahlen_Kum_Tab.xlsx?__blob=publicationFile"
+TESTUNGENURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Testzahlen-gesamt.xlsx?__blob=publicationFile"
+DASHURL="https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data"
+
+[ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP=$(mktemp -d)
+[ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+
+echo -e "\n\n${blue}+---------"
+echo -e "| ${red}Tempoary file in: $TEMP"
+echo -e "${blue}+---------${reset}\n\n"
+
 DEST="$TEMP/rki.xlsx"
 TDEST="$TEMP/testungen.xlsx"
+
+DASHDEST="$TEMP/RKI-COVID19.csv"
+DASHDESTA="$TEMP/A-RKI-COVID19.csv"
+
 CSV="$TEMP/rki"
 TCSV="$TEMP/testungen"
 SQL="$TEMP/rki.sql"
 GIT="$HOME/git/R-Example/"
 
-curl --output "$DEST" --url "$URL"
+function download_all {
+
+# Download table Fallzahlen_Kum_Tab and Testungen
+
+[ ! -e "$DEST" ] && curl --output "$DEST" --url "$KUMTABURL"
+[ ! -e "$TDEST" ] && curl --output "$TDEST" --url "$TESTUNGENURL"
+
+[ "$DEBUG" = "ON" ] && [ ! -e $DASHDEST ] && curl --output "$DASHDESTA" --url "$DASHURL"
+
+( ( [ "$DEBUG" = "ON" ] && cat "$DASHDESTA" ) || curl --url "$DASHURL" ) \
+| sed 's#"\([0-9]\{2\}\)\.\([0-9]\{2\}\)\.\([0-9]\{4\}\).*"#\3-\2-\1#g; s# 00:00:00##g; s#/#-#g; s#,[^,]*$##' \
+| sed 's#LK Göttingen (alt)#LK Göttingen#' \
+> "$DASHDEST"
+
+# ... convert tables into CSV files
 
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$DEST" "${CSV}%n.csv"
-
-TURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Testzahlen-gesamt.xlsx?__blob=publicationFile"
-curl --output "$TDEST" --url "$TURL"
-
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$TDEST" "${TCSV}%n.csv"
 
+}
 
-function bund  {
+function bund {
 
 # Importieren der bundesweiten Zahlen aus der kumulativen Tabelle.
-
 
 #---
 # Create SQL import file 
@@ -32,6 +65,11 @@ function bund  {
 # 3. Reformat dates
 # 4. Create SQL statements
 #---
+
+echo -e "\n\n${blue}+---------"
+echo -e "| ${red}Importieren der bundesweiten Zahlen aus der kumulativen Tabelle in die Datenbank"
+echo -e "${blue}+---------${reset}\n\n"
+
 if [ $(date "+%w") -lt 6 ]
 then
 
@@ -71,14 +109,17 @@ SELECT * FROM rki
 WHERE date > subdate(now(),10) ;
 EOF2
 
-) > "$SQL"
+) >> "$SQL"
 
-sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
-
-mysql --user=rscript --password=rscript < "$SQL"
 mysql --user=rscript --password=rscript < "$HOME/git/R-Example/SQL/RKI_Export.sql"
 
 sudo mv /tmp/RKI_nach* "$GIT/data/"
+else
+
+echo -e "\n\n${blue}+---------"
+echo -e "| ${red}Importieren wegen des Wochenendes übersprungen."
+echo -e "${blue}---------${reset}\n\n"
+
 fi
 
 } # Ende Bund
@@ -87,6 +128,10 @@ function bundeslaender {
 
 # Importieren der Länderzahlen aus der kumulativen Tabelle.
 
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Importieren der Bundesländer aus der kumulativen Tabelle in die Datenbank"
+    echo -e "${blue}---------${reset}\n\n"
+    
 (
 cat <<EOF3
 USE COVID19 ;
@@ -124,14 +169,16 @@ cat <<EOF6
 COMMIT;
 UNLOCK TABLES;
 EOF6
-) > "$SQL"
-
-mysql --user=rscript --password=rscript < "$SQL"
+) >> "$SQL"
 
 }
 
 function testungen {
 
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Importieren der aktuellen Testungen in die Datenbank"
+    echo -e "${blue}+---------${reset}\n\n" 
+    
 (
 cat <<TESTEOF1
 USE COVID19 ;
@@ -148,9 +195,7 @@ cat <<TESTEOF2
 COMMIT;
 UNLOCK TABLES;
 TESTEOF2
-) > "$SQL"
-
-mysql --user=rscript --password=rscript < "$SQL"
+) >> "$SQL"
 
 }
 
@@ -158,18 +203,9 @@ function rki_dashboard {
 
 # Importieren der Zahlen aus der Tabelle für das RKI Dashboard
 
-URL="https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data"
-DEST="$TEMP/RKI-COVID19.csv"
-DESTA="$TEMP/A-RKI-COVID19.csv"
-
-DEBUG=OFF
-
-[ "$DEBUG" = "ON" ] && [ ! -e $DEST ] && curl --output "$DESTA" --url "$URL"
-
-( ( [ "$DEBUG" = "ON" ] && cat "$DESTA" ) || curl --url "$URL" ) \
-| sed 's#"\([0-9]\{2\}\)\.\([0-9]\{2\}\)\.\([0-9]\{4\}\).*"#\3-\2-\1#g; s# 00:00:00##g; s#/#-#g; s#,[^,]*$##' \
-| sed 's#LK Göttingen (alt)#LK Göttingen#' \
-> "$DEST"
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Importieren der Tabelle für das Dashboard RKI in die Datenbank"
+    echo -e "${blue}+---------${reset}\n\n" 
 
 ( cat <<EOF
 USE COVID19;
@@ -203,7 +239,7 @@ ALTER TABLE RKIFaelle ADD INDEX(RefDatum);
 ALTER TABLE RKIFaelle ADD INDEX(Geschlecht);
 ALTER TABLE RKIFaelle ADD INDEX(Altersgruppe);
 
-LOAD DATA LOCAL INFILE '$DEST' 
+LOAD DATA LOCAL INFILE '$DASHDEST' 
     INTO TABLE RKIFaelle 
     FIELDS TERMINATED BY ',' 
     IGNORE 1 ROWS;
@@ -236,7 +272,7 @@ ALTER TABLE RKIFaelle DROP COLUMN Landkreis;
 SELECT max(Meldedatum), max(Datenbestand) FROM RKIFaelle;  
 
 EOF
-) | mysql --user=rscript --password=rscript
+) >> "$SQL"
 
 }
 
@@ -248,15 +284,29 @@ sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
     pushd RKI
     for r in *.r
     do
-        echo -e "--- $r ---"
+        echo -e "\n\n${blue}+---------"
+        echo -e "| ${red}${r}"
+        echo -e "${blue}+---------${reset}\n\n"
         Rscript $r
+#         read
+#         reset
      done
     popd
 popd
 }
 
+rm "$SQL"
+touch "$SQL"
+
+download_all
+
 bund
 bundeslaender
 rki_dashboard
 testungen
+
+sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
+
+mysql --user=rscript --password=rscript < "$SQL"
+
 run_r
