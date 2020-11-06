@@ -8,13 +8,17 @@
 # E-Mail: thomas@arend-rhb.de
 #
 
+setwd("~/git/R-Example")
 MyScriptName <-"RKI_get_html"
-
 
 library(data.table)
 library(rvest)
 library(stringr)
 library(RMariaDB)
+
+source("common/rki_sql.r")
+
+SQL <- 'select exists (select * from rki where date = current_date()-1) as vorhanden;'
 
 insert_new_data <- function (sql="") {
   
@@ -46,6 +50,7 @@ fallzahlen <- data.table(
   , deaths = newdata[2]
 )
 values <- paste( paste('"',as.character(fallzahlen$day[1]),'"', sep=""), fallzahlen$cases[1], fallzahlen$deaths[1], sep = ',')
-print(values)
-insert_new_data( paste ("insert into rki values ( ", values ,");"))
-                 
+vorhanden <- sqlGetRKI(SQL = SQL)
+if (vorhanden[1] == 0) {
+  insert_new_data( paste ("insert into rki values ( ", values ,");"))
+}

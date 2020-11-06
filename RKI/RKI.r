@@ -22,7 +22,8 @@ setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
-       
+source("lib/myfunctions.r")
+
 library(REST)
 
 options( 
@@ -70,17 +71,11 @@ reported <- daily$Date[m]
 
 
 barplot( as.numeric(daily$incCases[1:m]) # [fromto]
-         , ylim= c(0,
-                   ( max(
-                      as.numeric(daily$incCases[1:m])
-                      )%/%1000+1
-                     )*1000
-                   )
-         #, col=colors[1]
+         , ylim= limbounds(as.numeric(daily$incCases[1:m]))
          , main = paste("Daily cases DE from RKI until ", reported) 
          , sub = ""
          , xlab=""
-         , col=c(rep("blue",6),"red") 
+         , col=c(rep("lightblue",6),"red") 
          , ylab="Anzahl"
          #, names.arg = Tage # [fromto]
          , las = 2
@@ -90,12 +85,11 @@ title ( sub = paste("Source: rki.de; Created:", heute ), line= 3)
 grid()
 
 barplot( as.numeric(daily$incDeaths[1:m]) # [fromto]
-         , ylim= c(0,(max(as.numeric(daily$incDeaths[1:m]))%/%100+1)*100)
-         #, col=colors[1]
+         , ylim = limbounds(as.numeric(daily$incDeaths[1:m]))
          , main = paste("Daily deaths DE from RKI until", reported) 
          , sub = ""
          , xlab=""
-         , col=c(rep("blue",6),"red") 
+         , col=c(rep("lightblue",6),"red") 
          , ylab="Anzahl"
          #, names.arg = Tage # [fromto]
          , las = 2

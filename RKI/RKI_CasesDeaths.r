@@ -17,6 +17,7 @@ setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
+source("lib/myfunctions.r")
 
 png("png/RKI_Cases.png"
     , width=1920
@@ -44,12 +45,12 @@ sel <- daily$WTag != 6
 Tage[sel] <- NA
 
 barplot( as.numeric(daily$incCases)
-    , ylim=c(0,(max(as.numeric(daily$incCases))%/%1000+1)*1000)
+    , ylim=limbounds(as.numeric(daily$incCases))
     #, col=colors[1]
     , main = paste("Daily cases DE ", reported) 
     , sub = ""
     , xlab=""
-    , col=c(rep("blue",6),"red") 
+    , col=c(rep("lightblue",6),"red") 
     , ylab="Anzahl"
     , names.arg = Tage # [fromto]
     , las = 2

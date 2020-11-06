@@ -21,6 +21,7 @@ require(data.table)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("common/rki_sql.r")
 source("lib/copyright.r")
 
 options( 
@@ -91,22 +92,23 @@ reganalysis <- function (data, zr,  main = "Wöchentliche Fälle DE" ) {
 }
 # ----
 
-daily <- get_rki_tag_csv()
+daily <- sqlGetRKI()
 
-zeitraum <- 1:4
+zeitraum <- 28:35
 
 par( mfcol = c(1,2))
 
-weekly <- aggregate(incCases ~ Kw, FUN = sum, data = daily)
+weekly <- aggregate(as.numeric(incCases) ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <-  c("Kw","Count")
-reganalysis(weekly, zeitraum,main = "Wöchentliche Fälle DE" )
+
+reganalysis(weekly, zeitraum, main = "Wöchentliche Fälle DE" )
 
 rm(weekly)
 
-weekly <- aggregate(incDeaths ~ Kw, FUN = sum, data = daily)
+weekly <- aggregate(as.numeric(incDeaths) ~ Kw, FUN = sum, data = daily)
 
 colnames(weekly) <- c("Kw","Count")
-reganalysis(weekly, 29:31, main = "Wöchentliche Sterbefälle DE")
+reganalysis(weekly, 27:35, main = "Wöchentliche Sterbefälle DE")
 
 copyright()
 

@@ -50,7 +50,7 @@ png( "png/RKI_PredictDeaths.png", width = 3840, height = 2160)
 
 par( 
     mar = c(10,10,10,10)
-  , mfcol=c(1,2)
+  , mfcol=c(2,1)
   , family = "Carlito"
 )
 
@@ -154,7 +154,8 @@ single_plot <- function(data) {
   
 }
 
-lcaces <-length(cases[,1])
+lcases <-length(cases[,1])
+ldeaths <-length(deaths[,1])
 
 CFR <- colSums(deaths[,2:12])/colSums(cases[,2:12])
 
@@ -182,7 +183,7 @@ single_plot(prediction)
 
 grid()
 
-r <- prediction[,1]>=20
+r <- prediction[,1]>=30
 
 single_plot(prediction[r,])
 
@@ -198,12 +199,14 @@ ptab <- cbind(
   , prediction[(pl-7):pl,5]
 )
 
-vp <- viewport(x=0.75,y=0.5,width=0.5,height = 0.6)
+vp <- viewport(x=0.24,y=0.25,width=0.5,height = 0.6)
 
 tt <- ttheme_default(
         base_size = 48
         , core=list(
-          fg_params=list(fontface=c(rep("plain", 6), rep("bold.italic",2))
+          fg_params=list(  fontface=c(rep("plain", 6), rep("bold.italic",2))
+                         , hjust = 1
+                         , x = 0.95
                  )
           )
         )
@@ -211,7 +214,7 @@ tt <- ttheme_default(
 g <- tableGrob(
       round(ptab)
       , theme = tt
-      , cols = c("Kw", "Tote","Erwartet", "Min CI95%","Max CI95%" )
+      , cols = c("Kw", "Tote","Erwartet", "Min\nCI95%","Max\nCI95%" )
       , vp = vp      
       )
 

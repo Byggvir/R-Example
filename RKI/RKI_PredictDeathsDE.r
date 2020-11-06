@@ -8,7 +8,7 @@
 # E-Mail: thomas@arend-rhb.de
 #
 
-MyScriptName <-"RKI_PredictDeathDE"
+MyScriptName <-"RKI_PredictDeathsDE"
 
 
 library(tidyverse)
@@ -19,7 +19,7 @@ heute <- format(today, "%d %b %Y")
 
 setwd("~/git/R-Example")
 
-png(filename = "png/prognose_deaths.png"
+png(filename = paste("png/", MyScriptName, ".png", sep ="")
     , width = 1920
     , height = 1080
     )

@@ -30,19 +30,16 @@ png( paste( "png/", MyScriptName, heute, ".png", sep = "")
 par ( mar = c(10,10,10,10)
       , mfcol = c(2,1)
 )
-SQL <- paste( 'SELECT distinct A.Meldedatum, dayofweek(A.Meldedatum),B.Infizierte 
-  FROM RKIFaelle as A 
-  LEFT JOIN (SELECT Meldedatum, sum(AnzahlFall) AS Infizierte 
-    FROM RKIFaelle as C WHERE NeuerFall <> 0 GROUP BY Meldedatum) AS B
-    ON A.Meldedatum = B.Meldedatum where A.Meldedatum > "'
-, as.character(today-15)
-, '";'
-, sep = "")
-
+SQL <- paste( '
+SELECT distinct A.Meldedatum, dayofweek(A.Meldedatum),B.Infizierte
+FROM RKIFaelle as A
+LEFT JOIN (SELECT Meldedatum, sum(AnzahlFall) AS Infizierte
+FROM RKIFaelle as C WHERE NeuerFall <> 0 GROUP BY Meldedatum) AS B
+ON A.Meldedatum=B.Meldedatum where A.Meldedatum > "' , as.character(today-15), '";' , sep = "" )
 
 NeueFaelle <-sqlGetRKI(SQL = SQL)
 
-NeueFaelle[is.na(NeueFaelle[,3]),3] <- 0
+# NeueFaelle[is.na(NeueFaelle[,3]),3] <- 0
 
 mytags <- as.character(NeueFaelle[,1])
 

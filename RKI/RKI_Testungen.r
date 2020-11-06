@@ -24,14 +24,6 @@ source("common/rki_sql.r")
 source("lib/copyright.r")
 source("lib/myfunctions.r")
 
-par(family = "sans")
-options( 
-  digits = 7
-  , scipen = 7
-  , Outdec = "."
-  , max.print = 3000
-)
-
 setwd("~/git/R-Example")
 
 tests <- sqlGetRKI(SQL = sqlTestungen)
@@ -65,9 +57,14 @@ NewInfected <- aggregate(incCases~Kw,FUN = sum, data = cases)
 
 tests$New <- NewInfected$incCases[2:(length(Kw)+1)]
 
-options(scipen = 10)
-
 png("png/RKI_Testungen.png",width = 1920,height = 1080)
+par(family = "sans")
+options( 
+  digits = 7
+  , scipen = 10
+  , Outdec = "."
+  , max.print = 3000
+)
 
 par( mar = c(10, 6, 10, 6))
 
@@ -335,21 +332,21 @@ l3 <- lines( tests$Kw[tests$Kw >= AbKw]
 )
 
 text( tests$Kw[tests$Kw >= AbKw]
-     , ymax
+     , ylim[2]
      , labels = round(tests$New[tests$Kw >= AbKw]/tests$New[tests$Kw == AbKw] * 100,1)
      , cex = 2
      , col = "red"
      )
 
 text( tests$Kw[tests$Kw >= AbKw]
-     , ymax * 0.95
+     , ylim[2] * 0.95
      , labels = round(tests$Positiv[tests$Kw >= AbKw]/tests$Positiv[tests$Kw == AbKw] * 100,1)
      , cex = 2
      , col = "orange"
 )
 
 text( tests$Kw[tests$Kw >= AbKw]
-     , ymax * 0.9
+     , ylim[2] * 0.9
      , labels = round(tests$Testungen[tests$Kw >= AbKw]/tests$Testungen[tests$Kw == AbKw] * 100,1)
      , cex = 2
      , col = "blue"
