@@ -8,15 +8,20 @@ DROP TABLE IF EXISTS us_deaths;
 
 CREATE TABLE us_deaths (UID BIGINT, date INT, count INT , INDEX (UID, date));
 
+LOCK TABLES `us_cases` WRITE;
 LOAD DATA LOCAL INFILE '/home/thomas/git/R-Example/data/US-confirmed.csv' 
     INTO TABLE us_cases 
     FIELDS TERMINATED BY ',' 
     IGNORE 1 ROWS;
+UNLOCK TABLES;
+
+LOCK TABLES `us_deaths` WRITE;
 
 LOAD DATA LOCAL INFILE '/home/thomas/git/R-Example/data/US-deaths.csv' 
     INTO TABLE us_deaths 
     FIELDS TERMINATED BY ',' 
     IGNORE 1 ROWS;
+UNLOCK TABLES;
 
 SELECT "Date","Kw","WTag","Cases","Deaths"  
 UNION all ( 

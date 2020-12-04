@@ -52,7 +52,7 @@ bp <- barplot( CFR$Cases
 
 text( x = bp 
       , y = CFR$Cases
-      , labels = paste(CFR$Cases, " (", round(CFR$Cases/sCases*100,1), "%)", sep="")
+      , labels = paste(round(CFR$Cases), " (", round(CFR$Cases/sCases*100,0), "%)", sep="")
       , pos = 3
       , cex = 2
       , col = "red"

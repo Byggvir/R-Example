@@ -20,6 +20,7 @@ setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("common/ta_regressionanalysis.r")
 source("lib/averages.r")
+source("lib/myfunctions.r")
 
 SQL <- '
 select
@@ -80,14 +81,12 @@ regression_analysis <- function (
   
   xlim <- c(StartRegADate,PrognoseDate)
 
-  ylim <- c(  0
-              , ( max(
-                c(   exp(a)
-                     , exp(a+b*as.numeric(PrognoseDate-StartRegADate))
-                     , max(data$incCases[zr])
+  ylim <- limbounds( 
+             c(  exp(a)
+               , exp(a+b*as.numeric(PrognoseDate-StartRegADate))
+               , data$incCases[zr]
                 )
-              ) %/% 1000 + 1 ) * 1500
-  )
+                )
 
   pngname <- str_replace (
     paste( "JHU_Prognose"
@@ -238,7 +237,7 @@ regression_analysis <- function (
 
 
 countries <- get_rki_sql(
-  "select jhucountry.* from jhucountry join jhu on jhucountry.cid = jhu.cid group by jhu.cid having max(jhu.cases) >= 100000;" 
+  "select jhucountry.* from jhucountry join jhu on jhucountry.cid = jhu.cid group by jhu.cid having max(jhu.cases) >= 1000000;" 
 )
 
 for (country in as.integer(countries[,1]) ) {
@@ -270,7 +269,7 @@ for (country in as.integer(countries[,1]) ) {
       , EndDate = rkidata$Date[length(rkidata$Date)]
       , StartRegADate <- today - 42 # RegFrom
       , EndRegADate <- rkidata$Date[length(rkidata$Date)] # RegTo
-      , PrognoseDate = as.Date("2020-10-31")
+      , PrognoseDate = as.Date("2020-12-31")
       , data = rkidata
       , cname = countries[countries[,1]==country,3]
     )

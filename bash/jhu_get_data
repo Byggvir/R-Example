@@ -2,8 +2,22 @@
 
 # Get times series for US death and confirmed cases
 
+red=`tput setaf 1`
+green=`tput setaf 2`
+blue=`tput setaf 4`
+reset=`tput sgr0`
+
+DEBUG=OFF
+
+[ "$DEBUG" = "ON" ] && TEMP="/tmp/jhu" || TEMP=$(mktemp -d)
+[ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+
+echo -e "\n\n${blue}+---------"
+echo -e "| ${red}Tempoary file in: $TEMP"
+echo -e "${blue}+---------${reset}"
+
+ 
 TARGET="/home/thomas/git/R-Example/data/"
-TEMP=$(mktemp -d)
 
 GIT="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series"
 TYPES=(confirmed deaths)
@@ -11,11 +25,15 @@ TABLES=(jhucases jhudeaths)
 
 function Download {
 
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Download"
+    echo -e "${blue}+---------${reset}"
+
     for SUBSET in US global
     do
         for DATA in confirmed deaths
         do
-            wget -O "${TEMP}/${SUBSET}-${DATA}.csv" \
+            [ ! -e "${TEMP}/${SUBSET}-${DATA}.csv" ] && wget -O "${TEMP}/${SUBSET}-${DATA}.csv" \
                 "$GIT/time_series_covid19_${DATA}_${SUBSET}.csv"
 
         done
@@ -25,12 +43,16 @@ function Download {
 
 function US {
 
-    OFFSET=(11 12)
+    D=
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Import US into database"
+    echo -e "${blue}+---------${reset}"
 
+    OFFSET=(9 10)
     for i in 0 1
     do
         (   echo UID,day,count
-            cat "$TEMP/US-${DATA}.csv" \
+            cat "$TEMP/US-${TYPES[$i]}.csv" \
             | sed -n  '1d; s#,"[^"]*"##; s#\(,[^,]*\)\{'${OFFSET[$i]}'\}##; h; :a; x ; s#^\([^,]*\),\([0-9]*\).*#\1,\2#p; g; s#^\([^,]*\),\([0-9]*\)#\1#; t a;' \
             | awk -F ',' 'BEGIN { i=0;UID==0} {if ($1 == UID) {i=i+1;print ($1 "," i "," $2);} else { UID=$1;i=1; print($1 "," 0 "," 0); print ( $1 "," i"," $2 );}}'
         ) > "US-${TYPES[$i]}.csv"
@@ -42,6 +64,11 @@ function US {
 }
 
 function global_data {
+
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Import global data into database: Step 1"
+    echo -e "${blue}+---------${reset}"
+
 
 (
 cat <<EOF
@@ -57,18 +84,25 @@ CREATE TABLE jhucountry (
     , Longitude DOUBLE
     , INDEX (cid)
     );
+
 SET autocommit=0;
 LOCK TABLE jhucountry WRITE;
 EOF
 # Countries
 cat "${TEMP}/global-confirmed.csv" \
 | sed '1d; s#"\([^"]*\), *\([^"]*\)"#\2/\1#g; s#^\(\([^,]*,\)\{4\}\).*#\1#' \
-| awk -F ',' 'BEGIN {i=1;} { print("INSERT INTO jhucountry VALUES ( " i ",\"" $1 "\",\"" $2 "\"," $3 ","$4 ");"); i=i+1; }'
+| awk -F ',' 'BEGIN {i=1;} { lt=$3; lg=$4; if (lt=="") {lt=0} ; if (lg=="") {lg=0;};  print("INSERT INTO jhucountry VALUES ( " i ",\"" $1 "\",\"" $2 "\"," lt "," lg ");"); i=i+1; }'
 cat <<EOF
+
 COMMIT;
 UNLOCK TABLES;
+
 EOF
 ) | mysql --user=rscript --password=rscript
+
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Import global data into database: Step 2"
+    echo -e "${blue}+---------${reset}"
 
 for i in 0 1
 do
@@ -81,6 +115,7 @@ CREATE TABLE ${TABLES[$i]} ( cid INT , reported DATE, count BIGINT, INDEX (cid, 
 
 SET autocommit=0;
 LOCK TABLE ${TABLES[$i]} WRITE;
+
 EOF
 cat "${TEMP}/global-${TYPES[$i]}.csv" \
 | sed '1d; s#"\([^"]*\), *\([^"]*\)"#\2/\1#g;' \
@@ -88,12 +123,18 @@ cat "${TEMP}/global-${TYPES[$i]}.csv" \
 | sed 's#/$##' \
 | awk 'BEGIN {i=-1;j=0;} { if ($1=="-") { i=0; j=j+1; v=0} else { v=$1 };print("INSERT INTO '${TABLES[$i]}' VALUES (" j ", ADDDATE(\"2020-01-21\"," i ")," v ");") ; i=i+1; }'
 cat <<EOF
+
 COMMIT;
 UNLOCK TABLES;
+
 EOF
 ) | mysql --user=rscript --password=rscript
 
 done
+
+    echo -e "\n\n${blue}+---------"
+    echo -e "| ${red}Import global data into database: Step 3"
+    echo -e "${blue}+---------${reset}"
 
 (
 cat <<EOF
@@ -121,28 +162,39 @@ EOF
 
 }
 
+function exec_rscript {
+
+    pushd ~/git/R-Example/COVID19
+ 
+    for r in *.r
+    do
+	    echo -e "\n\n${blue}+---------"
+        echo -e "| ${red}$r"
+        echo -e "${blue}+---------${reset}"
+        Rscript $r
+    done
+
+    popd
+
+    pushd ~/git/R-Example/JHU
+ 
+    for r in *.r
+    do
+	    echo -e "\n\n${blue}+---------"
+        echo -e "| ${red}$r"
+        echo -e "${blue}+---------${reset}"
+        Rscript $r
+    done
+
+    popd
+
+}
+
 pushd ${TARGET}
 
 Download
 global_data
 US
- 
-popd
+exec_rscript 
 
-pushd ~/git/R-Example/COVID19
- 
-for r in *.r
-do
-	echo -e "--- $r ---"
- 	Rscript $r
-done
-popd
-
-pushd ~/git/R-Example/JHU
- 
-for r in *.r
-do
-	echo -e "--- $r ---"
- 	Rscript $r
-done
 popd

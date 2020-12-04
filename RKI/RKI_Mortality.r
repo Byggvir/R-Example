@@ -123,7 +123,7 @@ bp2 <- barplot( CFRyear$Cases / CFRyear$Population * 100000
 )     
 text( x = bp2 
       , y = CFRyear$Cases / CFRyear$Population * 100000
-      , labels = paste(round(CFRyear$Cases / CFRyear$Population * 100000,1),"\n(",CFRyear$Cases,")")
+      , labels = paste(round(CFRyear$Cases / CFRyear$Population * 100000,1),"\n(",round(CFRyear$Cases,0),")")
       , pos = 1
       , cex = 2
       , col = "black"
@@ -134,7 +134,7 @@ text( 0
       , paste( "Durchschnit: ~", 
                prettyNum(
                  round(
-                   sum(CFRyear$Cases)/sum(CFRyear$Population)*100000
+                   sum(CFRyear$Cases)/sum(CFRyear$Population)*100000,0
                  ),
                  big.mark="." ,decimal.mark = ","
                )
@@ -160,3 +160,4 @@ mtext( paste( "Fälle gem. RKI der ", Kw, ". Kalenderwoche" , sep = "" )
 copyright()
 
 dev.off()
+

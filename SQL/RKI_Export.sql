@@ -16,7 +16,8 @@ select
 from rki as t1 
 inner join rki as t2 
 on t1.date=adddate(t2.date,1)
-into OUTFILE '/tmp/RKI_nach_Tag.csv' FIELDS TERMINATED by ',';
+-- into OUTFILE '/tmp/RKI_nach_Tag.csv' FIELDS TERMINATED by ','
+;
 
 set @i=0;
 
@@ -35,4 +36,5 @@ select
     inner join rki as t2 
     on t1.date=adddate(t2.date,1)
     group by week(t1.date,3)
-    into OUTFILE '/tmp/RKI_nach_Kw.csv' FIELDS TERMINATED by ',';
+    -- into OUTFILE '/tmp/RKI_nach_Kw.csv' FIELDS TERMINATED by ','
+    ;

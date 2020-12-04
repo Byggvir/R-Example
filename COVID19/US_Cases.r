@@ -12,11 +12,12 @@ MyScriptName <-"US_Cases"
 
 
 require(data.table)
-
 setwd("~/git/R-Example")
+source("lib/copyright.r")
+source("lib/myfunctions.r")
 
-png( "png/CasesDeaths.png"
-     , width = 3840
+png( "png/US-CasesDeaths.png"
+     , width = 1920
      , height = 1080
      )
 #pdf("Cases.pdf",paper="a4r",pointsize=0.1)
@@ -29,16 +30,17 @@ today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
 fconfirmed <- read.csv(file = 'data/US-confirmed.csv', header=TRUE, sep=",")
-fdeaths <- read.csv(file = 'data/US-deaths.csv')
-
-reported <- format(as.Date("2020-01-22") + max(fconfirmed$day), "%d %b %Y")
-
-
+reported <- format(as.Date("2020-01-21") + max(fconfirmed$day), "%d %b %Y")
 cd = data.frame(UID=fconfirmed$UID,date=fconfirmed$day,wday=(fconfirmed$day+2)%%7,confirmed=fconfirmed$count)
-dd = data.frame(UID=fdeaths$UID,date=fdeaths$day,wday=(fdeaths$day+2)%%7,deaths=fdeaths$count)
-
+rm(fconfirmed)
 cases <- aggregate(confirmed~date,FUN=sum,data=cd)
+rm(cd)
+
+fdeaths <- read.csv(file = 'data/US-deaths.csv')
+dd = data.frame(UID=fdeaths$UID,date=fdeaths$day,wday=(fdeaths$day+2)%%7,deaths=fdeaths$count)
+rm(fdeaths)
 deaths <- aggregate(deaths~date,FUN=sum,data=dd)
+rm(dd)
 
 m <- length(cases$confirmed)
 n <- length(deaths$deaths)
@@ -51,6 +53,9 @@ daily = data.frame(
     incDeaths=c(0,deaths$deaths[2:n]-deaths$deaths[1:n-1])
     )
 
+rm(cases)
+rm(deaths)
+
 wdayCases   <-  aggregate(incCases~wday,FUN=sum,data=daily)
 wdayDeaths  <-  aggregate(incDeaths~wday,FUN=sum,data=daily)
 kwCases   <-  aggregate(incCases~kw,FUN=sum,data=daily)
@@ -60,33 +65,43 @@ options(digits=7)
 options(scipen=7)
 options(Outdec=".")
 
-op = par(mfcol=c(1,2))
+op = par(mfcol=c(2,1))
 
+Tage <- daily$Date
+sel <- daily$wday != 6
+Tage[sel] <- NA
+
+ylim <- limbounds (daily$incCases)
 barplot( daily$incCases
-    , ylim=c(0,100000)
+    , ylim=ylim
     #, col=colors[1]
     , main = paste("US daily new cases until ", reported) 
     , sub = paste("Date:", heute )
     , xlab="Day"
     , ylab="Count"
+    , names.arg = Tage
+    , col=c(rep("lightblue",6),"red")
     )     
 
 grid()
 
+ylim <- limbounds (daily$incDeaths)
 barplot( daily$incDeaths
-    , ylim=c(0,10000)
+    , ylim=ylim
     #, col=colors[1]
     , main = paste("US daily deaths until ", reported) 
     , sub = paste("Date:", heute )
     , xlab="Day"
     , ylab="Count"
+    , names.arg = Tage
+    , col=c(rep("lightblue",6),"red")
     )     
 
 grid()
 
 dev.off()
 
-png("png/CasesDeaths-kw.png",width=3840,height=1080)
+png("png/US-CasesDeaths-kw.png",width=3840,height=1080)
 
 op = par(mfcol=c(1,2))
 
@@ -103,3 +118,4 @@ plot( kwDeaths
 
 
 dev.off()
+
