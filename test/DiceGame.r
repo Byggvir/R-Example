@@ -1,7 +1,7 @@
 library(tidyverse)
 library(MASS)
 
-png(  filename="dice.png"
+png(  filename="/tmp/dice.png"
     , width = 1920
     , height = 1080)
 
@@ -14,7 +14,9 @@ dice <- function (n, t) {
   w <- NA
   w <- sample(1:6,n,replace=TRUE, prob = DiceProb)
   s = sqrt(5/36/n)
-
+  
+  print(c(mean(w),sd(w),sd(1:6),sd(1:6)/sqrt(n)))
+  
   bp <- barplot( table(w)/n*100
   , main = t
   , xlab = "Augen %"

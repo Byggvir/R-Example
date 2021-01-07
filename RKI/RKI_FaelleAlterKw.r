@@ -10,7 +10,6 @@
 
 MyScriptName <-"RKI_FalleAlterKw"
 
-
 library(data.table)
 library(readODS)
 
@@ -37,17 +36,15 @@ AgeGroups <- c(  AgeGroups
 
 AgeGroups <- c(AgeGroups, "90+")
 
-
 Kw <- max(CalWeeks[,"Kw"])
 
 population <- sum(dpop$both)
-
-png(paste( "png/", MyScriptName, ".png", sep=""), width = 3840, height = 2160)
 
 par(mar=c(5,5,8,5), mfrow = c(4,5))
 
 single_plot <- function(x, AG, sumAG,ylim=c(0,20)) {
    
+   png(paste( "png/", MyScriptName,"-", AG, ".png", sep=""), width = 960, height = 540)
    plot(
       data[,'Kw']
       , data[,'Count']/CalWeekSum[,'Count'] * 100
@@ -73,7 +70,7 @@ single_plot <- function(x, AG, sumAG,ylim=c(0,20)) {
    text( 30
          ,  sumAG/population*100 +0.5
          ,  paste("Anteil an Bevölkerung [",round(sumAG/population*100,1),"%]")
-         , cex = 2
+         , cex = 1
          , adj = 1
    )
    
@@ -82,17 +79,38 @@ single_plot <- function(x, AG, sumAG,ylim=c(0,20)) {
       , legend = paste("Altersgruppe", AG, "\nAnteil an Bevölkerung [",round(sumAG/population*100,1),"%]" )
       , col = "black"
       , lty = 1
-      , cex = 3
+      , cex = 2
    )
    
    grid()
+
+   copyright()
+   
+   dev.off()
+   
 }
+
+# --- 20- ----
+# Nur ein Blick auf die Altersgruppe 60+
+
+sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup < ", 20 , ' group by Kw;', sep="")
+
+print(sql)
+
+data <- sqlGetRKI(SQL=sql)
+
+l <- 1
+u <- 20
+calter <- sum(dpop$both[l:u])
+
+single_plot(data, "0-19", calter, c(0,40))
+
 
 i <- 1
 for (a in AGrp[,1]) {
    
    if (a < 85) {
-   sql <- paste("select * from RKIAlter where AgeGroup = ", a , ';', sep="")
+   sql <- paste("select * from RKIAlter where AgeGroup = ", a , '  ;', sep="")
    print(sql)
    data <- sqlGetRKI(SQL=sql)
    l <- a + 1 
@@ -109,7 +127,7 @@ for (a in AGrp[,1]) {
 # Die Daten der Population vom Statistikamt reichen nur bis 85+, RKI liefert 90+
 # Daher werden die 85+ / 85-89,90+ zusammengefasst.
 
-sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup >= ", 85 , ' group by Kw;', sep="")
+sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup >= ", 85 , '  group by Kw;', sep="")
 
 print(sql)
 
@@ -121,10 +139,11 @@ calter <- sum(dpop$both[l:u])
 
 single_plot(data, "85+", calter)
 
+
 # --- 60+ ----
 # Nur ein Blick auf die Altersgruppe 60+
 
-sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup >= ", 60 , ' group by Kw;', sep="")
+sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup >= ", 60 , '  group by Kw;', sep="")
 
 print(sql)
 
@@ -136,22 +155,6 @@ calter <- sum(dpop$both[l:u])
 
 single_plot(data, "60+", calter, c(0,40))
 
-# --- 20- ----
-# Nur ein Blick auf die Altersgruppe 60+
 
-sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup < ", 20 , ' group by Kw;', sep="")
-
-print(sql)
-
-data <- sqlGetRKI(SQL=sql)
-
-l <- 1
-u <- 20
-calter <- sum(dpop$both[l:u])
-
-single_plot(data, "20-", calter, c(0,40))
-
-copyright()
 
 dev.off()
-

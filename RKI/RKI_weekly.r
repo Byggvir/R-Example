@@ -82,11 +82,25 @@ reganalysis <- function (data, zr,  main = "Wöchentliche Fälle DE" ) {
          , ylim = pylim
          , lwd = 3
   )
+
   legend ( "top"
+           , inset = 0.02
            , legend = c("Fälle", "Lineare Regression", "Logarithmische Regression")
            , col = c("black", "red", "green")
            , lwd = 2
            , cex = 2
+  
+  )
+
+  legend ( "left"
+           , inset = 0.02
+           , legend = c(  paste("f(x)=" , round(ra1$coefficients[1],2),"+", round(ra1$coefficients[2],2), "* (x-7)")
+                        , paste("f(x)= exp^(" ,round(ra2$coefficients[1],2),"+", round(ra2$coefficients[2],2), "* (x-7) )" )
+                        )
+           , col = c("red", "green")
+           , lwd = 2
+           , cex = 1
+           
   )
   
 }
@@ -94,21 +108,21 @@ reganalysis <- function (data, zr,  main = "Wöchentliche Fälle DE" ) {
 
 daily <- sqlGetRKI()
 
-zeitraum <- 28:35
+par (   mar = c(10,10,10,10)
+      , mfcol = c(1,2)
+)
 
-par( mfcol = c(1,2))
-
+zeitraum <- 31:36
 weekly <- aggregate(as.numeric(incCases) ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <-  c("Kw","Count")
-
 reganalysis(weekly, zeitraum, main = "Wöchentliche Fälle DE" )
 
 rm(weekly)
 
+zeitraum <- 31:44
 weekly <- aggregate(as.numeric(incDeaths) ~ Kw, FUN = sum, data = daily)
-
 colnames(weekly) <- c("Kw","Count")
-reganalysis(weekly, 27:35, main = "Wöchentliche Sterbefälle DE")
+reganalysis(weekly, zeitraum, main = "Wöchentliche Sterbefälle DE")
 
 copyright()
 

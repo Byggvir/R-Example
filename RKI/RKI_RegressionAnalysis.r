@@ -340,3 +340,13 @@ regression_analysis (
   , PrognoseDate = today + 14
   , data = rkidata
 )
+
+eDate <- rkidata$Date[length(rkidata$Date)]
+regression_analysis (
+  StartDate = rkidata$Date[1]
+  , EndDate = eDate
+  , StartRegADate <- FromUntil[1]
+  , EndRegADate <- FromUntil[2]
+  , PrognoseDate = FromUntil[2]+ 14
+  , data = rkidata
+)

@@ -42,7 +42,7 @@ all_tables <- read_html(URL) %>%
       fill= TRUE
     , header= TRUE
     )
-newdata <- as.numeric(str_replace(all_tables[[1]][18,c(2,6)],'\\.',''))
+newdata <- as.numeric(str_replace_all(all_tables[[1]][18,c(2,6)],'\\.',''))
 
 fallzahlen <- data.table(
     day = today
@@ -54,3 +54,4 @@ vorhanden <- sqlGetRKI(SQL = SQL)
 if (vorhanden[1] == 0) {
   insert_new_data( paste ("insert into rki values ( ", values ,");"))
 }
+

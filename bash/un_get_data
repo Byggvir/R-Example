@@ -18,12 +18,12 @@ SSEX=(B M F)
 
 #-- get data from un --
 
-# for ((i=0;i<3;i++))
-# do
-#     curl --output "${DEST}-${SEX[${i}]}${SUFFIX}" \
-#         --url "${BASE}${TABLES[${i}]}${SUFFIX}"
-#     ssconvert  -S --export-type=Gnumeric_stf:stf_csv "${DEST}-${SEX[${i}]}${SUFFIX}" "${CSV}-${SEX[${i}]}-%n.csv"
-# done
+ for ((i=0;i<3;i++))
+ do
+     curl --output "${DEST}-${SEX[${i}]}${SUFFIX}" \
+         --url "${BASE}${TABLES[${i}]}${SUFFIX}"
+     ssconvert  -S --export-type=Gnumeric_stf:stf_csv "${DEST}-${SEX[${i}]}${SUFFIX}" "${CSV}-${SEX[${i}]}-%n.csv"
+ done
 (
 cat <<EOF
 USE COVID19;

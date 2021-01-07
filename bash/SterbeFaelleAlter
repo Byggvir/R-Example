@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cat ~/git/R-Example/data/sonderauswertung-sterbefaelle-2.csv \
+| sed '1,9d;/Insgesamt/d;s#X#0#; :N s#,,#,0,#g;t N; s# ##g ; s#u.mehr#-120# ;s#,$#,0#' \
+| sed 's#^\([0-9]*\),\([0-9]*\),\([0-9]*\)-\([0-9]*\),#A;\2;\3;\4\n# ; s#,#\n#g' \
+| awk -F ';' 'BEGIN { J=0; AGl=0; AGh=0;kw=1; } { if ($1=="A") { J=$2 ; AGl=$3 ; AGh=$4; kw=0; } else { print ( "INSERT INTO DeathsPerCW values (" J "," kw "," AGl "," AGh-1 ","  $1 "); " ) ; kw=kw+1 }}'
+
+cat ~/git/R-Example/data/sonderauswertung-sterbefaelle.csv \
+| sed 's#^\([0-9]*\),#A;\1\n# ;s#,$#,0# ; s#,#\n#g' \
+| awk -F ';' 'BEGIN { J=0; i=0; } { if ($1=="A") { J=$2 ; i=0; } else { print ( "INSERT INTO DeathsPerDay values (" J "," i ","  $1 "); " ) ; i=i+1 }}'

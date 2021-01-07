@@ -15,7 +15,7 @@ require(data.table)
 
 setwd("~/git/R-Example")
 
-png("png/Deaths.png",width=1920,height=1080)
+png("png/US-Deaths.png",width=1920,height=1080)
 
 wdays <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 colors <-c( "red", "yellow", "green", "blue", "black" )

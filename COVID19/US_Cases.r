@@ -10,7 +10,6 @@
 
 MyScriptName <-"US_Cases"
 
-
 require(data.table)
 setwd("~/git/R-Example")
 source("lib/copyright.r")
@@ -58,6 +57,7 @@ rm(deaths)
 
 wdayCases   <-  aggregate(incCases~wday,FUN=sum,data=daily)
 wdayDeaths  <-  aggregate(incDeaths~wday,FUN=sum,data=daily)
+
 kwCases   <-  aggregate(incCases~kw,FUN=sum,data=daily)
 kwDeaths  <-  aggregate(incDeaths~kw,FUN=sum,data=daily)
 
@@ -67,7 +67,7 @@ options(Outdec=".")
 
 op = par(mfcol=c(2,1))
 
-Tage <- daily$Date
+Tage <- daily$date
 sel <- daily$wday != 6
 Tage[sel] <- NA
 
@@ -81,6 +81,7 @@ barplot( daily$incCases
     , ylab="Count"
     , names.arg = Tage
     , col=c(rep("lightblue",6),"red")
+
     )     
 
 grid()
@@ -101,21 +102,48 @@ grid()
 
 dev.off()
 
-png("png/US-CasesDeaths-kw.png",width=3840,height=1080)
+png("png/US-CasesDeaths-kw.png",width=1920,height=1080)
 
-op = par(mfcol=c(1,2))
+op = par(mfcol=c(2,1))
 
-plot(  kwCases
-     , type="b"
-     , xlab = "Kaldenerwoche"
-     , ylab = "Anzahl"
+ylim <- limbounds (kwCases$incCases) * 1.1
+
+kwPlotC <- barplot(  kwCases$incCases
+                     , main = paste("US weekly cases until ", reported) 
+                     , sub = paste("Date:", heute )
+                     , xlab="Week"
+                     , ylab="Count"
+                     , ylim = ylim
+                     , col = "lightblue"
+                     , names.arg = kwCases$kw
 )
-plot( kwDeaths
-      , type="b"
-      , xlab = "Kaldenerwoche"
-      , ylab = "Anzahl"
+text( kwPlotC
+      , kwCases$incCases
+      , round(kwCases$incCases)
+      , cex = 1
+      , pos = 3
+      , offset = 2
+      , srt = 90
 )
 
+ylim <- limbounds (kwDeaths$incDeaths) * 1.1
+kwPlotD <- barplot( kwDeaths$incDeaths
+                    , main = paste("US weekly deaths until ", reported) 
+                    , sub = paste("Date:", heute )
+                    , xlab="Week"
+                    , ylab="Count"
+                    , ylim = ylim
+                    , col = "lightblue"
+                    , names.arg = kwCases$kw
+)
 
+text( kwPlotD
+      , kwDeaths$incDeaths
+      , round(kwDeaths$incDeaths)
+      , cex = 1
+      , pos = 3
+      , offset = 2
+      , srt = 90
+)
 dev.off()
 

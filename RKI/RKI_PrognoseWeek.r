@@ -39,7 +39,7 @@ SQL = '
       JOIN rki AS t2
       ON t1.date = adddate(t2.date,1)
     ) AS t3
-    where week(date,3) > 40 and week(date,3) < 44
+    where week(date,3) > 40 and week(date,3) < 53
     GROUP BY WTag;
 '
 )
@@ -52,17 +52,15 @@ print(c(casesperday,sum(casesperday),mean(casesperday)))
 
 #  Auswertung nach Wochentag und Wochen ab Kw 10
 
-weekdays <- read.csv('data/week.csv', header = TRUE)
-
 png('png/RKI_weekday.png'
     , width = 1920
     , height = 1080
     )
 par ( mar = c(10,10,10,10))
 
-ylim <- limbounds(weekdays[,6]) * 100
-boxplot(
-     (weekdays[,6]*100 ~ weekdays[,2])
+ylim <- limbounds(WTagAnteile[,2]) * 100
+barplot(
+     WTagAnteile[,2]*100 # ~ WTagAnteile[,1]
      , ylim = ylim
      , main = "Verteilung der gemeldeten Fälle auf Wochentage ab Kw 10"  
      , sub = ""
@@ -115,3 +113,4 @@ print(round(daily[l,7]/wtmean[daily[l,4]+1,2]*wtmean[,2],0))
 
 
 dev.off()
+

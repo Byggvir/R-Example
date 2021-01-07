@@ -52,8 +52,8 @@ heute <- format(today, "%d %b %Y")
 reported <- weekly$Kw[m]
 
 
-barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
-         , ylim = limbounds(as.numeric(weekly$Cases[1:m]))
+bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
+         , ylim = limbounds(as.numeric(weekly$Cases[1:m]))*1.1
          , main = paste("Weekly cases DE from calendarweek", weekly$Kw[1], "until", reported) 
          , sub = ""
          , xlab = ""
@@ -62,12 +62,22 @@ barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
          , names.arg = weekly$Kw
          , las = 1
 )
+
 title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
 
+text( bp1
+      , as.numeric(weekly$Cases[1:m])
+      , round(as.numeric(weekly$Cases[1:m]))
+      , cex = 1
+      , pos = 4
+      , offset = 1
+      , srt = 90
+)
+      
 grid()
 
-barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
-         , ylim = limbounds(as.numeric(weekly$Deaths[1:m]))
+bp2 <- barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
+         , ylim = limbounds(as.numeric(weekly$Deaths[1:m]))*1.1
          , main = paste("Weekly deaths DE from calendarweek", weekly$Kw[1], "until", reported) 
          , sub = ""
          , xlab = ""
@@ -77,6 +87,15 @@ barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
          , las = 1
 )
 title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
+
+text( bp2
+      , as.numeric(weekly$Deaths[1:m]) 
+      , round(as.numeric(weekly$Deaths[1:m]))
+      , cex = 1
+      , pos = 3
+      , offset = 1
+      , srt = 90
+)
 
 copyright()
 

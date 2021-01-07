@@ -12,6 +12,7 @@ reset=`tput sgr0`
 # List of download URL
 
 DASHURL="https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data"
+DASHURL2="https://download.byggvir.de/RKI/RKI-COVID19.csv.gz"
 
 KUMTABURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahlen_Kum_Tab.xlsx?__blob=publicationFile"
 TESTUNGENURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Testzahlen-gesamt.xlsx?__blob=publicationFile"
@@ -30,6 +31,7 @@ ADEST="$TEMP/altersverteilung.xlsx"
 
 DASHDEST="$TEMP/RKI-COVID19.csv"
 DASHDESTA="$TEMP/A-RKI-COVID19.csv"
+DASHDESTB="$TEMP/RKI-COVID19.csv.gz"
 
 KCSV="$TEMP/rki"
 ACSV="$TEMP/alter"
@@ -46,9 +48,13 @@ function download_all {
 [ ! -e "$KDEST" ] && curl --output "$KDEST" --url "$KUMTABURL"
 [ ! -e "$TDEST" ] && curl --output "$TDEST" --url "$TESTUNGENURL"
 
-[ "$DEBUG" = "ON" ] && [ ! -e $DASHDEST ] && curl --output "$DASHDESTA" --url "$DASHURL"
+[ ! -e "$DASHDESTB" ] && curl --output "$DASHDESTB" --url "$DASHURL2"
 
-( ( [ "$DEBUG" = "ON" ] && cat "$DASHDESTA" ) || curl --url "$DASHURL" ) \
+[   -e "$DASHDESTB" ] && gzip  --decompress "$DASHDESTB"
+
+[ ! -e "$DASHDEST" ] && curl --output "$DASHDESTA" --url "$DASHURL"
+
+[ ! -e $DASHDEST ] && ( cat "$DASHDESTA" || curl --url "$DASHURL" ) \
 | sed 's#"\([0-9]\{2\}\)\.\([0-9]\{2\}\)\.\([0-9]\{4\}\).*"#\3-\2-\1#g; s# 00:00:00##g; s#/#-#g; s#,[^,]*$##' \
 | sed 's#LK Göttingen (alt)#LK Göttingen#' \
 > "$DASHDEST"
@@ -77,10 +83,16 @@ echo -e "\n\n${blue}+---------"
 echo -e "| ${red}Importieren der bundesweiten Zahlen aus der kumulativen Tabelle in die Datenbank"
 echo -e "${blue}+---------${reset}\n\n"
 
+STARTDATE=$(sed '1,2d; 4,$d; s#,.*##; s#/#-#g' "${KCSV}2.csv")
+
 if [ $(date "+%w") -lt 6 ]
 then
 
 ( cat <<EOF1
+-- 
+-- RKI Kummulative Tabelle
+-- 
+
 USE COVID19;
 DROP TABLE IF EXISTS neu;
 
@@ -89,12 +101,11 @@ CREATE TABLE neu (date DATE primary key, cases INT, deaths INT);
 SET autocommit=0;
 # LOCK TABLE neu WRITE;
 
-INSERT INTO neu VALUES ("2020-02-23",0,0);
+INSERT INTO neu VALUES (adddATE("$STARTDATE",-2),0,0);
 EOF1
 
-sed '1,3d; /^"/ s#^"25.08,2020",#2020-08-25,#; s#^\([0-9]\{2\}\).\([0-9]\{2\}\)\.\(202[0-9]\)#\3-\2-\1#; s#^\(202[0-9]\)/\([0-9]\{2\}\)/\([0-9]\{2\}\)#\1-\2-\3#;' "${KCSV}1.csv" \
-| sed 's#"[^"]*",##; s#,,#,0,#g; s#,,#,#g'   \
-| awk -F ',' 'BEGIN {i=1}; {if ($2>0) print("INSERT INTO neu VALUES (ADDDATE(\"2020-02-24\"," i ")," $2 "," $5 ");" );i=i+1}'
+sed '1,2d; s#^[^,]*,##; s#,,#,#; :r s#,,#,0,#g; t r;' "${KCSV}2.csv" \
+| awk -F ',' 'BEGIN {i=-1}; {if ($1>0) print("INSERT INTO neu VALUES (ADDDATE(\"'$STARTDATE'\"," i ")," $1 "," $3 ");" );i=i+1}'
 
 cat <<EOF2
 COMMIT;
@@ -150,7 +161,7 @@ SET autocommit=0;
 LOCK TABLE rkibland WRITE;
 EOF3
 
-cat "${TEMP}/rki2.csv" \
+cat "${TEMP}/rki3.csv" \
 | sed '1,2d;$d; s#,.*##;' \
 | awk -F ',' 'BEGIN {i=1;} { print ("INSERT INTO rkibland VALUES (" i ",\"" $1 "\");"); i=i+1}'
 
@@ -169,7 +180,7 @@ SET autocommit=0;
 LOCK TABLE rkiblcases WRITE;
 EOF5
 
-cat "${TEMP}/rki2.csv" \
+cat "${TEMP}/rki3.csv" \
 | sed '1,2d;$d; s#,*$##; s#^[^,]*,#-\n#; s#,#\n#g;' \
 | awk -F ',' 'BEGIN {i=-1;j=0;} { if ($1=="-") { i=0; j=j+1; v=0} else { v=$1 };print("INSERT INTO rkiblcases VALUES (" j ", ADDDATE(\"2020-05-06\"," i ")," v ");") ; i=i+1; }'
 
@@ -253,17 +264,12 @@ ALTER TABLE RKIFaelle ADD INDEX(RefDatum);
 ALTER TABLE RKIFaelle ADD INDEX(Geschlecht);
 ALTER TABLE RKIFaelle ADD INDEX(Altersgruppe);
 
-SET autocommit=0;
-LOCK TABLE RKIFaelle WRITE;
-
 LOAD DATA LOCAL INFILE '$DASHDEST' 
     INTO TABLE RKIFaelle 
     FIELDS TERMINATED BY ',' 
     IGNORE 1 ROWS;
 
-COMMIT;
-UNLOCK TABLES;
-    
+   
 DROP TABLE IF EXISTS Bundesland;
 
 CREATE TABLE Bundesland ( 
@@ -278,17 +284,9 @@ CREATE TABLE Landkreis (
     , Landkreis CHAR(64)
     , INDEX (Landkreis));
     
-SET autocommit=0;
-LOCK TABLE Bundesland WRITE;
-
 INSERT INTO Bundesland
 SELECT DISTINCT IdBundesland, Bundesland
 FROM RKIFaelle;
-COMMIT;
-UNLOCK TABLES;
-    
-SET autocommit=0;
-LOCK TABLE Landkreis WRITE;
 
 INSERT INTO Landkreis
 SELECT DISTINCT IdLandkreis, Landkreis
@@ -296,8 +294,6 @@ FROM RKIFaelle;
 
 ALTER TABLE RKIFaelle DROP COLUMN Bundesland;
 ALTER TABLE RKIFaelle DROP COLUMN Landkreis;
-COMMIT;
-UNLOCK TABLES;
 
 SELECT max(Meldedatum), max(Datenbestand) FROM RKIFaelle;  
 
@@ -326,6 +322,7 @@ LOCK TABLE RKIAlter WRITE;
 
 EOF
 cat ${ACSV}1.csv \
+    | sed 's#^2014/10/01#"10 - 14"#; s#^2020/09/05#"5 - 9"#' \
     | sed -n  '1d; /Gesamt/d; s#[" ]##g; s#[-+][^,]*,#,#; h; :a; x ; s#^\([^,]*\),\([0-9]*\).*#\1,\2#p; g; s#^\([^,]*\),\([0-9]*\)#\1#; t a;' \
     | awk -F ',' 'BEGIN { i=10;UID==0} {if ($1 == UID) {i=i+1;} else { UID=$1;i=10;}; print ( "INSERT INTO RKIAlter VALUES (" $1 "," i "," $2 ");");}'
 
@@ -362,16 +359,16 @@ popd
 rm "$SQL"
 touch "$SQL"
 
-#download_all
+download_all
 
-#bund
-#bundeslaender
-#rki_dashboard
-#testungen
+bund
+bundeslaender
+rki_dashboard
+testungen
 Altersverteilung
 
-#sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
+sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
 
-#mysql --user=rscript --password=rscript < "$SQL"
+mysql --user=rscript --password=rscript < "$SQL"
 
-#run_r
+run_r

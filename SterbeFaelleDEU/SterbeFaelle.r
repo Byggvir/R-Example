@@ -1,4 +1,4 @@
-
+#!/usr/bin/env Rscript
 
 setwd("~/git/R-Example")
 png("png/SterbeFaelle2018.png",width=1920,height=1080)

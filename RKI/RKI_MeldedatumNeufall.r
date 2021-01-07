@@ -15,6 +15,7 @@ setwd("~/git/R-Example")
 MyScriptName <- "RKI_MeldedatumNeufall"
 
 source("lib/copyright.r")
+source("lib/myfunctions.r")
 source("common/rki_sql.r")
 
 today <- Sys.Date()
@@ -38,6 +39,7 @@ FROM RKIFaelle as C WHERE NeuerFall <> 0 GROUP BY Meldedatum) AS B
 ON A.Meldedatum=B.Meldedatum where A.Meldedatum > "' , as.character(today-15), '";' , sep = "" )
 
 NeueFaelle <-sqlGetRKI(SQL = SQL)
+NeueFaelle[is.na(NeueFaelle[,3]),3] <- 0
 
 # NeueFaelle[is.na(NeueFaelle[,3]),3] <- 0
 
@@ -56,7 +58,7 @@ bp1 <- barplot(NeueFaelle[,3]
         , las = 1
         , xlab = ""
         , ylab = ""
-        , ylim = c(0,ceiling(max(NeueFaelle[,3]/1000+1)*1000))
+        , ylim = limbounds(NeueFaelle[,3])
 )
 
 s <- sum(NeueFaelle[,3], na.rm = TRUE)
@@ -103,7 +105,7 @@ bp2 <- barplot(NeueFaelle[,3]
         , las = 1
         , xlab = ""
         , ylab = ""
-        , ylim = c(0,ceiling(max(NeueFaelle[,3]/100+1)*100))
+        , ylim = limbounds(NeueFaelle[,3])
 )
 
 s <- sum(NeueFaelle[,3], na.rm = TRUE)

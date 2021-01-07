@@ -19,7 +19,8 @@ require(data.table)
 library(REST)
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
+#source("common/rki_download.r")
+source("common/rki_sql.r")
 source("lib/copyright.r")
 
 tendenz <- function (x) {
@@ -38,7 +39,6 @@ tendenz <- function (x) {
 country <- "DEU"
 
 cases <- sqlGetRKI()
-cases2 <- get_rki_tag_csv()
 
 png(  paste("png/RKI_Wochentag-",country,".png",sep="")
     , width = 1920
@@ -147,8 +147,8 @@ plot(
     , ylim= c(0,25)
     , xlab="Wochentag"
     , ylab="Fälle pro Tag [%]"
-    , main=paste("Erkrankungen und Todesfälle (",country,")")
-    , sub="Meldedatum nach Wochentage"
+    , main=paste("Neuinfektionen und Todesfälle (",country,")")
+    , sub="Meldedatum RKI nach Wochentag"
     )
 
 text(0:6
@@ -188,7 +188,7 @@ axis( 1
     )
 
 legend( "topright"
-    , legend=c("Erkrankte","Gestorbene")
+    , legend=c("Neuinfektionen","Gestorbene")
     , col=c("blue", "black")
     , lty=1
     )

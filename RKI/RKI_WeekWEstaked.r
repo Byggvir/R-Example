@@ -1,0 +1,71 @@
+#!/usr/bin/env Rscript
+#
+#
+# Script: RKI.r
+#
+# Stand: 2020-10-21
+# (c) 2020 by Thomas Arend, Rheinbach
+# E-Mail: thomas@arend-rhb.de
+#
+
+MyScriptName <-"RKI_Week_WE"
+
+
+# Reads the cumulative cases and death from rki.de
+# The Excel file is in a very poor format. Therefore we have to adjust the data.
+# The weekly cases and deaths are in the second worksheet. We need only column 2 and 5.
+# The date  in column one is one day ahead in time.
+
+require(data.table)
+
+setwd("~/git/R-Example")
+source("common/rki_download.r")
+source("common/rki_sql.r")
+source("lib/copyright.r")
+source("lib/myfunctions.r")
+
+library(REST)
+library(ggplot2)
+library(viridis)
+library(hrbrthemes)
+
+# Stacked
+
+
+options( 
+    digits = 7
+  , scipen = 7
+  , Outdec = "."
+  , max.print = 3000
+  )
+
+BL <- c( "West", "Ost")
+Bev <- sqlGetRKI(SQL = "select BLWestEast(Id) as Bundesland,sum(Anzahl) as Anzahl from BevBLand group by BLWestEast(Id);")
+
+colors <-c( "red", "yellow", "green", "blue", "black" )
+
+today <- Sys.Date()
+heute <- format(today, "%d %b %Y")
+
+SQL = paste ('call CasesPerWeekWE();', sep ="")
+
+weekly <- sqlGetRKI(SQL = SQL)
+m <- length(weekly[1,])
+reported <- weekly$Kw[m]
+weekly$Cases[weekly$Bundesland=='Ost'] <- weekly$Cases[weekly$Bundesland=='Ost'] / Bev[1,2] * 100000
+weekly$Cases[weekly$Bundesland=='West'] <- weekly$Cases[weekly$Bundesland=='West'] / Bev[2,2] * 100000
+
+
+blp <- ggplot(weekly, aes(fill=Bundesland, y=Cases, x=Kw)) +
+  geom_bar(position="dodge", stat="identity") +
+  scale_fill_viridis(discrete = T) +
+  ggtitle("Corona: Fälle Bundesländer Ost - West nach Kalenderwoche des Meldedatums") +
+  theme_ipsum() +
+  xlab("Kalenderwoche") +
+  ylab("Neu gemeldete Fälle pro 100k pro Woche")
+
+ggsave(plot = blp, file = paste('png/', MyScriptName,".png", sep="")
+       , type = "cairo-png",  bg = "white"
+       , width = 29.7, height = 21, units = "cm", dpi = 150)
+
+

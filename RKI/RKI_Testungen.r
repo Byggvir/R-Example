@@ -163,11 +163,11 @@ lines(tests$Kw
     , col = "blue"
     )
 
-lines(tests$Kw
-    , tests$FP
-    , type = "b"
-    , col = "red"
-    )
+# lines(tests$Kw
+#     , tests$FP
+#     , type = "b"
+#     , col = "red"
+#     )
 
 lines(tests$Kw
     , tests$New
@@ -177,8 +177,19 @@ lines(tests$Kw
 
 legend (
     "topright"
-    , legend = c("Infected","Positive","False positive", "Testes", "New infected")
-    , col = c("green","blue","red","orange","black")
+    , legend = c( 
+        "Infected"
+      , "Positive"
+     # , "False positive"
+      , "Testes"
+      , "New infected"
+      )
+    , col = c(  "green"
+              , "blue"
+      #        , "red"
+              , "orange"
+              , "black"
+              )
     , lty = 1
     )
 
@@ -334,21 +345,21 @@ l3 <- lines( tests$Kw[tests$Kw >= AbKw]
 text( tests$Kw[tests$Kw >= AbKw]
      , ylim[2]
      , labels = round(tests$New[tests$Kw >= AbKw]/tests$New[tests$Kw == AbKw] * 100,1)
-     , cex = 2
+     , cex = 1
      , col = "red"
      )
 
 text( tests$Kw[tests$Kw >= AbKw]
      , ylim[2] * 0.95
      , labels = round(tests$Positiv[tests$Kw >= AbKw]/tests$Positiv[tests$Kw == AbKw] * 100,1)
-     , cex = 2
+     , cex = 1
      , col = "orange"
 )
 
 text( tests$Kw[tests$Kw >= AbKw]
      , ylim[2] * 0.9
      , labels = round(tests$Testungen[tests$Kw >= AbKw]/tests$Testungen[tests$Kw == AbKw] * 100,1)
-     , cex = 2
+     , cex = 1
      , col = "blue"
 )
 

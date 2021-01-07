@@ -19,6 +19,7 @@ library(readODS)
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
+source("common/rki_sql.r")
 source("lib/copyright.r")
 
 week_offset <- 2
@@ -38,7 +39,10 @@ deaths <- as.matrix(
   )
 )
 
-cases <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
+SQL <- "select Kw, AgeGroup div 10, sum(Count) from RKIAlter group by Kw,AgeGroup div 10;"
+cases <- sqlGetRKI(SQL)
+
+# cases <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
 
 AgeGroups <- c("0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80-89","90-99","100+")
 
