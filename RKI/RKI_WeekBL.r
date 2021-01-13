@@ -35,13 +35,10 @@ options(
 SQL <- 'select * from Bundesland order by IdBundesland;'
 BL <- sqlGetRKI(SQL = SQL)
 
-
 colors <-c( "red", "yellow", "green", "blue", "black" )
 
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
-
-reported <- weekly$Kw[m]
 
 
 for (i in BL[,1]) {
@@ -56,6 +53,8 @@ SQL = paste ('call CasesPerWeekBL(',i,' );', sep ="")
 
 weekly <- sqlGetRKI(SQL = SQL)
 m <- length(weekly[,1])
+
+reported <- weekly$Kw[m]
 
 bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
          , ylim = limbounds(as.numeric(weekly$Cases[1:m]))*1.1

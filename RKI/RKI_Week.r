@@ -36,6 +36,8 @@ SQL = 'call CasesPerWeek()'
 
 weekly <- sqlGetRKI(SQL = SQL)
 m <- length(weekly[,1])
+reported <- weekly$Kw[m]
+
 
 png(  "png/RKI_CasesDeathsWeek.png"
     , width = 1920
@@ -49,12 +51,9 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-reported <- weekly$Kw[m]
-
-
 bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
          , ylim = limbounds(as.numeric(weekly$Cases[1:m]))*1.1
-         , main = paste("Weekly cases DE from calendarweek", weekly$Kw[1], "until", reported) 
+         , main = paste("Wöchentliche Fälle von Kalenderwoche", weekly$Kw[1], "bis", reported) 
          , sub = ""
          , xlab = ""
          , col = "lightblue"

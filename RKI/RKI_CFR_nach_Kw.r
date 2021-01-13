@@ -8,6 +8,7 @@
 # E-Mail: thomas@arend-rhb.de
 #
 
+options(scipen = 999)
 MyScriptName <-"RKI_CFR_nach_Kw"
 
 
@@ -21,6 +22,7 @@ setwd("~/git/R-Example")
 source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
+source("lib/myfunctions.r")
 
 week_offset <- 2
 
@@ -30,17 +32,14 @@ cumulate <- function(x) {
   for (i in 2:length(x)) s[i] <- s[i-1] + x[i]
     
   return (s)
+  
 }
 
-deaths <- as.matrix(
-    readODS::read_ods(
-      path = "data/SterbeFälleAlter.ods" 
-      , sheet = 12
-  )
-)
-
-SQL <- "select Kw, AgeGroup div 10, sum(Count) from RKIAlter group by Kw,AgeGroup div 10;"
+SQL <- "select Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKIAlter group by Kw,AgeGroup div 10;"
 cases <- sqlGetRKI(SQL)
+
+SQL <- "select CalWeek as Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from SterbeFaelleKw group by CalWeek,AgeGroup div 10 , Sex;"
+deaths <- sqlGetRKI(SQL)
 
 # cases <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
 
@@ -49,46 +48,49 @@ AgeGroups <- c("0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80
 png(paste("png/RKI_CFR_nach_Kw_offset_", week_offset,".png", sep=""), width = 3840, height = 2160)
 
 par(   mar = c(10,6,10,6)
-     , mfrow = c(3,4)
+     , mfrow = c(3,3)
      )
 
-single_plot <- function(deaths, cases, calweeks, AgeGroup, ylim=c(0,50) ) {
+single_plot <- function(AgeGroup, AGText ) {
+  
+  
+  SQL <- paste("select Kw as Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKIAlter where Kw < 54 and AgeGroup div 10 = ", AgeGroup, "group by Kw,AgeGroup div 10;")
+  cases <- sqlGetRKI(SQL)
+  cases$Count <- cumulate( cases$Count)
+  
+  SQL <- paste("select CalWeek as Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from SterbeFaelleKw  where AgeGroup div 10 = ", AgeGroup, "group by CalWeek,AgeGroup div 10;")
+  deaths <- sqlGetRKI(SQL)
+  
+  l <- nrow(deaths)
+  o <- 10
+  CFR <- deaths$Count[(1+o):l]/cases$Count[1:(l-l)]
+  ylim <-limbounds(CFR)
   
   plot(
-    calweeks
-    , deaths/cases *100
+    (1+o):l
+    , CFR * 100
     , type = "l"
     , lwd = 3
     , col = "black"
     , xlab = "Kalenderwoche"
     , ylab = "CFR [%]"
-    , ylim = ylim
+    , ylim = ylim * 100
     , main = paste("Kumulative CoViD-19 CFR nach Kw\nOffset Tote zu Fälle =", week_offset,"Wochen")
     , cex.main = 4
     , cex.lab = 3
     , sub = ""
     , axes = FALSE 
   )
+  
  axis(1,cex.axis=2 )  
  axis(2,cex.axis=2, las = 2 )
- lastweek <- length(calweeks)
+ lastweek <- length(cases$Kw)
 
  options (digits = 3)
  
- text(
-    calweeks[lastweek]
-   , ylim[2]/10
-   , paste("CFR=", format(deaths[lastweek]/cases[lastweek] * 100, nsmall = 2),"%",
-           "\nmax=",format(max(deaths[cases>0]/cases[cases>0]) * 100, nsmall = 2),"%"
-           ,sep="")
-   , adj = 1
-   , cex = 5
-   , col= "blue"
- )
-
- legend(
+  legend(
     "top"
-    , legend = paste("Altersgruppe", AgeGroup,sep=" ")
+    , legend = paste("Altersgruppe", AGText,sep=" ")
     , col = "black"
     , lty = 1
     , cex = 5
@@ -98,49 +100,22 @@ single_plot <- function(deaths, cases, calweeks, AgeGroup, ylim=c(0,50) ) {
 
 }
 
-zr1 <- (1 + week_offset):length(cases[,1])
-zr2 <- 1:(length(cases[,1]) - week_offset)
-
-for (a in 2:12) {
+for (a in 0:8) {
   
-  l <- ((a-2)*10)
+  l <- a*10
   u <- l+9
   
-  if (a - 2 == 10) {
+  if (a == 10) {
     ag <- "100+"
     }
   else {
     ag <- paste(l,"-",u)
   }
   
-  single_plot(
-      deaths = cumulate(deaths[zr1,a])
-    , cases = cumulate(cases[zr1,a])
-    , calweeks = cases[zr2,1]
-    , AgeGroup = ag
+  single_plot(a,ag)
 
-  )
-# 
 }
-
-AGxPlus <- 2:12
-
-single_plot(
-   deaths = cumulate(rowSums(deaths[zr1,AGxPlus]))
-  , cases = cumulate(rowSums(cases[zr2,AGxPlus]))
-  , calweeks = cases[zr1,1]
-  , AgeGroup = "Alle"
-  , ylim = c(0,10))
 
 copyright()
 
 dev.off()
-
-options(digits=3)
-
-CFR <- colSums(deaths[,2:12])/colSums(cases[,2:12])
-
-print(colSums(t(cases[,2:12])*CFR))
-
-
-

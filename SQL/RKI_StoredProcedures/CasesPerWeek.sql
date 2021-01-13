@@ -64,6 +64,7 @@ begin
 end
 //
 
+
 drop procedure if exists CasesPerWeekBL //
 
 create procedure CasesPerWeekBL (IdBL INT)
@@ -116,4 +117,3 @@ end
 //
 
 delimiter ;
- 

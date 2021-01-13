@@ -20,9 +20,9 @@ library(ggplot2)
 library(viridis)
 library(hrbrthemes)
 
-w1 <- read.csv('data/CherryTomatos.csv')
+w1 <- read.csv('data/CherryTomatos_Gewicht.csv', dec = '.', )
 
-weight <-as.data.table(table(w1))
+weight <-as.data.table(table(w1$Gewicht))
 
 colnames(weight) <- c('Gewicht', 'Anzahl')
 
@@ -50,4 +50,4 @@ ggsave(plot = blp, file = paste('png/', MyScriptName,".png", sep="")
        , type = "cairo-png",  bg = "white"
        , width = 29.7, height = 21, units = "cm", dpi = 150)
 
-print ( c(mean(w1[,1]), sd(w1[,1])))
+print ( c(mean(w1[,2]), sd(w1[,2])))

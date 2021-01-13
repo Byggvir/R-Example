@@ -20,8 +20,8 @@ function run_r {
         echo -e "| ${red}${r}"
         echo -e "${blue}+---------${reset}\n\n"
         Rscript $r
-         read
-         reset
+#         read
+#         reset
      done
     popd
 popd
