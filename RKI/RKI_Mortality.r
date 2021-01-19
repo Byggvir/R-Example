@@ -16,11 +16,11 @@ MyScriptName <-"RKI_Mortality"
 #library(tidyverse)
 #library(scales)
 
-library(readODS)
 setwd("~/git/R-Example")
 
 source('lib/copyright.r')
 source('lib/myfunctions.r')
+source('common/rki_sql.r')
 
 today <- Sys.Date()
 heute <- format(today - 1, "%Y-%m-%d" )
@@ -35,7 +35,8 @@ par(mar=c(10,8,12,8), mfcol = c(2,1) )
 options(big.mark = ".", decimal.mark=",")
 
 CFR <- readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 2)
-Cases <- readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3)
+Cases <- sqlGetRKI('select Kw, (AgeGroup div 10)*10 as Agegroup, sum(Count) from RKIAlter group by kw,AgeGroup div 10;')
+Deaths <- sqlGetRKI('select * from SterbeFaelleKw where AgeGroup <100 ;')
 
 Kw <- max(Cases[,"Kw"])
 

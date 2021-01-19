@@ -32,6 +32,7 @@ options(
   , Outdec = "."
   , max.print = 3000
   )
+
 SQL <- 'select * from Bundesland order by IdBundesland;'
 BL <- sqlGetRKI(SQL = SQL)
 

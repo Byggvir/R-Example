@@ -17,16 +17,16 @@ DASHURL2="https://download.byggvir.de/RKI/RKI-COVID19.csv"
 [ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
 [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
 
-echo -e "\n\n${blue}+---------"
-echo -e "| ${red}Tempoary file in: $TEMP"
-echo -e "${blue}+---------${reset}\n\n"
+# echo -e "\n\n${blue}+---------"
+# echo -e "| ${red}Tempoary file in: $TEMP"
+# echo -e "${blue}+---------${reset}\n\n"
 
 DASHDEST="$TEMP/RKI-COVID19.csv"
 DASHDESTA="$TEMP/A-RKI-COVID19.csv"
 
-function download_dashboard {
+function download {
 
-# Download table Fallzahlen_Kum_Tab and Testungen
+# Download dashboard table
 
 [ ! -e $DASHDEST ] && curl --output "$DASHDEST" --url "$DASHURL2"
 
@@ -40,13 +40,13 @@ function download_dashboard {
 
 }
 
-function rki_dashboard {
+function dashboard {
 
 # Importieren der Zahlen aus der Tabelle für das RKI Dashboard
 
-    echo -e "\n\n${blue}+---------"
-    echo -e "| ${red}Importieren der Tabelle für das Dashboard RKI in die Datenbank"
-    echo -e "${blue}+---------${reset}\n\n" 
+#     echo -e "\n\n${blue}+---------"
+#     echo -e "| ${red}Importieren der Tabelle für das Dashboard RKI in die Datenbank"
+#     echo -e "${blue}+---------${reset}\n\n" 
 
 ( cat <<EOF
 USE COVID19;
@@ -54,14 +54,14 @@ USE COVID19;
 DROP TABLE IF EXISTS RKIFaelle;
 
 CREATE TABLE IF NOT EXISTS RKIFaelle (
-    ObjectId INT
-    , IdBundesland INT
+    IdBundesland INT
     , Bundesland CHAR(32)
     , Landkreis CHAR(64)
     , Altersgruppe CHAR(7)
     , Geschlecht CHAR(1)
     , AnzahlFall INT
     , AnzahlTodesfall INT
+    , ObjectId INT
     , Meldedatum DATE
     , IdLandkreis INT
     , Datenbestand DATE
@@ -114,8 +114,8 @@ ALTER TABLE RKIFaelle DROP COLUMN Landkreis;
 SELECT max(Meldedatum), max(Datenbestand) FROM RKIFaelle;  
 
 EOF
-) >> "$SQL"
-
+) 
 }
 
-download_dashboard
+download
+dashboard

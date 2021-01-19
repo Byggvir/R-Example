@@ -266,9 +266,9 @@ for (country in as.integer(countries[,1]) ) {
   try (
     regression_analysis (
         StartDate = rkidata$Date[1]
-      , EndDate = rkidata$Date[length(rkidata$Date)]
-      , StartRegADate <- today - 42 # RegFrom
-      , EndRegADate <- rkidata$Date[length(rkidata$Date)] # RegTo
+      , EndDate = as.Date("2020-12-31") # rkidata$Date[length(rkidata$Date)]
+      , StartRegADate <- today - 120 # RegFrom
+      , EndRegADate <- as.Date("2020-11-30") # rkidata$Date[length(rkidata$Date)]  # RegTo
       , PrognoseDate = as.Date("2020-12-31")
       , data = rkidata
       , cname = countries[countries[,1]==country,3]

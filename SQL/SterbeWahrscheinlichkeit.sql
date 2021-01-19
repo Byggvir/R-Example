@@ -22,10 +22,6 @@ end
 
 delimiter ;
 
-call AgeTab (85);
-
-select * from Age;
- 
 create temporary table if not exists SumAge 
     select 
         Age

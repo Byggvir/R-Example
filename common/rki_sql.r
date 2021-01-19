@@ -1,7 +1,7 @@
 library(RMariaDB)
 library(data.table)
 
-sqlTestungen <- 'select * from Testungen;'
+sqlTestungen <- 'select (@i:=@i+1) as Nr, Jahr, Kw, Testungen, Positiv from Testungen;'
 
 sqlGetRKI <- function (
   SQL = ' select 

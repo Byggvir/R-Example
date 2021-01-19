@@ -9,6 +9,8 @@ green=`tput setaf 2`
 blue=`tput setaf 4`
 reset=`tput sgr0`
 
+SEDDIR="$(dirname $0)/sed"
+
 # List of download URL
 
 DASHURL="https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data"
@@ -101,7 +103,7 @@ CREATE TABLE neu (date DATE primary key, cases INT, deaths INT);
 SET autocommit=0;
 # LOCK TABLE neu WRITE;
 
-INSERT INTO neu VALUES (adddATE("$STARTDATE",-2),0,0);
+INSERT INTO neu VALUES (ADDDATE("$STARTDATE",-2),0,0);
 EOF1
 
 sed '1,2d; s#^[^,]*,##; s#,,#,#; :r s#,,#,0,#g; t r;' "${KCSV}2.csv" \
@@ -203,7 +205,13 @@ cat <<TESTEOF1
 USE COVID19 ;
 DROP TABLE IF EXISTS Testungen;
 
-CREATE TABLE Testungen (Kw INT, Testungen INT, Positiv INT, PRIMARY KEY (Kw));
+CREATE TABLE Testungen (
+    Jahr INT, 
+    Kw INT, 
+    Testungen BIGINT, 
+    Positiv BIGINT, 
+    PRIMARY KEY (Kw)
+    );
 
 SET autocommit=0;
 LOCK TABLE Testungen WRITE;
@@ -211,7 +219,7 @@ LOCK TABLE Testungen WRITE;
 TESTEOF1
 
 cat "${TCSV}1.csv" \
-| sed '1d;$d; /Bis/ s#"Bis einschließlich KW10"#10#; /Summe/d; s#,".*##; s#,,#,#; s#\*##' \
+| sed '1d;$d; /Bis/ s#"Bis einschließlich KW10, 2020"#2020,10#; /Summe/d; s#\([0-9]\{1,2\}\)/\([0-9]\{4\}\)\**#\2,\1#; s#,".*##; s#,,#,#;' \
 | sed 's#^#INSERT INTO Testungen VALUES (#; s#$#);#'
 
 cat <<TESTEOF2
@@ -224,7 +232,7 @@ TESTEOF2
 
 }
 
-function rki_dashboard {
+function dashboard {
 
 # Importieren der Zahlen aus der Tabelle für das RKI Dashboard
 
@@ -238,7 +246,7 @@ USE COVID19;
 DROP TABLE IF EXISTS RKIFaelle;
 
 CREATE TABLE IF NOT EXISTS RKIFaelle (
-    ObjectId INT
+      ObjectId INT
     , IdBundesland INT
     , Bundesland CHAR(32)
     , Landkreis CHAR(64)
@@ -246,6 +254,7 @@ CREATE TABLE IF NOT EXISTS RKIFaelle (
     , Geschlecht CHAR(1)
     , AnzahlFall INT
     , AnzahlTodesfall INT
+--    , ObjectId INT
     , Meldedatum DATE
     , IdLandkreis INT
     , Datenbestand DATE
@@ -297,6 +306,8 @@ ALTER TABLE RKIFaelle DROP COLUMN Landkreis;
 
 SELECT max(Meldedatum), max(Datenbestand) FROM RKIFaelle;  
 
+-- call UpdateYesterday();
+
 EOF
 ) >> "$SQL"
 
@@ -308,23 +319,28 @@ function Altersverteilung {
 (
 cat <<EOF
 
-DROP TABLE IF EXISTS RKIAlter;
+USE COVID19;
 
-CREATE TABLE IF NOT EXISTS RKIAlter (
-     AgeGroup INT
+DROP TABLE IF EXISTS RKI_CasesByAge;
+
+CREATE TABLE IF NOT EXISTS RKI_CasesByAge (
+      Jahr INT
     , Kw INT
+    , AgeGroup INT
     , Count INT
-    , PRIMARY KEY (AgeGroup,Kw)
+    , CumulatedCount INT
+    , PRIMARY KEY (Jahr, Kw, AgeGroup)
 );
 
 SET autocommit=0;
-LOCK TABLE RKIAlter WRITE;
+
+LOCK TABLE RKI_CasesByAge WRITE;
 
 EOF
 cat ${ACSV}1.csv \
     | sed 's#^2014/10/01#"10 - 14"#; s#^2020/09/05#"5 - 9"#' \
-    | sed -n  '1d; /Gesamt/d; s#[" ]##g; s#[-+][^,]*,#,#; h; :a; x ; s#^\([^,]*\),\([0-9]*\).*#\1,\2#p; g; s#^\([^,]*\),\([0-9]*\)#\1#; t a;' \
-    | awk -F ',' 'BEGIN { i=10;UID==0} {if ($1 == UID) {i=i+1;} else { UID=$1;i=10;}; print ( "INSERT INTO RKIAlter VALUES (" $1 "," i "," $2 ");");}'
+    | sed -n  --file "$SEDDIR/RKI_Alter.sed" \
+    | awk -F ',' 'BEGIN { jahr=2020; i=10; s=0; UID==0 } {if ($1 == UID) { s=s+$2; print ( "INSERT INTO RKI_CasesByAge VALUES (" jahr "," i "," $1 "," $2 "," s ");"); i=i+1; if ( i > 53 ) { i=1; jahr=jahr+1;} } else { UID=$1; i=10; jahr=2020; s=0;} };'
 
 cat <<EOF
 
@@ -363,7 +379,7 @@ download_all
 
 bund
 bundeslaender
-rki_dashboard
+dashboard
 testungen
 Altersverteilung
 

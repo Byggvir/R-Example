@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Import Sterbefälle nach Kw into MariaDB
+
+SEDDIR="$(dirname $0)/sed"
+
+cat <<EOF
+USE COVID19;
+
+DROP TABLE IF EXISTS SterbeFaelleKw;
+
+CREATE TABLE IF NOT EXISTS SterbeFaelleKw (
+    Jahr INT
+  , Kw INT
+  , AgeGroup INT
+  , Sex INT
+  , Count BIGINT
+  , PRIMARY KEY (Jahr, Kw, AgeGroup, Sex)
+  );
+EOF
+
+SEX=(M F)
+
+for i in 0 1 
+do 
+    cat ~/git/R-Example/data/SterbeFälle${SEX[$i]}.csv \
+    | sed --file "$SEDDIR/rki_sterbefaelle.sed" \
+    | awk -F ';' 'BEGIN {AG=0;KW=0;} {if ($1 =="A" ) {Jahr=$2;KW=$3; AG=0} else { print("INSERT INTO SterbeFaelleKw VALUES (" Jahr "," KW "," AG*10 ",'$i'," $1 ");"); AG=AG+1}}'
+done

@@ -17,14 +17,14 @@ library(data.table)
 
 setwd("~/git/R-Example")
 
-pEI <- 1/3 # probability to get infectious after being expoesed
+pEI <- 1/3 # probability to get infectious after being exposed
 pIR <- 1/7 # probability to recover when infectious
 
-Tn <- 200 # Number of iterations (days)
+Tn <- 1000 # Number of iterations (days)
 
 Population <- 83200000 # Population at start
 
-R0 <- 3 * pIR # Reproduction value at start (persons / day)
+R0 <- 2 * pIR # Reproduction value at start (persons / day)
 
 png(filename="png/SEIR.png"
   , width = 1920
@@ -107,6 +107,15 @@ plot(1:Tn
      , ylab = ""
      , ylim = c(0, Population)
 )
-print (max(SEIR$I))
+
+legend( "right"
+      , legend = c("Suceptible", "Exposed", "Infectuos", "Recovered")
+#      , lty = 2
+      , col = c("blue","orange","red","green")
+      , cex = 3
+      , lwd = 2
+      , bg = "lightgray"
+      )
+print (SEIR)
 
 dev.off()

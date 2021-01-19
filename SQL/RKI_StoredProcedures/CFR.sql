@@ -10,15 +10,15 @@ begin
     set @t := 0 ;
     select 
         Kw
-        , (@t:=@t+Tote)
-        , (@f:=@f+Faelle)
+        , (@t:=@t+Tote) as Deaths
+        , (@f:=@f+Faelle) as Cases
         , @t/@f*100 as CFR 
         from (
             select 
                 week(Refdatum,3) as Kw
                 , sum(AnzahlTodesfall) as Tote
                 , sum(AnzahlFall) as Faelle
-            from RKIFaelle 
+            from RKIFaelle
             group by week(Refdatum,3)) as CFR
     ;
 end

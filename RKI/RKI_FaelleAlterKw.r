@@ -11,7 +11,7 @@
 MyScriptName <-"RKI_FalleAlterKw"
 
 library(data.table)
-library(readODS)
+
 
 setwd("~/git/R-Example")
 source("common/rki_download.r")
@@ -19,10 +19,10 @@ source("lib/copyright.r")
 
 plotcol <- "white"
 
-AGrp <- sqlGetRKI(SQL="select distinct AgeGroup from RKIAlter order by AgeGroup;")
+AGrp <- sqlGetRKI(SQL="select distinct AgeGroup from RKI_CasesByAge order by AgeGroup;")
 
-CalWeeks <- sqlGetRKI(SQL="select distinct Kw from RKIAlter order by Kw;") 
-CalWeekSum <- sqlGetRKI(SQL="select Kw, sum(Count) as Count from RKIAlter group by Kw;")
+CalWeeks <- sqlGetRKI(SQL="select distinct (Jahr-2020)*53 + Kw as Kw from RKI_CasesByAge order by Jahr, Kw;") 
+CalWeekSum <- sqlGetRKI(SQL="select (Jahr-2020)*53 + Kw as Kw, sum(Count) as Count from RKI_CasesByAge group by Jahr,Kw;")
 
 dpop <- read.table(file("data/DEPopulationAge.csv"), sep=";", header=TRUE)
 
@@ -110,7 +110,7 @@ i <- 1
 for (a in AGrp[,1]) {
    
    if (a < 85) {
-   sql <- paste("select * from RKIAlter where AgeGroup = ", a , '  ;', sep="")
+   sql <- paste("select (Jahr-2020)*53 + Kw, Count  from RKIAlter where AgeGroup = ", a , '  ;', sep="")
    print(sql)
    data <- sqlGetRKI(SQL=sql)
    l <- a + 1 
@@ -127,7 +127,7 @@ for (a in AGrp[,1]) {
 # Die Daten der Population vom Statistikamt reichen nur bis 85+, RKI liefert 90+
 # Daher werden die 85+ / 85-89,90+ zusammengefasst.
 
-sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup >= ", 85 , '  group by Kw;', sep="")
+sql <- paste("select AgeGroup,(Jahr-2020)*53 + Kw as Kw,sum(Count) as Count from RKIAlter where AgeGroup >= ", 85 , '  group by Jahr, Kw;', sep="")
 
 print(sql)
 
@@ -143,7 +143,7 @@ single_plot(data, "85+", calter)
 # --- 60+ ----
 # Nur ein Blick auf die Altersgruppe 60+
 
-sql <- paste("select AgeGroup,Kw,sum(Count) as Count from RKIAlter where AgeGroup >= ", 60 , '  group by Kw;', sep="")
+sql <- paste("select AgeGroup,(Jahr-2020)*53 + Kw as Kw,sum(Count) as Count from RKI_CasesByAge where AgeGroup >= ", 60 , '  group by Jahr,Kw;', sep="")
 
 print(sql)
 

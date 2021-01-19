@@ -112,14 +112,14 @@ par (   mar = c(10,10,10,10)
       , mfcol = c(1,2)
 )
 
-zeitraum <- 31:36
+zeitraum <- 26:44
 weekly <- aggregate(as.numeric(incCases) ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <-  c("Kw","Count")
 reganalysis(weekly, zeitraum, main = "Wöchentliche Fälle DE" )
 
 rm(weekly)
 
-zeitraum <- 31:44
+zeitraum <- 26:47
 weekly <- aggregate(as.numeric(incDeaths) ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <- c("Kw","Count")
 reganalysis(weekly, zeitraum, main = "Wöchentliche Sterbefälle DE")
