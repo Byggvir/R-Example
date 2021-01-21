@@ -55,8 +55,11 @@ m <- length(weekly[1,])
 reported <- weekly$Kw[m]
 weekly$Cases[weekly$Bundesland=='Ost'] <- weekly$Cases[weekly$Bundesland=='Ost'] / Bev[1,2] * 100000
 weekly$Cases[weekly$Bundesland=='West'] <- weekly$Cases[weekly$Bundesland=='West'] / Bev[2,2] * 100000
+# weekly$Cases[weekly$Bundesland=='Bund'] <- weekly$Cases[weekly$Bundesland=='Bund'] / (Bev[1,2]+Bev[2,2]) * 100000
+
 weekly$Deaths[weekly$Bundesland=='Ost'] <- weekly$Deaths[weekly$Bundesland=='Ost'] / Bev[1,2] * 100000
 weekly$Deaths[weekly$Bundesland=='West'] <- weekly$Deaths[weekly$Bundesland=='West'] / Bev[2,2] * 100000
+# weekly$Deaths[weekly$Bundesland=='Bund'] <- weekly$Deaths[weekly$Bundesland=='Bund'] / (Bev[1,2]+Bev[2,2]) * 100000
 
 
 p1 <- ggplot(weekly, aes(fill=Bundesland, y=Cases, x=Kw)) +

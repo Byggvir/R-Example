@@ -1,11 +1,11 @@
-use COVID19;
+USE COVID19;
 
 delimiter //
 
-drop function if exists is_westbl //
+DROP FUNCTION IF EXISTS is_westbl //
 
-create FUNCTION is_westbl (n INT , we BOOL) returns BOOL DETERMINISTIC
-begin
+CREATE FUNCTION is_westbl (n INT , we BOOL) returns BOOL DETERMINISTIC
+BEGIN
   
   set @r := 0;
   if we then set @r := (n < 12);
@@ -16,9 +16,9 @@ begin
 end
 //
 
-drop function if exists BLWestEast //
+DROP FUNCTION IF EXISTS BLWestEast //
 
-create function BLWestEast (n INT )
+CREATE FUNCTION BLWestEast (n INT )
 RETURNS varchar(20) DETERMINISTIC
 
 BEGIN
@@ -30,191 +30,203 @@ BEGIN
   end if;
   return dir;
   
-end
+END
 //
 
-drop procedure if exists CasesPerWeek //
+DROP PROCEDURE IF EXISTS CasesPerWeek //
 
-create procedure CasesPerWeek ()
-begin
+CREATE PROCEDURE CasesPerWeek ()
+BEGIN
 
-  drop table if exists cpd;
+  DROP TABLE IF EXISTS cpd;
   
-  create temporary table cpd ( Date DATE PRIMARY KEY, Kw INT, Cases INT, Deaths INT )
-  select 
-    t1.date as Date
-    , ( case when t1.date > "2021-01-03" then 53+week(t1.date,3) else week(t1.date,3) end ) as Kw
-    , t1.cases - t2.cases as Cases
-    , t1.deaths - t2.deaths as Deaths
-    from rki as t1 
-    inner join rki as t2 
-    on t1.date=adddate(t2.date,1)
-    where t1.cases > t2.cases
+  CREATE TEMPORARY TABLE cpd ( Date DATE PRIMARY KEY, Kw INT, Cases INT, Deaths INT )
+  SELECT 
+    t1.date AS Date
+    , ( case when t1.date > "2021-01-03" then 53+week(t1.date,3) else week(t1.date,3) end ) AS Kw
+    , t1.cases - t2.cases AS Cases
+    , t1.deaths - t2.deaths AS Deaths
+    FROM rki AS t1 
+    INNER JOIN rki AS t2 
+    ON t1.date=adddate(t2.date,1)
+    WHERE t1.cases > t2.cases
   ;
     
-  select 
-      Kw as Kw
-    , sum(Cases) as Cases
-    , sum(Deaths) as Deaths
-    from cpd
-    group by Kw
-    order by Kw
+  SELECT 
+      Kw AS Kw
+    , sum(Cases) AS Cases
+    , sum(Deaths) AS Deaths
+    FROM cpd
+    GROUP BY Kw
+    ORDER BY Kw
   ;
 
-end
+END
 //
 
 
-drop procedure if exists CasesPerWeekBL //
+DROP PROCEDURE IF EXISTS CasesPerWeekBL //
 
-create procedure CasesPerWeekBL (IdBL INT)
-begin
+CREATE PROCEDURE CasesPerWeekBL (IdBL INT)
+BEGIN
 
-   select 
-      IdBundesland as BL
-    , ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) as Kw
-    , sum(AnzahlFall) as Cases
-    , sum(AnzahlTodesfall) as Deaths
-    from RKIFaelle
-    where IdBundesland = IdBL
+   SELECT 
+      IdBundesland AS BL
+    , ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
+    , sum(AnzahlFall) AS Cases
+    , sum(AnzahlTodesfall) AS Deaths
+    FROM RKIFaelle
+    WHERE IdBundesland = IdBL
     and ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 8
-    group by IdBundesland, ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) ;
+    GROUP BY IdBundesland, ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) ;
 end
 //
 
-drop procedure if exists CasesPerWeekBLWE //
+DROP PROCEDURE IF EXISTS CasesPerWeekBLWE //
 
-create procedure CasesPerWeekBLWE (West BOOL)
-begin
+CREATE PROCEDURE CasesPerWeekBLWE (West BOOL)
+BEGIN
 
-   select 
-       ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) as Kw
-    , sum(AnzahlFall) as Cases
-    , sum(AnzahlTodesfall) as Deaths
-    from RKIFaelle
-    where is_westbl(IdBundesland,West)
+   SELECT 
+       ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
+    , sum(AnzahlFall) AS Cases
+    , sum(AnzahlTodesfall) AS Deaths
+    FROM RKIFaelle
+    WHERE is_westbl(IdBundesland,West)
     and  ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 8
-    group by  ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) 
+    GROUP BY  ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) 
     ;
-end
+END
 //
 
-drop procedure if exists CasesPerWeekWE //
+DROP PROCEDURE IF EXISTS CasesPerWeekWE //
 
-create procedure CasesPerWeekWE ()
-begin
+CREATE PROCEDURE CasesPerWeekWE ()
+BEGIN
 
-  select 
-    ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) as Kw
-    , BLWestEast(IdBundesland) as Bundesland
-    , sum(AnzahlFall) as Cases
-    , sum(AnzahlTodesfall) as Deaths
-    , round(sum(AnzahlTodesfall) /sum(AnzahlFall)*100,1) as CFR
-    from RKIFaelle
-    where ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 9
-    group by BLWestEast(IdBundesland), Kw 
+    SELECT 
+        ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
+        , BLWestEast(IdBundesland) AS Bundesland
+        , sum(AnzahlFall) AS Cases
+        , sum(AnzahlTodesfall) AS Deaths
+        , round(sum(AnzahlTodesfall) / sum(AnzahlFall)*100,1) AS CFR
+    FROM RKIFaelle
+    WHERE ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 9
+    GROUP BY BLWestEast(IdBundesland), Kw
+--     UNION
+--     SELECT 
+--         ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
+--         , 'Bund' AS Bundesland
+--         , sum(AnzahlFall) AS Cases
+--         , sum(AnzahlTodesfall) AS Deaths
+--         , round(sum(AnzahlTodesfall) / sum(AnzahlFall)*100,1) AS CFR
+--     FROM RKIFaelle
+--     WHERE ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 9
+--     GROUP BY Kw
+    
+    
   ;
-end
+END
 //
-drop procedure if exists MinMaxCasesPerWeek //
+DROP PROCEDURE IF EXISTS MinMaxCasesPerWeek //
 
-create procedure MinMaxCasesPerWeek (minW INT, maxW INT)
-begin
+CREATE PROCEDURE MinMaxCasesPerWeek (minW INT, maxW INT)
+BEGIN
     
-    drop table if exists cpw;
+    DROP TABLE IF EXISTS cpw;
     
-    create temporary table cpw ( IdBundesland INT, Kw INT, Cases BIGINT, Deaths BIGINT, PRIMARY KEY (IdBundesland,Kw) )
-        select 
-            IdBundesland as IdBundesland
-            , ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) as Kw
-            , sum(AnzahlFall) as Cases
-            , sum(AnzahlTodesfall) as Deaths
-        from RKIFaelle
-        where ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end )
-        group by IdBundesland, Kw 
+    CREATE TEMPORARY TABLE cpw ( IdBundesland INT, Kw INT, Cases BIGINT, Deaths BIGINT, PRIMARY KEY (IdBundesland,Kw) )
+        SELECT 
+            IdBundesland AS IdBundesland
+            , ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
+            , sum(AnzahlFall) AS Cases
+            , sum(AnzahlTodesfall) AS Deaths
+        FROM RKIFaelle
+        WHERE ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end )
+        GROUP BY IdBundesland, Kw 
     ;
     
-    drop table if exists minmaxcpw;
+    DROP TABLE IF EXISTS minmaxcpw;
     
-    create temporary table minmaxcpw ( 
+    CREATE TEMPORARY TABLE minmaxcpw ( 
         IdBundesland INT
         , minCases BIGINT
         , minDeaths BIGINT
         , maxCases BIGINT
         , maxDeaths BIGINT
         , PRIMARY KEY (IdBundesland) )
-    select 
-        IdBundesland as IdBundesland
-        , min(Cases) as minCases
-        , min(Deaths) as minDeaths
-        , max(Cases) as maxCases
-        , max(Deaths) as maxDeaths
-    from cpw
-    where Kw >= minW and Kw <= maxW
-    group by IdBundesland
+    SELECT 
+        IdBundesland AS IdBundesland
+        , min(Cases) AS minCases
+        , min(Deaths) AS minDeaths
+        , max(Cases) AS maxCases
+        , max(Deaths) AS maxDeaths
+    FROM cpw
+    WHERE Kw >= minW and Kw <= maxW
+    GROUP BY IdBundesland
     ;
     
-    select 
-        M.IdBundesland as BL
-        , Bundesland as Bundesland
-        , M.minCases as 'Min'
-        , max(W1.Kw) as 'minKw'
-        , M.maxCases as 'Max'
-        , max(W2.Kw) as 'maxKw'
-        , max(W2.Kw)-max(W1.Kw) as 'Wochen'
-        , round(exp(log(M.maxCases / M.minCases) / (max(W2.Kw)-max(W1.Kw))),4)  as Ratio
-    from minmaxcpw as M
-    join cpw as W1
+    SELECT 
+        M.IdBundesland AS BL
+        , Bundesland AS Bundesland
+        , M.minCases AS 'Min'
+        , max(W1.Kw) AS 'minKw'
+        , M.maxCases AS 'Max'
+        , max(W2.Kw) AS 'maxKw'
+        , max(W2.Kw)-max(W1.Kw) AS 'Wochen'
+        , round(exp(log(M.maxCases / M.minCases) / (max(W2.Kw)-max(W1.Kw))),4)  AS Ratio
+    FROM minmaxcpw AS M
+    JOIN cpw AS W1
         on M.IdBundesland = W1.IdBundesland
         and M.minCases = W1.Cases
-    join cpw as W2
+    JOIN cpw AS W2
         on M.IdBundesland = W2.IdBundesland
         and M.maxCases = W2.Cases
-    join Bundesland as B
+    JOIN Bundesland AS B
         on
             M.IdBundesland = B.IdBundesland
-    group by M.IdBundesland
+    GROUP BY M.IdBundesland
     ;
 end
 //
 
-drop procedure if exists MinMaxCasesPerWeekAgeGroup //
+DROP PROCEDURE IF EXISTS MinMaxCasesPerWeekAgeGroup //
 
-create procedure MinMaxCasesPerWeekAgeGroup (minW INT, maxW INT)
-begin
+CREATE PROCEDURE MinMaxCasesPerWeekAgeGroup (minW INT, maxW INT)
+BEGIN
     
-    drop table if exists minmaxAG;
+    DROP TABLE IF EXISTS minmaxAG;
     
-    create temporary table minmaxAG ( 
+    CREATE TEMPORARY TABLE minmaxAG ( 
         AgeGroup INT
         , minCount INT
         , maxCount INT
         , PRIMARY KEY (AgeGroup) )
-    select 
-        AgeGroup as AgeGroup
-        , min(Count) as minCount
-        , max(Count) as maxCount
-    from RKI_CasesByAge
-    where (Jahr-2020)*53 + Kw >= minW and (Jahr-2020)*53 + Kw  <= maxW
-    group by AgeGroup
+    SELECT 
+        AgeGroup AS AgeGroup
+        , min(Count) AS minCount
+        , max(Count) AS maxCount
+    FROM RKI_CasesByAge
+    WHERE (Jahr-2020)*53 + Kw >= minW and (Jahr-2020)*53 + Kw  <= maxW
+    GROUP BY AgeGroup
     ;
     
-    select 
-        M.AgeGroup as AgeGroup
-        , M.minCount as 'Min'
-        , max(W1.Kw) as 'minKw'
-        , M.maxCount as 'Max'
-        , max(W2.Kw) as 'maxKw'
-        , max(W2.Kw)-max(W1.Kw) as 'Wochen'
-        , round(exp(log(M.maxCount / M.minCount) / (max(W2.Kw)-max(W1.Kw))),4)  as Ratio
-    from minmaxAG as M
-    join RKI_CasesByAge as W1
+    SELECT 
+        M.AgeGroup AS AgeGroup
+        , M.minCount AS 'Min'
+        , max(W1.Kw) AS 'minKw'
+        , M.maxCount AS 'Max'
+        , max(W2.Kw) AS 'maxKw'
+        , max(W2.Kw)-max(W1.Kw) AS 'Wochen'
+        , round(exp(log(M.maxCount / M.minCount) / (max(W2.Kw)-max(W1.Kw))),4)  AS Ratio
+    FROM minmaxAG AS M
+    JOIN RKI_CasesByAge AS W1
         on M.AgeGroup = W1.AgeGroup
         and M.minCount = W1.Count
-    join RKI_CasesByAge as W2
+    JOIN RKI_CasesByAge AS W2
         on M.AgeGroup = W2.AgeGroup
         and M.maxCount = W2.Count
-    group by M.AgeGroup
+    GROUP BY M.AgeGroup
     ;
 end
 //

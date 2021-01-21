@@ -61,6 +61,8 @@ function download_all {
 | sed 's#LK Göttingen (alt)#LK Göttingen#' \
 > "$DASHDEST"
 
+head -n 1 "$DASHDEST"
+
 # ... convert tables into CSV files
 
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$ADEST" "${ACSV}%n.csv"
@@ -376,10 +378,9 @@ rm "$SQL"
 touch "$SQL"
 
 download_all
-
+dashboard
 bund
 bundeslaender
-dashboard
 testungen
 Altersverteilung
 

@@ -1,14 +1,13 @@
-USE Bevoelkerung;
+USE COVID19;
 
 DROP TABLE IF EXISTS DEU;
 
 CREATE TABLE DEU (
-    Stichtag DATE
-  , Age INT
-  , Male BIGINT
-  , Female BIGINT
-  , Insgesamt BIGINT
-  , INDEX (Stichtag, Age)
+    sdate DATE
+  , age INT
+  , male BIGINT
+  , female BIGINT
+  , INDEX (sdate, age)
   );
 
 LOAD DATA LOCAL INFILE '/home/thomas/git/R-Example/data/12411-0006.csv' 

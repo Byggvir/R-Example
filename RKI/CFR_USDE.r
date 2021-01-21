@@ -11,20 +11,27 @@
 MyScriptName <-"CFR_USDE"
 
 
-library(data.table)
-library(utils)
-require("readODS")
+require(data.table)
 
 setwd("~/git/R-Example")
+source("common/rki_download.r")
+source("common/rki_sql.r")
 source("lib/copyright.r")
+source("lib/myfunctions.r")
+
+library(REST)
+library(ggplot2)
+library(gridExtra)
+library(viridis)
+library(hrbrthemes)
+require("readODS")
 
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
 
 US <- read_ods("data/CFR.ods",sheet=6)
-DE <- read_ods("data/SterbeFälleAlter.ods",sheet=2)
-DE$Deaths <- DE$Male + DE$Female
+DE <- sqlGetRKI(SQL = 'call CFRKw(2021,2);')
 
 png("png/CFR_USDE.png", width = 1920, height = 1080)
 
@@ -36,8 +43,8 @@ stats <- data.table(
   AgeGroup = c("0-49","50+")
   , USCases = c(sum(US$Cases[1:5]),sum(US$Cases[6:length(US$AgeGroup)]))
   , USDeaths = c(sum(US$Deaths[1:5]),sum(US$Deaths[6:length(US$AgeGroup)]))
-  , DECases = c(sum(DE$Cases[1:5]),sum(DE$Cases[6:length(DE$Age)]))
-  , DEDeaths = c(sum(DE$Deaths[1:5]),sum(DE$Deaths[6:length(DE$Age)]))
+  , DECases = c(sum(DE$Cases[1:5]),sum(DE$Cases[6:length(DE$AgeGroup)]))
+  , DEDeaths = c(sum(DE$Deaths[1:5]),sum(DE$Deaths[6:length(DE$AgeGroup)]))
 )
 
 PlotBar <-  function( x, main ="", ylim=c(0,100)) {
