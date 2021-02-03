@@ -54,5 +54,21 @@ begin
 end
 //
 
+DROP PROCEDURE IF EXISTS CasesPerDayBL //
+
+CREATE PROCEDURE CasesPerDayBL (IdBL INT)
+BEGIN
+
+   SELECT 
+      IdBundesland AS BL
+    , Meldedatum AS Kw
+    , sum(AnzahlFall) AS Cases
+    , sum(AnzahlTodesfall) AS Deaths
+    FROM RKIFaelle
+    WHERE IdBundesland = IdBL
+    GROUP BY IdBundesland, Meldedatum ;
+end
+//
+
 delimiter ;
  

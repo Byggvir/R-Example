@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Import CoViD-19 deaths into database
+
+CC=$1
+
+echo "delete from WorldDeaths where CountryCode = $CC;"
+
+ cat ../data/CoViD19Deaths/$CC.csv \
+| sed '1d' \
+| awk -F ';' '{ for (i=$3;i<=$4;i++) { print ("insert into WorldDeaths values (" $1 ",\"" $2 "\"," i "," $5/($4-$3+1) ");" )}}'

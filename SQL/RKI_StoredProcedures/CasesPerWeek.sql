@@ -58,8 +58,7 @@ BEGIN
     , sum(Deaths) AS Deaths
     FROM cpd
     GROUP BY Kw
-    ORDER BY Kw
-  ;
+    ORDER BY Kw;
 
 END
 //
@@ -128,6 +127,7 @@ BEGIN
   ;
 END
 //
+
 DROP PROCEDURE IF EXISTS MinMaxCasesPerWeek //
 
 CREATE PROCEDURE MinMaxCasesPerWeek (minW INT, maxW INT)

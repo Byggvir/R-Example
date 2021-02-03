@@ -164,6 +164,21 @@ calter <- sum(dpop$both[l:u])
 
 single_plot(data, "60+", calter, c(0,40))
 
+# --- 20 - 49----
+# Nur ein Blick auf die Altersgruppe 60+
+
+sql <- paste("select AgeGroup,(Jahr-2020)*53 + Kw as Kw,sum(Count) as Count from RKI_CasesByAge where AgeGroup >= 20 and  AgeGroup <= 49 group by Jahr,Kw order by Jahr,Kw;", sep="")
+
+print(sql)
+
+data <- sqlGetRKI(SQL=sql)
+
+l <- 20
+u <- 49
+calter <- sum(dpop$both[l:u])
+
+single_plot(data, "20-49", calter, c(0,80))
+
 
 
 dev.off()

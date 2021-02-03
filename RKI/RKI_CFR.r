@@ -8,8 +8,20 @@
 # E-Mail: thomas@arend-rhb.de
 #
 
+options(scipen = 999)
 MyScriptName <-"RKI_CFR"
 
+# Entwicklung der CFR nach Altersgruppe und Kw
+
+library(data.table)
+library(readr)
+library(readODS)
+
+setwd("~/git/R-Example")
+
+source("common/rki_sql.r")
+source("lib/copyright.r")
+source("lib/myfunctions.r")
 
 require("readODS")
 

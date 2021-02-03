@@ -212,7 +212,7 @@ CREATE TABLE Testungen (
     Kw INT, 
     Testungen BIGINT, 
     Positiv BIGINT, 
-    PRIMARY KEY (Kw)
+    PRIMARY KEY (Jahr,Kw)
     );
 
 SET autocommit=0;
@@ -242,21 +242,35 @@ function dashboard {
     echo -e "| ${red}Importieren der Tabelle für das Dashboard RKI in die Datenbank"
     echo -e "${blue}+---------${reset}\n\n" 
 
+A=''
+B=''
+
+# ObjectId is sometimes in the first column sometime before Meldedatum
+
+head -n 1 "$DASHDEST" | grep ',ObjectId'
+if [ $? -eq 0 ]
+then
+    A=''
+    B=', ObjectId INT'
+else
+    A='ObjectId INT ,'
+    B=''
+fi
+
 ( cat <<EOF
 USE COVID19;
 
 DROP TABLE IF EXISTS RKIFaelle;
 
 CREATE TABLE IF NOT EXISTS RKIFaelle (
-      ObjectId INT
-    , IdBundesland INT
+    ${A} IdBundesland INT
     , Bundesland CHAR(32)
     , Landkreis CHAR(64)
     , Altersgruppe CHAR(7)
     , Geschlecht CHAR(1)
     , AnzahlFall INT
     , AnzahlTodesfall INT
---    , ObjectId INT
+      ${B}
     , Meldedatum DATE
     , IdLandkreis INT
     , Datenbestand DATE
@@ -387,5 +401,4 @@ Altersverteilung
 sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
 
 mysql --user=rscript --password=rscript < "$SQL"
-
 run_r

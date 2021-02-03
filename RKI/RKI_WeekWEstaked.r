@@ -35,7 +35,7 @@ library(hrbrthemes)
 
 options( 
     digits = 7
-  , scipen = 7
+  , scipen = 999
   , Outdec = "."
   , max.print = 3000
   )

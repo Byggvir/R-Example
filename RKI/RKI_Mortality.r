@@ -34,9 +34,9 @@ par(mar=c(10,8,12,8), mfcol = c(2,1) )
 
 options(big.mark = ".", decimal.mark=",")
 
-CFR <- readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 2)
-Cases <- sqlGetRKI('select Kw, (AgeGroup div 10)*10 as Agegroup, sum(Count) from RKIAlter group by kw,AgeGroup div 10;')
-Deaths <- sqlGetRKI('select * from SterbeFaelleKw where AgeGroup <100 ;')
+CFR <- sqlGetRKI('select * from SterbeFaelleKw where AgeGroup <100 ;')
+# Cases <- sqlGetRKI('select Kw, (AgeGroup div 10)*10 as Agegroup, sum(Count) from RKIAlter group by kw,AgeGroup div 10;')
+# Deaths <- sqlGetRKI('select * from SterbeFaelleKw where AgeGroup <100 ;')
 
 Kw <- max(Cases[,"Kw"])
 

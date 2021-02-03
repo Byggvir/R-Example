@@ -279,30 +279,30 @@ regression_analysis <- function (
     , lwd = 3
     , cex = 3)
 
-  vp <- viewport( 
-        x = 0.2
-      , y = 0.45
-      , width = 0.5
-      , height = 0.6
-      )
-  tt <- ttheme_default(
-    base_size = 12
-    , core=list(
-      fg_params=list(   hjust = 1
-                      , x = 0.95
-      )
-    )
-  )
-  
-  g <- tableGrob(
-    PrognoseTab[PrognoseTab$Date >= EndRegADate,]
-    , theme = tt
-    , cols = c("Datum", "WTag", "Mean", "Min\nCI95%","Max\nCI95%" )
-    , vp = vp      
-  )
-  
-  grid.draw(g
-            , )
+  # vp <- viewport( 
+  #       x = 0.2
+  #     , y = 0.45
+  #     , width = 0.5
+  #     , height = 0.6
+  #     )
+  # tt <- ttheme_default(
+  #   base_size = 12
+  #   , core=list(
+  #     fg_params=list(   hjust = 1
+  #                     , x = 0.95
+  #     )
+  #   )
+  # )
+  # 
+  # g <- tableGrob(
+  #   PrognoseTab[PrognoseTab$Date >= EndRegADate,]
+  #   , theme = tt
+  #   , cols = c("Datum", "WTag", "Mean", "Min\nCI95%","Max\nCI95%" )
+  #   , vp = vp      
+  # )
+  # 
+  # grid.draw(g
+  #           , )
   
   
   dev.off()
@@ -314,8 +314,8 @@ rkidata <- sqlGetRKI(SQL )
 
 eDate <- rkidata$Date[length(rkidata$Date)]
 
-for (j in c(7,14) ) {
-for (i in c(20)) {
+for (j in c(64)) {
+for (i in c(27)) {
   
   regression_analysis (
       StartDate = rkidata$Date[1]
@@ -331,22 +331,23 @@ for (i in c(20)) {
   
 } # End for j
 
-eDate <- rkidata$Date[length(rkidata$Date)]
-regression_analysis (
-  StartDate = rkidata$Date[1]
-  , EndDate = eDate
-  , StartRegADate <- FromUntil[1]
-  , EndRegADate <- FromUntil[2]
-  , PrognoseDate = today + 14
-  , data = rkidata
-)
+# eDate <- rkidata$Date[length(rkidata$Date)]
+# regression_analysis (
+#   StartDate = rkidata$Date[1]
+#   , EndDate = eDate
+#   , StartRegADate <- FromUntil[1]
+#   , EndRegADate <- FromUntil[2]
+#   , PrognoseDate = today + 14
+#   , data = rkidata
+# )
+# 
 
 eDate <- rkidata$Date[length(rkidata$Date)]
 regression_analysis (
   StartDate = rkidata$Date[1]
   , EndDate = eDate
-  , StartRegADate <- FromUntil[1]
-  , EndRegADate <- FromUntil[2]
-  , PrognoseDate = FromUntil[2]+ 14
+  , StartRegADate <- eDate - 27
+  , EndRegADate <- eDate -7
+  , PrognoseDate = as.Date("2021-02-14")
   , data = rkidata
 )

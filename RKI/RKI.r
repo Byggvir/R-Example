@@ -3,7 +3,8 @@
 #
 # Script: RKI.r
 #
-# Stand: 2020-10-21
+# last Change: 2021-01-22
+#
 # (c) 2020 by Thomas Arend, Rheinbach
 # E-Mail: thomas@arend-rhb.de
 #
@@ -19,7 +20,6 @@ setwd("~/git/R-Example")
 
 require(data.table)
 
-source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
 source("lib/myfunctions.r")
@@ -35,25 +35,6 @@ options(
 
 daily <- sqlGetRKI()
 m <- length(daily[,1])
-
-# WTag <- aggregate(cbind(incCases,incDeaths) ~ WTag, FUN=sum, data= daily[100:m,] )
-# 
-# KorrekturFaktor <- data.table (
-#   WTag = 0:6
-#   , Faktor = sum(WTag$incCases)/WTag$incCases/7
-# )
-# 
-# print(KorrekturFaktor)
-# 
-# for (i in 1:m) {
-#   daily$incCases[i] <- daily$incCases[i] * KorrekturFaktor$Faktor[daily$WTag[i]+1]
-# }
-# 
-# daily$gCases[1] <- daily$incCases[1]
-# 
-# for (i in 2:m) {
-#   daily$gCases[i] <- daily$incCases[i] * 0.2 + daily$gCases[i-1]*0.8
-# }
 
 png(  "png/RKI_CasesDeathsB.png"
     , width=1920

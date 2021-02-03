@@ -35,10 +35,10 @@ cumulate <- function(x) {
   
 }
 
-SQL <- "select Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKIAlter group by Kw,AgeGroup div 10;"
+SQL <- "select (Jahr-2020)*53 + Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKI_CasesByAge group by Kw,AgeGroup div 10;"
 cases <- sqlGetRKI(SQL)
 
-SQL <- "select CalWeek as Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from SterbeFaelleKw group by CalWeek,AgeGroup div 10 , Sex;"
+SQL <- "select (Jahr-2020)*53 + Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKI_DeathsByAgeKw group by Jahr, Kw, AgeGroup div 10 , Sex;"
 deaths <- sqlGetRKI(SQL)
 
 # cases <- as.matrix(readODS::read_ods(path = "data/SterbeFälleAlter.ods", sheet = 3))
@@ -54,11 +54,11 @@ par(   mar = c(10,6,10,6)
 single_plot <- function(AgeGroup, AGText ) {
   
   
-  SQL <- paste("select Kw as Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKIAlter where Kw < 54 and AgeGroup div 10 = ", AgeGroup, "group by Kw,AgeGroup div 10;")
+  SQL <- paste("select (Jahr-2020)*53 + Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKI_CasesByAge where AgeGroup div 10 = ", AgeGroup, "group by Jahr, Kw,AgeGroup div 10;")
   cases <- sqlGetRKI(SQL)
   cases$Count <- cumulate( cases$Count)
   
-  SQL <- paste("select CalWeek as Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from SterbeFaelleKw  where AgeGroup div 10 = ", AgeGroup, "group by CalWeek,AgeGroup div 10;")
+  SQL <- paste("select (Jahr-2020)*53 + Kw, AgeGroup div 10 as AgeGroup, sum(Count) as Count from RKI_DeathsByAgeKw where AgeGroup div 10 = ", AgeGroup, "group by Jahr,Kw,AgeGroup div 10;")
   deaths <- sqlGetRKI(SQL)
   
   l <- nrow(deaths)

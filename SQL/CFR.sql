@@ -13,7 +13,7 @@ join (
         select AgeGroup 
             , sum(Count) as Deaths
         from SterbeFaelleKw 
-        where CalWeek = @Kw
+        where Kw = @Kw
         group by AgeGroup 
     ) as D
 on D.AgeGroup = (C.AgeGroup div 10 * 10)
@@ -27,7 +27,7 @@ select Deaths,Cases, Deaths / Cases
 from (
 select 
       ( select sum(Count) from RKIAlter where Kw <= @Kw - @delta ) as Cases
-    , ( select sum(Count) from SterbeFaelleKw where CalWeek = @Kw) as Deaths 
+    , ( select sum(Count) from SterbeFaelleKw where Kw = @Kw) as Deaths 
 ) as CFR
 ;
 

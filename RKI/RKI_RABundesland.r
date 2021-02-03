@@ -189,10 +189,10 @@ SQL <- 'call MinMaxCasesPerWeek(20,56);'
 BL <- sqlGetRKI(SQL = SQL)
 
 sw <- 10
-ew <- 55
+ew <- 58
 srw <- 30
 erw <- 51
-pw <- 55
+pw <- 56
 
 for (B in BL[,1]) {
   

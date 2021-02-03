@@ -1,12 +1,17 @@
 #!usr/bin/env Rscript
 #
 #
-# Script: RKI_RegressionAnalysisKw.r
+# Script: DIVI_RA.r
 #
-# Stand: 2020-10-21
-# (c) 2020 by Thomas Arend, Rheinbach
+# Script to demonstrate that ICU occupation follow apprximately exponetieal groth 
+# at the beginning of a pandemic / epicemic
+#
+# Last change: 2021-01-22
+#
+# (c) 2021 by Thomas Arend, Rheinbach
 # E-Mail: thomas@arend-rhb.de
 #
+
 
 MyScriptName <-"RKI_Bundesland"
 library(REST)
@@ -30,12 +35,12 @@ heute <- format(today, "%d %b %Y")
 
 options(
   digits = 7
-  ,   scipen = 7
+  ,   scipen = 999
   ,   Outdec = "."
   ,   max.print = 3000
 )
 
-# Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI
+# Regression Analysis 
 
 regression_analysis <- function (
   DayStart

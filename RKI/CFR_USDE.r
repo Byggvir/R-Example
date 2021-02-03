@@ -3,7 +3,8 @@
 #
 # Script: CFR_USDE.r
 #
-# Stand: 2020-10-21
+# Last change: 2021-01-22
+#
 # (c) 2020 by Thomas Arend, Rheinbach
 # E-Mail: thomas@arend-rhb.de
 #
