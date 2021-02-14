@@ -23,7 +23,7 @@ heute <- format(today, "%d %b %Y")
 
 CFR <- read_ods("data/CFR.ods",sheet=6)
 
-png("png/CFR_US.png", width = 1920, height = 1080)
+png("png/JHU/CFR_US.png", width = 1920, height = 1080)
 
 AgeGroups <- CFR[,"AgeGroup"]
                  

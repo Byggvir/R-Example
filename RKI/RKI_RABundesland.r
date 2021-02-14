@@ -192,7 +192,7 @@ sw <- 10
 ew <- 58
 srw <- 30
 erw <- 51
-pw <- 56
+pw <- 60
 
 for (B in BL[,1]) {
   

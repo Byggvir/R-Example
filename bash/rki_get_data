@@ -388,17 +388,19 @@ sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
 popd
 }
 
-rm "$SQL"
-touch "$SQL"
+# rm "$SQL"
+# touch "$SQL"
+# 
+# download_all
+# dashboard
+# bund
+# bundeslaender
+# testungen
+# Altersverteilung
+# 
+# sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
+# 
+# mysql --user=rscript --password=rscript < "$SQL"
+# run_r
 
-download_all
-dashboard
-bund
-bundeslaender
-testungen
 Altersverteilung
-
-sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
-
-mysql --user=rscript --password=rscript < "$SQL"
-run_r

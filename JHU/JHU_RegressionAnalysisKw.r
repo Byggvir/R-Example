@@ -19,26 +19,25 @@ source("common/rki_download.r")
 source("common/ta_regressionanalysis.r")
 source("lib/copyright.r")
 
-SQL <- c("
-select 
-    (@i:=@i+1) as Woche
-    , min(t2.reported) as Date
-    , week(t2.reported,3) as Kw
-    , count(week(t2.reported,3)) as Tage
-    , sum(t2.cases-t3.cases) as Cases
-    , sum(t2.deaths-t3.deaths) as Deaths
-    , min(t2.cases-t3.cases) as WMin
-    , max(t2.cases-t3.cases) as WMax 
-from jhucountry as t1 
-inner join jhu as t2
-  on t1.cid = t2.cid
-inner join jhu as t3 
-  on t2.cid = t3.cid
-  and
-  t2.reported=adddate(t3.reported,1)
-where t1.cid = "
-, "group by week(t2.reported,3);"
-)
+SQL <- c( paste(
+'select'
+, '(@i:=@i+1) as Woche'
+, ', min(t2.reported) as Date'
+, ', ( case when (t2.reported< "2021-01-04") then week(t2.reported,3) else 53 + week(t2.reported,3) end) as Kw'
+, ', count(*) as Tage'
+, ', sum(t2.cases-t3.cases) as Cases'
+, ', sum(t2.deaths-t3.deaths) as Deaths'
+, ', min(t2.cases-t3.cases) as WMin'
+, ', max(t2.cases-t3.cases) as WMax' 
+, 'from jhucountry as t1'
+, 'inner join jhu as t2'
+, 'on t1.cid = t2.cid'
+, 'inner join jhu as t3'
+, 'on t2.cid = t3.cid and t2.reported=adddate(t3.reported,1)'
+, 'where t1.cid ='
+, sep = ' ')
+,'group by Kw;' ) 
+
 CI <- 0.95
 
 today <- Sys.Date()
@@ -51,16 +50,13 @@ options(
   ,   max.print = 3000
 )
 
-# Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI
+# Einlesen der Daten aus den Fällen der JHU
+
 countries <- get_rki_sql(
   "select jhucountry.* from jhucountry join jhu on jhucountry.cid = jhu.cid group by jhu.cid having max(jhu.cases) >= 100000;" 
 )
 
 for (country in as.integer(countries[,1]) ) {
-  
-  rkidata <- get_rki_sql(
-    paste(SQL[1], country , SQL[2] )
-  )
   
 kw <- get_rki_sql(sql = paste(SQL[1],country,SQL[2]), prepare = "set @i:=1")
 
@@ -73,7 +69,7 @@ StartRegAKw <- EndKw - 8
 m <- max(kw$Kw[kw$Tage == 7])
 print(m)
 
-for (EndRegAKw in 42:m) {
+EndRegAKw <- 57
   zr <- kw$Kw >= StartRegAKw & kw$Tage == 7 & kw$Kw <= EndRegAKw
   
   FromTo <- kw$Kw[zr] - StartRegAKw
@@ -96,7 +92,7 @@ for (EndRegAKw in 42:m) {
   
   png(
     paste(
-      "png/JHU_RegressionKw"
+      "png/JHU/JHU_RegressionKw"
       , countries[country,3]
       , StartRegAKw
       , "-"
@@ -277,4 +273,4 @@ for (EndRegAKw in 42:m) {
   dev.off()
   
 }
-}
+

@@ -267,9 +267,9 @@ regression_analysis <- function (
     , inset = 0.02
     , title = paste( "Tägliche Steigerung CI  ",  CI * 100, "%", sep="")
     , legend = c( 
-          paste(round((exp(ci[2,1])-1)*100,1),"% / R7 =",round((exp(7*ci[2,1])),1))
-        , paste(round((exp(ra$coefficients[2])-1)*100,1),"% / R7 =", round((exp(7*ra$coefficients[2])),1))
-        , paste(round((exp(ci[2,2])-1)*100,1),"% / R7 =",round((exp(7*ci[2,2])),1)))
+          paste(round((exp(ci[2,1])-1)*100,2),"% / R7 =",round((exp(7*ci[2,1])),2))
+        , paste(round((exp(ra$coefficients[2])-1)*100,2),"% / R7 =", round((exp(7*ra$coefficients[2])),2))
+        , paste(round((exp(ci[2,2])-1)*100,2),"% / R7 =",round((exp(7*ci[2,2])),2)))
     , col = c(
         "green"
       , "orange"
@@ -313,23 +313,23 @@ regression_analysis <- function (
 rkidata <- sqlGetRKI(SQL )
 
 eDate <- rkidata$Date[length(rkidata$Date)]
-
-for (j in c(64)) {
-for (i in c(27)) {
-  
-  regression_analysis (
-      StartDate = rkidata$Date[1]
-    , EndDate = eDate
-    , StartRegADate <- eDate - i
-    , EndRegADate <- eDate
-    , PrognoseDate = eDate + j # as.Date("2020-12-01")
-    , data = rkidata
-
-)
-    
-} # End for i
-  
-} # End for j
+# 
+# for (j in c(64)) {
+# for (i in c(27)) {
+#   
+#   regression_analysis (
+#       StartDate = rkidata$Date[1]
+#     , EndDate = eDate
+#     , StartRegADate <- eDate - i
+#     , EndRegADate <- eDate
+#     , PrognoseDate = eDate + j # as.Date("2020-12-01")
+#     , data = rkidata
+# 
+# )
+#     
+# } # End for i
+#   
+# } # End for j
 
 # eDate <- rkidata$Date[length(rkidata$Date)]
 # regression_analysis (
@@ -346,8 +346,8 @@ eDate <- rkidata$Date[length(rkidata$Date)]
 regression_analysis (
   StartDate = rkidata$Date[1]
   , EndDate = eDate
-  , StartRegADate <- eDate - 27
-  , EndRegADate <- eDate -7
-  , PrognoseDate = as.Date("2021-02-14")
+  , StartRegADate <- eDate - 34
+  , EndRegADate <- eDate
+  , PrognoseDate = eDate + 28
   , data = rkidata
 )

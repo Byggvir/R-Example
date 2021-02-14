@@ -35,9 +35,10 @@ having Kw >= 35
 ;
 end
 //
-DROP PROCEDURE IF EXISTS Landkreis //
 
-CREATE PROCEDURE Landkreis (IdLK INT)
+DROP PROCEDURE IF EXISTS LandkreisAltersgruppen //
+
+CREATE PROCEDURE LandkreisAltersgruppen (IdLK INT)
 BEGIN
 
     select 
@@ -55,5 +56,23 @@ BEGIN
 end
 //
 
+
+DROP PROCEDURE IF EXISTS Landkreis //
+
+CREATE PROCEDURE Landkreis (IdLK INT)
+BEGIN
+
+    select 
+        ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) as Kw
+        , sum(AnzahlFall) as Anzahl 
+    from RKIFaelle
+    where 
+        IdLandkreis = IdLK
+    group by 
+          Kw
+
+;
+end
 //
+
 delimiter ;

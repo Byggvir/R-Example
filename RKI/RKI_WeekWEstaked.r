@@ -68,7 +68,7 @@ p1 <- ggplot(weekly, aes(fill=Bundesland, y=Cases, x=Kw)) +
   ggtitle("Corona: Fälle Bundesländer Ost - West nach Kalenderwoche des Meldedatums") +
   theme_ipsum() +
   xlab("Kalenderwoche") +
-  ylab("Neu gemeldete Fälle pro 100.000 pro Woche")
+  ylab("Gemeldete Fälle pro 100.000 pro Woche")
 
 
 p2 <- ggplot(weekly, aes(fill=Bundesland, y=Deaths, x=Kw)) +
@@ -77,7 +77,7 @@ p2 <- ggplot(weekly, aes(fill=Bundesland, y=Deaths, x=Kw)) +
   ggtitle("Corona: Todesfälle Bundesländer Ost - West nach Kalenderwoche des Meldedatums") +
   theme_ipsum() +
   xlab("Kalenderwoche") +
-  ylab("Neu gemeldete Todesfälle pro 100.000 pro Woche")
+  ylab("Gemeldete Todesfälle pro 100.000 pro Woche")
 
 gg <- grid.arrange(p1,p2, ncol=1)
 

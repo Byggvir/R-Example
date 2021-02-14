@@ -32,9 +32,8 @@ heute <- format(today, "%d %b %Y")
 
 lk <- sqlGetRKI('select * from Landkreis;')
 
-for ( i in 1:length(lk[,1])
-      ) {
-  
+LandkreisTabelle <- function (i) {
+
 data <- sqlGetRKI(paste('call LandkreisTable(', lk[i,1] , ');') )
 
 print( paste('--',lk[i,],'---'))
@@ -98,6 +97,10 @@ grid.draw(table)
 
 dev.off()
 
+}
+
+LandkreisDiagramAltersgruppe <- function (i) {
+  
 data <- sqlGetRKI(paste('call Landkreis(', lk[i,1] , ');') )
 
 
@@ -117,5 +120,37 @@ plot(gg)
 ggsave(plot = gg, file = paste('png/LK/LK-', lk[i,1],"-",lk[i,2],"-2.png", sep="")
        , type = "cairo-png",  bg = "white"
        , width = 29.1, height = 21, units = "cm", dpi = 150)
+}
 
+LandkreisDiagram <- function (i) {
+  
+  data <- sqlGetRKI(paste('call Landkreis(', lk[i,1] , ');') )
+  
+  
+  p <- ggplot(data, aes(y=Anzahl, x=Kw)) +
+    geom_bar(stat="identity") +
+    scale_fill_viridis(discrete = T) +
+    ggtitle( paste( 'Corona: Fallzahlen im', lk[i,1], "-", lk[i,2])) +
+    theme_ipsum() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    xlab("Kalenderwoche") +
+    ylab("Fallzahlen pro Kw")
+  
+  gg <- grid.arrange(p, ncol=1)
+  
+  plot(gg)
+  
+  ggsave(plot = gg, file = paste('png/LK/LK-', lk[i,1],"-",lk[i,2],"-2.png", sep="")
+         , type = "cairo-png",  bg = "white"
+         , width = 29.1, height = 21, units = "cm", dpi = 150)
+}
+
+lastlk <- length(lk[,1])
+# lastlk <- 5
+
+for ( i in 1:lastlk) {
+
+#  LandkreisTabelle(i)
+  LandkreisDiagram(i)
+  
 }
