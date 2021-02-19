@@ -1,3 +1,54 @@
 #!/bin/bash
+#!/bin/bash
 
-wget -O /tmp/swe.xlsx 'https://fohm.maps.arcgis.com/sharing/rest/content/items/b5e7488e117749c19881cce45db13f7e/data'
+DEBUG=OFF
+
+# Color for output
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+blue=`tput setaf 4`
+reset=`tput sgr0`
+
+CC=752     # SWE Country_Code 752
+
+SEDDIR="$(dirname $0)/sed"
+AWKDIR="$(dirname $0)/awk"
+
+# List of download URL
+
+[ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
+[ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+
+DATE=$(date +%F)
+DATE="2021-02-12"
+FOHMURL="https://raw.githubusercontent.com/truthly/c19/master/files/$DATE.xlsx"
+FOHMDEST="$TEMP/swe.xlsx"
+FOHMCSV="$TEMP/swe"
+
+function download {
+
+# Download table
+
+[ ! -e "$FOHMDEST" ] && curl --output "$FOHMDEST" --url "$FOHMURL"
+
+if [ $? -eq 0 ] 
+then
+ ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$FOHMDEST" "${FOHMCSV}%n.csv"
+fi
+
+}
+
+function import {
+
+    # SWE Country_Code 752
+
+    ( echo 'CountryCode,Sex,Altersgruppe,Bis,Todesfall'
+      sed --file "$SEDDIR/$CC.sed"  < "${FOHMCSV}5.csv" \
+    | awk -F ',' -e 'BEGIN { CC='$CC';}' -f "$AWKDIR/$CC.awk"  
+    ) > "../data/CoViD19Deaths/$CC.csv"
+    
+}
+
+download
+import

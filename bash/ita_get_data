@@ -1,0 +1,53 @@
+#!/bin/bash
+#!/bin/bash
+
+DEBUG=OFF
+
+# Color for output
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+blue=`tput setaf 4`
+reset=`tput sgr0`
+
+CC=380     # ITA Country_Code 380
+
+SEDDIR="$(dirname $0)/sed"
+AWKDIR="$(dirname $0)/awk"
+
+# List of download URL
+
+[ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
+[ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+
+DATE=$(date +%F)
+DATE="2021-02-12"
+ITAURL="https://www.epicentro.iss.it/coronavirus/open-data/covid_19-iss.xlsx"
+ITADEST="$TEMP/ita.xlsx"
+ITACSV="$TEMP/ita"
+
+function download {
+
+# Download table
+
+[ ! -e "$FOHMDEST" ] && wget --output-document="$ITADEST" "$ITAURL"
+
+if [ $? -eq 0 ] 
+then
+ ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$ITADEST" "${ITACSV}%n.csv"
+fi
+
+}
+
+function import {
+
+    # ITA Country_Code 380
+
+    ( echo 'CountryCode,Sex,Altersgruppe,Bis,Todesfall'
+      sed --file "$SEDDIR/$CC.sed"  < "${ITACSV}9.csv" \
+    ) > "../data/CoViD19Deaths/$CC.csv"
+    
+}
+
+#download
+import

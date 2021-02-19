@@ -56,21 +56,21 @@ jung <- data[data$Altersgruppe<50,]
 
 p1 <- ggplot(alt, aes(fill=Region, y=VergleichsTodesfallzahl, x=as.numeric(Altersgruppe))) +
   geom_bar(stat="identity", position=position_dodge())+
-  geom_text(aes(label=VergleichsTodesfallzahl), vjust=-0.1, color="black",
+  geom_text(aes(label=round(VergleichsTodesfallzahl,1)), vjust=-0.1, color="black",
             position = position_dodge(width=9), size=2)+
   scale_fill_brewer(palette="Paired")+
-  ggtitle("Corona: Vergleich der Todesfallzahlen (Alters-standardisiert auf DEU) >= 50 Jahre"  
-  , subtitle="Stand: 31.01.2021") +
+  ggtitle("Corona: Todesfallzahlen pro 100k Einw. (Alters-standardisiert auf DEU) >= 50 Jahre"  
+  , subtitle="Stand DE: 16.02.2021") +
   theme_minimal() +
   xlab("Altersgruppe") +
   ylab("Todesfälle")
 
 p2 <- ggplot(jung, aes(fill=Region, y=VergleichsTodesfallzahl, x=as.numeric(Altersgruppe))) +
   geom_bar(stat="identity", position=position_dodge())+
-  geom_text(aes(label=VergleichsTodesfallzahl), vjust=-0.1, color="black",
+  geom_text(aes(label=round(VergleichsTodesfallzahl,1)), vjust=-0.1, color="black",
             position = position_dodge(width=9), size=2)+
   scale_fill_brewer(palette="Paired")+
-  ggtitle("Corona: Vergleich der Todesfallzahlen (Alters-standardisiert auf DEU) < 50 Jahre") +
+  ggtitle("Corona: Todesfallzahlen pro 100k Einw.  (Alters-standardisiert auf DEU) < 50 Jahre") +
   theme_minimal() +
   xlab("Altersgruppe") +
   ylab("Todesfälle")
@@ -84,4 +84,27 @@ ggsave(plot = gg, file = paste('png/', MyScriptName,".png", sep="")
        , type = "cairo-png",  bg = "white"
        , width = 29.7, height = 21, units = "cm", dpi = 150)
 
-summary(warnings())
+SQL = 'call CompareCountriesSum(276);'
+
+data <- sqlGetRKI(SQL = SQL)
+
+p3 <- ggplot(data, aes(fill=Region,y=VergleichsTodesfallzahl, x=Region)) +
+  geom_bar(position="dodge", stat="identity") +
+  geom_text(aes(label=round(VergleichsTodesfallzahl,1)), vjust=-0.1, color="black",
+            position = position_dodge(width=1), size=5)+
+  scale_fill_viridis(discrete = T) +
+  ggtitle("Corona: Todesfallzahlen pro 100k Einw. (Alters-standardisiert auf DEU)"  
+          , subtitle="Stand DE: 15.02.2021") +
+  theme_ipsum() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("Region") +
+  ylab("Todesfälle")
+
+gg <- grid.arrange(p3, ncol=1)
+
+plot(gg)
+
+ggsave(plot = gg, file = paste('png/', MyScriptName,"-Sum.png", sep="")
+       , type = "cairo-png",  bg = "white"
+       , width = 29.7, height = 21, units = "cm", dpi = 150)
+

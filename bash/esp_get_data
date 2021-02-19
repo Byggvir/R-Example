@@ -1,0 +1,100 @@
+#!/bin/bash
+
+DEBUG=OFF
+
+# Color for output
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+blue=`tput setaf 4`
+reset=`tput sgr0`
+
+CC=724     # ESP Country_Code 724
+
+PGMDIR="$(dirname $0)"
+SEDDIR="$(dirname $0)/sed"
+AWKDIR="$(dirname $0)/awk"
+
+# List of download URL
+
+[ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
+[ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+
+DATE=$(date +%F)
+DATE="2021-02-12"
+ESPURL="###"
+ESPDEST="$TEMP/esp.pdf"
+ESPCSV="$TEMP/esp.csv"
+
+function download {
+
+# Download table
+
+[ ! -e "$FOHMDEST" ] && curl --output "$FOHMDEST" --url "$FOHMURL"
+
+if [ $? -eq 0 ] 
+then
+ ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$FOHMDEST" "${FOHMCSV}%n.csv"
+fi
+
+}
+
+function import {
+
+# SWE Country_Code 752
+(
+echo 'CountryCode,Sex,Altersgruppe,Bis,Todesfall'
+(
+cat <<EOF
+USE COVID19;
+
+CREATE TEMPORARY TABLE spain (
+
+    provincia_iso CHAR(10)
+    , sexo CHAR(10)
+    , grupo_edad CHAR(10)
+    , fecha DATE
+    , num_casos INT
+    , num_hosp INT
+    , num_uci INT
+    , num_def INT 
+    , PRIMARY KEY(provincia_iso, sexo, grupo_edad, fecha)
+    
+    )
+    ;
+LOAD DATA LOCAL INFILE '/tmp/rki-2021-02-16/esp.csv' 
+    INTO TABLE spain 
+    FIELDS TERMINATED BY ',' 
+    IGNORE 1 ROWS;
+
+SELECT
+    sexo
+    , grupo_edad
+    , sum(num_def) as count 
+FROM 
+    spain
+GROUP BY 
+    sexo
+    , grupo_edad
+UNION
+SELECT
+    'B'
+    , grupo_edad
+    , sum(num_def) as count 
+FROM 
+    spain
+GROUP BY
+    grupo_edad
+
+;
+EOF
+) \
+| mysql --user=rscript --password=rscript \
+| sed 's#^M#F#; s#^H#M#; s#^NC#U#; s#^#724,#; s#NC#999,999#; s#\t#,#g; s#-#,#;s#80+#80,100#' \
+) > ../data/CoViD19Deaths/724.csv
+}
+
+# download
+pushd ""$PGMDIR""
+import
+popd

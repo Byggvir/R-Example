@@ -23,6 +23,11 @@ echo "delete from WorldDeaths where CountryCode = $CC;"
 | tr ',' ';' \
 | tr -d '.' \
 | awk -F ';' '{ for (i=$3;i<=$4;i++) { print ("insert into WorldDeaths values (" $1 ",\"" $2 "\"," i "," $5/($4-$3+1) ");" )}}'
+cat <<EOF
+
+insert into WorldDeaths select CountryCode,'B',Agegroup,sum(Count) from WorldDeaths where CountyCode=380 group by CountryCode,Agegroup;
+
+EOF
 
 done
 

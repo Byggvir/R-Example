@@ -60,8 +60,9 @@ single_plot <- function(AgeGroup, AGText ) {
  axis(2,cex.axis=2, las = 2 )
 
  grid()
- print(max(CFR[15:l])*100)
-
+ CFRMax = max(CFR[15:l])
+ 
+ print(CFRMax*100)
 }
 plot(
   NULL

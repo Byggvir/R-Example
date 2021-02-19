@@ -1,5 +1,5 @@
 #
-# ---- Zeichnen des Ergebnisses einer exponentiellen Regressiosnanalyse auf einem Plot
+# ---- Zeichnen des Ergebnisses einer exponentiellen Regressionsanalyse auf einem Plot
 #
 
 plotregression <- function( a , b, xlim = c(0,1), ylim = c(0,3), linecol = c("green","orange","red")) {

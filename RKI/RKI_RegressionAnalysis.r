@@ -18,7 +18,7 @@ library(lubridate)
 
 setwd("~/git/R-Example")
 
-source("common/rki_download.r")
+# source("common/rki_download.r")
 source("lib/copyright.r")
 source("common/ta_regressionanalysis.r")
 source("common/rki_sql.r")
@@ -313,23 +313,23 @@ regression_analysis <- function (
 rkidata <- sqlGetRKI(SQL )
 
 eDate <- rkidata$Date[length(rkidata$Date)]
-# 
-# for (j in c(64)) {
-# for (i in c(27)) {
-#   
-#   regression_analysis (
-#       StartDate = rkidata$Date[1]
-#     , EndDate = eDate
-#     , StartRegADate <- eDate - i
-#     , EndRegADate <- eDate
-#     , PrognoseDate = eDate + j # as.Date("2020-12-01")
-#     , data = rkidata
-# 
-# )
-#     
-# } # End for i
-#   
-# } # End for j
+
+for (j in c(14)) {
+for (i in c(34)) {
+
+  regression_analysis (
+      StartDate = rkidata$Date[1]
+    , EndDate = eDate
+    , StartRegADate <- eDate - i - 7
+    , EndRegADate <- eDate - 7
+    , PrognoseDate = eDate + j # as.Date("2020-12-01")
+    , data = rkidata
+
+)
+
+} # End for i
+
+} # End for j
 
 # eDate <- rkidata$Date[length(rkidata$Date)]
 # regression_analysis (
@@ -341,13 +341,3 @@ eDate <- rkidata$Date[length(rkidata$Date)]
 #   , data = rkidata
 # )
 # 
-
-eDate <- rkidata$Date[length(rkidata$Date)]
-regression_analysis (
-  StartDate = rkidata$Date[1]
-  , EndDate = eDate
-  , StartRegADate <- eDate - 34
-  , EndRegADate <- eDate
-  , PrognoseDate = eDate + 28
-  , data = rkidata
-)
