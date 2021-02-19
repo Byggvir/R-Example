@@ -20,8 +20,7 @@ AWKDIR="$(dirname $0)/awk"
 [ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
 [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
 
-DATE=$(date +%F)
-DATE="2021-02-12"
+DATE=$(date +%F --date="yesterday -1 day")
 FOHMURL="https://raw.githubusercontent.com/truthly/c19/master/files/$DATE.xlsx"
 FOHMDEST="$TEMP/swe.xlsx"
 FOHMCSV="$TEMP/swe"

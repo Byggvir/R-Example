@@ -314,22 +314,23 @@ rkidata <- sqlGetRKI(SQL )
 
 eDate <- rkidata$Date[length(rkidata$Date)]
 
+for (k in c(0,7,14)) {
 for (j in c(14)) {
 for (i in c(34)) {
-
+    
   regression_analysis (
       StartDate = rkidata$Date[1]
     , EndDate = eDate
-    , StartRegADate <- eDate - i - 7
-    , EndRegADate <- eDate - 7
-    , PrognoseDate = eDate + j # as.Date("2020-12-01")
+    , StartRegADate <- eDate - i - k
+    , EndRegADate <- eDate - k
+    , PrognoseDate = eDate + j
     , data = rkidata
 
 )
 
 } # End for i
-
 } # End for j
+} # End for k
 
 # eDate <- rkidata$Date[length(rkidata$Date)]
 # regression_analysis (
