@@ -9,7 +9,7 @@ green=`tput setaf 2`
 blue=`tput setaf 4`
 reset=`tput sgr0`
 
-CC=752     # SWE Country_Code 752
+CC=56    # BEL Country_Code 56
 
 SEDDIR="$(dirname $0)/sed"
 AWKDIR="$(dirname $0)/awk"
@@ -19,34 +19,33 @@ AWKDIR="$(dirname $0)/awk"
 [ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
 [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
 
-DATE=$(date +%F --date="yesterday -1 day")
-FOHMURL="https://raw.githubusercontent.com/truthly/c19/master/files/$DATE.xlsx"
-FOHMDEST="$TEMP/swe.xlsx"
-FOHMCSV="$TEMP/swe"
+URL="https://epistat.sciensano.be/Data/COVID19BE_MORT.csv"
+DEST="$TEMP/bel.csv"
+CSV="$TEMP/bel"
 
 function download {
 
-# Download table
+Download table
 
-[ ! -e "$FOHMDEST" ] && curl --output "$FOHMDEST" --url "$FOHMURL"
+[ ! -e "$DEST" ] && curl --output "$DEST" --url "$URL"
 
-if [ $? -eq 0 ] 
-then
- ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$FOHMDEST" "${FOHMCSV}%n.csv"
-fi
+# if [ $? -eq 0 ] 
+# then
+#  ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$DEST" "${CSV}%n.csv"
+# fi
 
 }
 
 function import {
 
-    # SWE Country_Code 752
+    # BEL Country_Code 56
 
     ( echo 'CountryCode,Sex,Altersgruppe,Bis,Todesfall'
-      sed --file "$SEDDIR/$CC.sed"  < "${FOHMCSV}5.csv" \
+      sed --file "$SEDDIR/$CC.sed"  < "${CSV}.csv" \
     | awk -F ',' -e 'BEGIN { CC='$CC';}' -f "$AWKDIR/$CC.awk"  
     ) > "../data/CoViD19Deaths/$CC.csv"
     
 }
 
 download
-import
+#import

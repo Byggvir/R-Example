@@ -248,7 +248,7 @@ regression_analysis <- function (
            , lty = c(1,1,4,3,3,3)
   )
   
-  # Add labels to pronosed dates
+  # Add labels to prognosed dates
   
   for (x in EndRegADate:PrognoseDate) {
     
