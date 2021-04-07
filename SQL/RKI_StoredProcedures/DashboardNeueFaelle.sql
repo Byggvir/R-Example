@@ -7,7 +7,7 @@ drop procedure if exists Neuefaelle //
 create procedure Neuefaelle ()
 begin
 
-    SELECT distinct A.Meldedatum, dayofweek(A.Meldedatum),B.Infizierte
+    SELECT distinct A.Meldedatum as Meldedatum, weekday(A.Meldedatum) as WTag,B.Infizierte as Infizierte
     FROM RKIFaelle  AS A
     LEFT JOIN (SELECT Meldedatum, sum(AnzahlFall) AS Infizierte
     FROM RKIFaelle  AS C WHERE NeuerFall <> 0 GROUP BY Meldedatum) AS B

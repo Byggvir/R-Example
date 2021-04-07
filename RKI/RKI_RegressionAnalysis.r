@@ -3,7 +3,7 @@
 #
 # Script: RKI_RegressionAnalysis.r
 #
-# Stand: 2020-10-21
+# Stand: 2021-02-22
 # (c) 2020 by Thomas Arend, Rheinbach
 # E-Mail: thomas@arend-rhb.de
 #
@@ -18,7 +18,6 @@ library(lubridate)
 
 setwd("~/git/R-Example")
 
-# source("common/rki_download.r")
 source("lib/copyright.r")
 source("common/ta_regressionanalysis.r")
 source("common/rki_sql.r")
@@ -53,19 +52,19 @@ options(
 
 SQL <- '
 select 
-    t1.date as Date
+    Meldedatum as Meldedatum
     , (@i:=@i+1) as Day
-    , week(t1.date,3) as Kw
-    , dayofweek(t1.date) as WTag
-    , t1.cases as Cases
-    , t1.deaths as Deaths
-    , t1.cases-t2.cases as incCases
-    , t1.deaths-t2.deaths as incDeaths
-from rki as t1 
-inner join rki as t2 
-on t1.date=adddate(t2.date,1)
-where t1.cases > t2.cases;
+    , week(Meldedatum,3) as Kw
+    , dayofweek(Meldedatum) as WTag
+    , sum(AnzahlFall) as AnzahlFall
+from RKIFaelle
+group by Meldedatum;
 '
+SQLWTag <- "select weekday(Meldedatum) as WTag, sum(AnzahlFall) / (select sum(AnzahlFall) /7  from RKIFaelle) as AnteilWoche from RKIFaelle group by WTag;"
+
+Kor <- sqlGetRKI(SQLWTag)  
+
+rkidata <- sqlGetRKI(SQL )
 
 # Function execute a regression analysis 
 
@@ -80,10 +79,10 @@ regression_analysis <- function (
   , data 
 ) {
   
-  zr <- data$Date >= StartRegADate & data$Date <= EndRegADate
-  FromTo <- data$Date[zr] - StartRegADate
+  zr <- data$Meldedatum >= StartRegADate & data$Meldedatum <= EndRegADate
+  FromTo <- data$Meldedatum[zr] - StartRegADate
   
-  ra <- lm(log(data$incCases[zr]) ~ FromTo)
+  ra <- lm(log(data$AnzahlFall[zr]) ~ FromTo)
   ci <- confint(ra,level = CI)
   
   a <- c( ci[1,1], ra$coefficients[1] , ci[1,2])
@@ -102,27 +101,23 @@ regression_analysis <- function (
 
   K <-cbind(
     data$WTag[zr]
-    , ( data$incCases[zr] / (exp(a[2] + b[2] * as.numeric(FromTo)) )
+    , ( data$AnzahlFall[zr] / (exp(a[2] + b[2] * as.numeric(FromTo)) )
     )
   )
   
   colnames(K) <- c("WTag","Anteil")
   
-  Kor <- aggregate(Anteil ~ WTag, FUN = mean, data = K)
-  
-  # print(Kor)
-    
   PrognoseTab <- data.table (
     Date = (Tage + StartRegADate)
-    , WTag = Wochentage[wday(Tage + StartRegADate)]
+    , WTag = Wochentage[wday(Tage + StartRegADate, week_start = 1)]
     , assumed = round(exp(a[2] + b[2] * Tage)
-    * Kor[wday(Tage + StartRegADate),2])
+    * Kor[wday(Tage + StartRegADate, week_start = 1),2])
     , lower = round(exp(a[1] + b[1] * Tage)
-    * Kor[wday(Tage + StartRegADate),2])
+    * Kor[wday(Tage + StartRegADate, week_start = 1),2])
     , upper = round(exp(a[3] + b[3] * Tage)
-    * Kor[wday(Tage + StartRegADate),2])
+    * Kor[wday(Tage + StartRegADate, week_start = 1),2])
   )
-  
+
   print(PrognoseTab)
 
   png( paste( "png/RKI_Prognose"
@@ -142,8 +137,8 @@ regression_analysis <- function (
   par (   mar = c(10,5,10,5) 
           , bg = "lightyellow")
   
-  plot(data$Date[zr]
-       , data$incCases[zr]
+  plot(data$Meldedatum[zr]
+       , data$AnzahlFall[zr]
        , main = ""
        , sub = paste("Vom", StartRegADate, "bis", EndRegADate )
        , xlab = "Datum"
@@ -163,10 +158,10 @@ regression_analysis <- function (
   )
   copyright(c("RKI","TA"))
   
-  zr <- data$Date >= StartRegADate & data$Date <= EndRegADate
+  zr <- data$Meldedatum >= StartRegADate & data$Meldedatum <= EndRegADate
   
-  lines ( data$Date[zr]
-          , data$incCases[zr]
+  lines ( data$Meldedatum[zr]
+          , data$AnzahlFall[zr]
           , col = "black"
           , lwd = 3
   )
@@ -178,10 +173,10 @@ regression_analysis <- function (
           , lty = 4
   )
   
-  zr <- data$Date >= EndRegADate
+  zr <- data$Meldedatum >= EndRegADate
   
-  lines ( data$Date[zr]
-          , data$incCases[zr]
+  lines ( data$Meldedatum[zr]
+          , data$AnzahlFall[zr]
           , col = "gray"
           , lwd = 3
   )
@@ -229,7 +224,7 @@ regression_analysis <- function (
            , legend = c( 
              "Cases inside timeframe of RA"
              , "Cases outside timeframe of RA"
-             , "Predicted cases"
+             , "model cases"
              , paste("Upper limit CI ",  CI * 100, "%", sep="")
              , "Mean"
              , paste("Lower limit CI ",  CI * 100, "%", sep="")
@@ -248,28 +243,14 @@ regression_analysis <- function (
            , lty = c(1,1,4,3,3,3)
   )
   
-  # Add labels to prognosed dates
-  
-  for (x in EndRegADate:PrognoseDate) {
-    
-    
-    # regression_label(
-    #   x - as.numeric(StartRegADate)
-    #   , a
-    #   , b
-    #   , xlim = c(0, as.numericPrognoseDate - StartRegADate)
-    #   , ylim = ylim)
-    
-  }
-
   legend(
     "top"
     , inset = 0.02
     , title = paste( "Tägliche Steigerung CI  ",  CI * 100, "%", sep="")
     , legend = c( 
-          paste(round((exp(ci[2,1])-1)*100,2),"% / R7 =",round((exp(7*ci[2,1])),2))
-        , paste(round((exp(ra$coefficients[2])-1)*100,2),"% / R7 =", round((exp(7*ra$coefficients[2])),2))
-        , paste(round((exp(ci[2,2])-1)*100,2),"% / R7 =",round((exp(7*ci[2,2])),2)))
+          paste(round((exp(ci[2,1])-1)*100,2),"% / R =",round((exp(4*ci[2,1])),2))
+        , paste(round((exp(ra$coefficients[2])-1)*100,2),"% / R =", round((exp(4*ra$coefficients[2])),2))
+        , paste(round((exp(ci[2,2])-1)*100,2),"% / R =",round((exp(4*ci[2,2])),2)))
     , col = c(
         "green"
       , "orange"
@@ -279,7 +260,7 @@ regression_analysis <- function (
     , lwd = 3
     , cex = 3)
 
-  # vp <- viewport( 
+  # vp <- viewport(
   #       x = 0.2
   #     , y = 0.45
   #     , width = 0.5
@@ -298,7 +279,7 @@ regression_analysis <- function (
   #   PrognoseTab[PrognoseTab$Date >= EndRegADate,]
   #   , theme = tt
   #   , cols = c("Datum", "WTag", "Mean", "Min\nCI95%","Max\nCI95%" )
-  #   , vp = vp      
+  #   , vp = vp
   # )
   # 
   # grid.draw(g
@@ -309,17 +290,14 @@ regression_analysis <- function (
   
 }
 
-
-rkidata <- sqlGetRKI(SQL )
-
-eDate <- rkidata$Date[length(rkidata$Date)]
+eDate <- rkidata$Meldedatum[length(rkidata$Meldedatum)-1]
 
 for (k in c(0,7,14)) {
 for (j in c(14)) {
-for (i in c(34)) {
+for (i in c(20,34)) {
     
   regression_analysis (
-      StartDate = rkidata$Date[1]
+      StartDate = rkidata$Meldedatum[1]
     , EndDate = eDate
     , StartRegADate <- eDate - i - k
     , EndRegADate <- eDate - k
@@ -332,9 +310,9 @@ for (i in c(34)) {
 } # End for j
 } # End for k
 
-# eDate <- rkidata$Date[length(rkidata$Date)]
+# eDate <- rkidata$Meldedatum[length(rkidata$Meldedatum)]
 # regression_analysis (
-#   StartDate = rkidata$Date[1]
+#   StartDate = rkidata$Meldedatum[1]
 #   , EndDate = eDate
 #   , StartRegADate <- FromUntil[1]
 #   , EndRegADate <- FromUntil[2]

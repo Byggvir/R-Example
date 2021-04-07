@@ -9,7 +9,7 @@
 #
 
 MyScriptName <-"RKI"
-
+PNG <- "png/RKI_CasesDeathsWeek_"
 
 # Reads the cumulative cases and death from rki.de
 # The Excel file is in a very poor format. Therefore we have to adjust the data.
@@ -19,7 +19,6 @@ MyScriptName <-"RKI"
 require(data.table)
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
 source("lib/myfunctions.r")
@@ -42,7 +41,7 @@ heute <- format(today, "%d %b %Y")
 
 for (i in c(1,2)) {
 
-  png(  paste("png/RKI_CasesDeathsWeek", BL[i],".png", sep="")
+  png(  paste(PNG, BL[i],".png", sep="")
         , width = 1920
         , height = 1080
   )
@@ -54,8 +53,10 @@ weekly <- sqlGetRKI(SQL = SQL)
 m <- length(weekly[,1])
 reported <- weekly$Kw[m]
 
-bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
-         , ylim = limbounds(as.numeric(weekly$Cases[1:m]))*1.1
+y <- as.numeric(weekly$Cases[1:m])
+
+bp1 <- barplot( y # [fromto]
+         , ylim = limbounds(y)*1.1
          , main = paste("Wöchentliche Fälle von Kalenderwoche", weekly$Kw[1], "bis", reported) 
          , sub = ""
          , xlab = ""
@@ -68,8 +69,8 @@ bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
 title ( sub = BL[i], line = 3, cex.sub = 1.5 )
 
 text( bp1
-      , as.numeric(weekly$Cases[1:m])
-      , round(as.numeric(weekly$Cases[1:m]))
+      , y
+      , round(y)
       , cex = 1
       , pos = 3
       , offset = 2
@@ -78,8 +79,9 @@ text( bp1
       
 grid()
 
-bp2 <- barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
-         , ylim = limbounds(as.numeric(weekly$Deaths[1:m]))*1.1
+y<-as.numeric(weekly$Deaths[1:m])
+bp2 <- barplot( y # [fromto]
+         , ylim = limbounds(y)*1.1
          , main = paste("Wöchentliche Todesfälle von Kalenerwoche", weekly$Kw[1], "until", reported) 
          , sub = ""
          , xlab = ""
@@ -92,8 +94,8 @@ bp2 <- barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
 title ( sub = BL[i], line = 3, cex.sub=1.5)
 
 text( bp2
-      , as.numeric(weekly$Deaths[1:m]) 
-      , round(as.numeric(weekly$Deaths[1:m]))
+      , y 
+      , round(y)
       , cex = 1
       , pos = 3
       , offset = 2

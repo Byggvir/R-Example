@@ -19,7 +19,6 @@ MyScriptName <-"RKI"
 require(data.table)
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
 source("lib/myfunctions.r")
@@ -51,8 +50,10 @@ colors <-c( "red", "yellow", "green", "blue", "black" )
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
-         , ylim = limbounds(as.numeric(weekly$Cases[1:m]))*1.1
+y <- as.numeric(weekly$Cases[1:m])
+
+bp1 <- barplot( y # [fromto]
+         , ylim = limbounds(y)*1.1
          , main = paste("Wöchentliche Fälle von Kalenderwoche", weekly$Kw[1], "bis", reported) 
          , sub = ""
          , xlab = ""
@@ -65,18 +66,19 @@ bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
 title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
 
 text( bp1
-      , as.numeric(weekly$Cases[1:m])
-      , round(as.numeric(weekly$Cases[1:m]))
+      , y
+      , round(y)
       , cex = 1
-      , pos = 4
-      , offset = 1
+      , pos = 3
+      , offset = 3
       , srt = 90
 )
       
 grid()
 
-bp2 <- barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
-         , ylim = limbounds(as.numeric(weekly$Deaths[1:m]))*1.1
+y <- as.numeric(weekly$Deaths[1:m])
+bp2 <- barplot( y # [fromto]
+         , ylim = limbounds(y)*1.1
          , main = paste("Weekly deaths DE from calendarweek", weekly$Kw[1], "until", reported) 
          , sub = ""
          , xlab = ""
@@ -88,8 +90,8 @@ bp2 <- barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
 title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
 
 text( bp2
-      , as.numeric(weekly$Deaths[1:m]) 
-      , round(as.numeric(weekly$Deaths[1:m]))
+      , y 
+      , round(y)
       , cex = 1
       , pos = 3
       , offset = 1

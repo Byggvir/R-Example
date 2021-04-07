@@ -10,6 +10,7 @@ blue=`tput setaf 4`
 reset=`tput sgr0`
 
 SEDDIR="$(dirname $0)/sed"
+AWKDIR="$(dirname $0)/awk"
 
 # List of download URL
 
@@ -196,7 +197,7 @@ EOF6
 
 }
 
-function testungen {
+function Testungen {
 
     echo -e "\n\n${blue}+---------"
     echo -e "| ${red}Importieren der aktuellen Testungen in die Datenbank"
@@ -221,7 +222,7 @@ LOCK TABLE Testungen WRITE;
 TESTEOF1
 
 cat "${TCSV}1.csv" \
-| sed '1d;$d; /Bis/ s#"Bis einschließlich KW10, 2020"#2020,10#; /Summe/d; s#\([0-9]\{1,2\}\)/\([0-9]\{4\}\)\**#\2,\1#; s#,".*##; s#,,#,#;' \
+| sed '1d;$d; /Bis/ s#"Bis einschließlich KW10, 2020"#10/2020#; /Summe/,$d; s#\([0-9]\{1,2\}\)/\([0-9]\{4\}\)\**#\2,\1#; s#,".*##; s#,,#,#;s#,$##;' \
 | sed 's#^#INSERT INTO Testungen VALUES (#; s#$#);#'
 
 cat <<TESTEOF2
@@ -353,10 +354,11 @@ SET autocommit=0;
 LOCK TABLE RKI_CasesByAge WRITE;
 
 EOF
-cat ${ACSV}1.csv \
-    | sed 's#^2014/10/01#"10 - 14"#; s#^2020/09/05#"5 - 9"#' \
+# sed 's#^2014/10/01#"10 - 14"#; s#^2020/09/05#"5 - 9"#' \
+
+cat ${ACSV}0.csv \
     | sed -n  --file "$SEDDIR/RKI_Alter.sed" \
-    | awk -F ',' 'BEGIN { jahr=2020; i=10; s=0; UID==0 } {if ($1 == UID) { s=s+$2; print ( "INSERT INTO RKI_CasesByAge VALUES (" jahr "," i "," $1 "," $2 "," s ");"); i=i+1; if ( i > 53 ) { i=1; jahr=jahr+1;} } else { UID=$1; i=10; jahr=2020; s=0;} };'
+    | awk -F ',' -f  $AWKDIR/alter1.awk
 
 cat <<EOF
 
@@ -395,10 +397,9 @@ download_all
 dashboard
 bund
 bundeslaender
-testungen
+Testungen
 Altersverteilung
 
-sudo rm /tmp/RKI_nach_{Tag,Kw}.csv 2>/dev/null
 
 mysql --user=rscript --password=rscript < "$SQL"
 run_r

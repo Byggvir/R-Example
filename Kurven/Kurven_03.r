@@ -27,31 +27,31 @@ title(main = " Exponential-Funktion vs Sigmoid-Funktion"
 
 grid()
 
-# par(new=TRUE)
-# 
-# curve(exp(x)
-#       , a, b
-#       , ylim = ylim
-#       , col="blue"
-#       , xaxt="n"
-#       , yaxt="n"
-#       , xlab=""
-#       , ylab=""
-# )
+par(new=TRUE)
 
-# par(new=TRUE)
-# 
-# curve( exp(x) - 1/(1+exp(-x))
-#        , a, b
-#        , ylim = ylim
-#       , col="red"
-#       , xaxt="n"
-#       , yaxt="n"
-#       , xlab=""
-#       , ylab=""
-#       , lwd = 3
-# )
-# 
+curve(exp(x)
+      , a, b
+      , ylim = ylim
+      , col="blue"
+      , xaxt="n"
+      , yaxt="n"
+      , xlab=""
+      , ylab=""
+)
+
+par(new=TRUE)
+
+curve( exp(x) - 1/(1+exp(-x))
+       , a, b
+       , ylim = ylim
+      , col="red"
+      , xaxt="n"
+      , yaxt="n"
+      , xlab=""
+      , ylab=""
+      , lwd = 3
+)
+
 par(new=TRUE)
 
 curve( exp(-exp(-x))

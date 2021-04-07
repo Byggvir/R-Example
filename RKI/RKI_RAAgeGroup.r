@@ -198,7 +198,7 @@ sw <- 10
 ew <- 55
 srw <- 30
 erw <- 51
-pw <- 58
+pw <- 63
 
 
 for (i in 1:length(AgeGroups[,1])) {

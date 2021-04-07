@@ -10,6 +10,8 @@
 #
 
 MyScriptName <-"RKI"
+PNG <- "png/RKI_CasesDeathsB.png"
+
 setwd("~/git/R-Example")
 
 
@@ -36,7 +38,7 @@ options(
 daily <- sqlGetRKI()
 m <- length(daily[,1])
 
-png(  "png/RKI_CasesDeathsB.png"
+png(  PNG
     , width=1920
     , height=1080
     )
@@ -76,6 +78,8 @@ barplot( as.numeric(daily$incDeaths[1:m]) # [fromto]
          , las = 2
 )
 title ( sub = paste("Source: rki.de; Created:", heute ), line= 3)
+
+grid()
 
 copyright()
 

@@ -19,7 +19,6 @@ op <- options(nwarnings = 10000)
 require(data.table)
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
 source("lib/myfunctions.r")
@@ -29,6 +28,10 @@ library(ggplot2)
 library(gridExtra)
 library(viridis)
 library(hrbrthemes)
+library(scales)
+library(Cairo)
+library(extrafont)
+extrafont::loadfonts()
 
 # Stacked
 
@@ -51,8 +54,10 @@ heute <- format(today, "%d %b %Y")
 SQL = paste ('call CasesPerWeekWE();', sep ="")
 
 weekly <- sqlGetRKI(SQL = SQL)
+
 m <- length(weekly[1,])
 reported <- weekly$Kw[m]
+
 weekly$Cases[weekly$Bundesland=='Ost'] <- weekly$Cases[weekly$Bundesland=='Ost'] / Bev[1,2] * 100000
 weekly$Cases[weekly$Bundesland=='West'] <- weekly$Cases[weekly$Bundesland=='West'] / Bev[2,2] * 100000
 # weekly$Cases[weekly$Bundesland=='Bund'] <- weekly$Cases[weekly$Bundesland=='Bund'] / (Bev[1,2]+Bev[2,2]) * 100000

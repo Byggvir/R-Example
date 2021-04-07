@@ -1,1 +1,3 @@
-apt install gnumeric  
+#!/bin/bash
+
+sudo apt install gnumeric libxml2-dev libfontconfig1-dev libudunits2-dev

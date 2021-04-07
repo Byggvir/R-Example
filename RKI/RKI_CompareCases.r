@@ -16,7 +16,7 @@ library(gridExtra)
 library(grid)
 setwd("~/git/R-Example")
 
-source("common/rki_download.r")
+#source("common/rki_download.r")
 source("common/rki_sql.r")
 source("common/ta_regressionanalysis.r")
 source("lib/copyright.r")

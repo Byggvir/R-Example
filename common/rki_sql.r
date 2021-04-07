@@ -1,3 +1,4 @@
+library(bit64)
 library(RMariaDB)
 library(data.table)
 
@@ -23,7 +24,12 @@ sqlGetRKI <- function (
   
   rmariadb.db <- "COVID19"
   
-  COVID19DB <- dbConnect(RMariaDB::MariaDB(),default.file=rmariadb.settingsfile,group=rmariadb.db)
+  COVID19DB <- dbConnect(
+    RMariaDB::MariaDB()
+    , default.file = rmariadb.settingsfile
+    , group=rmariadb.db
+    , bigint="numeric"
+    )
   dbExecute(COVID19DB, prepare)
   rsQuery <- dbSendQuery(COVID19DB, SQL)
   dbRows<-dbFetch(rsQuery)

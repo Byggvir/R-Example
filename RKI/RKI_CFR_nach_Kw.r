@@ -13,13 +13,17 @@ MyScriptName <-"RKI_CFR_nach_Kw"
 
 
 # Entwicklung der CFR nach Altersgruppe und Kw
-
+library(bit64)
 library(data.table)
 library(readr)
 library(readODS)
+library(scales)
+library(Cairo)
+library(extrafont)
+extrafont::loadfonts()
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
+
 source("common/rki_sql.r")
 source("lib/copyright.r")
 source("lib/myfunctions.r")
@@ -45,12 +49,13 @@ single_plot <- function(AgeGroup, AGText ) {
   
   l <- nrow(deaths)
   o <- week_offset
+
   CFR <- deaths$Count[(1+o):l]/cases$Count[1:(l-o)]
   ylim <-c(0,50) #limbounds(CFR)
-  
+
   lines(
-    cases$Kw[(1+o):l]
-    , CFR * 100
+    cases$Kw[as.numeric(1+o):l]
+    , CFR * 100.0
     , type = "l"
     , lwd = 3
     , col = LineColors[AgeGroup+1]
@@ -58,17 +63,27 @@ single_plot <- function(AgeGroup, AGText ) {
 
  axis(1,cex.axis=2 )  
  axis(2,cex.axis=2, las = 2 )
-
- grid()
+ 
  CFRMax = max(CFR[15:l])
  
- print(CFRMax*100)
+ #print(CFRMax*100)
+ #print(CFR[l]*100)
+ 
+ text( cases$Kw[l]
+      , CFR[l]*100
+      , paste(round(CFR[l]*100,1),"% , max ",round(CFRMax*100,1),"%",sep='')
+      , cex = 2
+      , adj = 1
+      , pos = 1
+      , col = LineColors[AgeGroup+1]
+      )
 }
+
 plot(
   NULL
   , xlab = "Kalenderwoche"
   , ylab = "CFR [%]"
-  , xlim = c(15,60)
+  , xlim = c(15,70)
   , ylim = c(0,50)
   , main = paste("CoViD-19: Rohe CFR nach Kw")
   , sub = ""
@@ -78,8 +93,11 @@ plot(
   , axes = FALSE 
 )
 
+
+grid()
+
 title(sub = "Jeweils bis zur Kalenderwoche n kumulierte Fallzahlen", line = 8, cex.sub = 3)
-for (a in 6:9) {
+for (a in 5:9) {
   
   l <- a*10
   u <- l+9
@@ -98,8 +116,8 @@ options (digits = 3)
 
 legend(
   "top"
-  , legend = paste("Altersgruppe", AgeGroups[7:10],sep=" ")
-  , col = LineColors[7:10]
+  , legend = paste("Altersgruppe", AgeGroups[6:10],sep=" ")
+  , col = LineColors[6:10]
   , lty = 1
   , cex = 2
 )

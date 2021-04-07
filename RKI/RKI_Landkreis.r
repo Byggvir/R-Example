@@ -10,7 +10,7 @@
 
 options(OutDec=',')
 
-MyScriptName <- "MortalityStdPopulation"
+MyScriptName <- "RKI_Landkreis.r"
 
 require(data.table)
 library(REST)
@@ -30,7 +30,7 @@ source("common/rki_sql.r")
 today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
-lk <- sqlGetRKI('select * from Landkreis;')
+lk <- sqlGetRKI('select * from Landkreis order by IdLandkreis;')
 
 LandkreisTabelle <- function (i) {
 

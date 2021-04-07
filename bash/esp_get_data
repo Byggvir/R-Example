@@ -21,27 +21,26 @@ AWKDIR="$(dirname $0)/awk"
 [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
 
 DATE=$(date +%F)
-DATE="2021-02-12"
-ESPURL="###"
-ESPDEST="$TEMP/esp.pdf"
-ESPCSV="$TEMP/esp.csv"
+URL="###"
+DEST="$TEMP/esp.pdf"
+CSV="$TEMP/esp.csv"
 
 function download {
 
 # Download table
 
-[ ! -e "$FOHMDEST" ] && curl --output "$FOHMDEST" --url "$FOHMURL"
+[ ! -e "$DEST" ] && curl --output "$DEST" --url "$URL"
 
 if [ $? -eq 0 ] 
 then
- ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$FOHMDEST" "${FOHMCSV}%n.csv"
+ ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$DEST" "${CSV}%n.csv"
 fi
 
 }
 
 function import {
 
-# SWE Country_Code 752
+# ESP Country_Code 724
 (
 echo 'CountryCode,Sex,Altersgruppe,Bis,Todesfall'
 (

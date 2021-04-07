@@ -81,6 +81,25 @@ BEGIN
 end
 //
 
+DROP PROCEDURE IF EXISTS CasesPerWeekBL21 //
+
+CREATE PROCEDURE CasesPerWeekBL21 (IdBL INT)
+BEGIN
+
+   SELECT 
+      IdBundesland AS BL
+    , week(Meldedatum,3) AS Kw
+    , sum(AnzahlFall) AS Cases
+    , sum(AnzahlTodesfall) AS Deaths
+    FROM RKIFaelle
+    WHERE IdBundesland = IdBL
+    and Meldedatum > "2021-01-03"
+    and week(Meldedatum,3)
+    GROUP BY IdBundesland, Kw ;
+end
+//
+
+
 DROP PROCEDURE IF EXISTS CasesPerWeekBLWE //
 
 CREATE PROCEDURE CasesPerWeekBLWE (West BOOL)
