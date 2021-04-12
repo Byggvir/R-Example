@@ -97,20 +97,22 @@ regression_analysis <- function (
                 )
               ) %/% 100 + 1 ) * 100
   )
-
-  plot(  x[1:(l-goback)]
-       , y[1:(l-goback)]
-       , main = ""
-       , sub = ""
-       , xlab = "Tag x"
-       , ylab = "Anzahl"
-       , ylim = ylim
-       , type = "l"
-       , lwd = 3
-       , xlim = xlim
-       , col = "black"
-       
+  
+  plot(  NA # x[1:(l-goback)]
+         , NA # y[1:(l-goback)]
+         , main = ""
+         , sub = ""
+         , xlab = "Tag x"
+         , ylab = "Anzahl"
+         , ylim = ylim
+         , type = "l"
+         , lwd = 3
+         , xlim = xlim
+         , col = "black"
+         
   )
+  
+  plotregression(a, b, xlim= c(0, max(x)), ylim = ylim, is_log = is_log)
   
   t <- title ( 
     main = main
@@ -121,10 +123,16 @@ regression_analysis <- function (
     , cex.sub = 2
     , line = -3
   )
-  
-  
+
   copyright(c("TAr"))
   
+  lines ( x[1:(l-goback)]
+          , y[1:(l-goback)]
+          , col = "black"
+          , type = "l"
+          , lwd = 3
+          , lty = 4
+  )
   if (goback > 0) {
   lines ( x[(l-goback):l]
           , y[(l-goback):l]
@@ -135,9 +143,8 @@ regression_analysis <- function (
   }
   
   grid()
-  
-  plotregression(a, b, xlim= c(0, max(x)), ylim = ylim, is_log = is_log)
-  
+
+
   lr <- ifelse (b[2] > 0 ,"topleft", "topright")
   
   legend(
@@ -193,6 +200,39 @@ for ( i in c(3:12,14)) {
   print(f_exp(4,0,ra$coefficients[2]))
   print(f_exp(4,0,ci[2,]))
 
-  }
+}
+
+amtag <-daten[2:l,14] - daten[1:(l-1),14]
+
+xlim <- limbounds(x[1:(l-1)])
+ylim <- limbounds(amtag)
+
+plot(  x[1:(l-1)]
+       , amtag
+       , main = ""
+       , sub = ""
+       , xlab = "Tag x"
+       , ylab = "Anzahl"
+       , ylim = ylim
+       , type = "l"
+       , lwd = 3
+       , xlim = xlim
+       , col = "black"
+       , cex = 4
+       
+)
+
+t <- title ( 
+  main = "Baden-Württemberg VoC"
+  , cex.main = 3
+)
+t <- title ( 
+  sub = "Tägliche Fallzahlen"
+  , cex.sub = 2
+  , line = -3
+)
+
+
+grid()
 
 dev.off()

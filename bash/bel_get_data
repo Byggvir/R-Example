@@ -25,7 +25,7 @@ CSV="$TEMP/bel"
 
 function download {
 
-Download table
+# Download table
 
 [ ! -e "$DEST" ] && curl --output "$DEST" --url "$URL"
 
@@ -48,4 +48,4 @@ function import {
 }
 
 download
-#import
+import

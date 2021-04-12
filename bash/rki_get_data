@@ -332,7 +332,6 @@ EOF
 
 function Altersverteilung {
 
-
 (
 cat <<EOF
 
