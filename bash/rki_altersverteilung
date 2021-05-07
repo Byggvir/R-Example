@@ -1,0 +1,111 @@
+#!/bin/bash
+
+DEBUG=OFF
+
+# Color for output
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+blue=`tput setaf 4`
+reset=`tput sgr0`
+
+SEDDIR="$(dirname $0)/sed"
+AWKDIR="$(dirname $0)/awk"
+
+# List of download URL
+ALTERSURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Altersverteilung.xlsx;jsessionid=2E107E192CA4296ACADEAC1F1666BCE0.internet102?__blob=publicationFile"
+
+[ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
+[ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+
+echo -e "\n\n${blue}+---------"
+echo -e "| ${red}Tempoary file in: $TEMP"
+echo -e "${blue}+---------${reset}\n\n"
+
+ADEST="$TEMP/altersverteilung.xlsx"
+
+ACSV="$TEMP/alter"
+
+SQL="$TEMP/rki.sql"
+GIT="$HOME/git/R-Example/"
+
+function download_all {
+
+# Download table Fallzahlen_Kum_Tab and Testungen
+
+[ ! -e "$ADEST" ] && curl --output "$ADEST" --url "$ALTERSURL"
+
+# ... convert tables into CSV files
+
+ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$ADEST" "${ACSV}%n.csv"
+
+}
+
+function Altersverteilung {
+
+(
+cat <<EOF
+
+USE COVID19;
+
+DROP TABLE IF EXISTS RKI_CasesByAge;
+
+CREATE TABLE IF NOT EXISTS RKI_CasesByAge (
+      Jahr INT
+    , Kw INT
+    , AgeGroup INT
+    , Count INT
+    , CumulatedCount INT
+    , PRIMARY KEY (Jahr, Kw, AgeGroup)
+);
+
+SET autocommit=0;
+
+LOCK TABLE RKI_CasesByAge WRITE;
+
+EOF
+# sed 's#^2014/10/01#"10 - 14"#; s#^2020/09/05#"5 - 9"#' \
+
+cat "${ACSV}1.csv" \
+    | sed -n  --file "$SEDDIR/RKI_Alter.sed" \
+    | awk -F ',' -f  "$AWKDIR/alter1.awk"
+
+cat <<EOF
+
+COMMIT;
+UNLOCK TABLES;
+ 
+EOF
+) >> "$SQL"
+
+}
+
+function run_r {
+
+pushd $HOME/git/R-Example/
+
+sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
+
+    pushd RKI
+    for r in *.r
+    do
+        echo -e "\n\n${blue}+---------"
+        echo -e "| ${red}${r}"
+        echo -e "${blue}+---------${reset}\n\n"
+        Rscript $r
+#         read
+#         reset
+     done
+    popd
+popd
+}
+
+rm "$SQL"
+touch "$SQL"
+
+download_all
+Altersverteilung
+
+
+mysql --user=rscript --password=rscript < "$SQL"
+# run_r

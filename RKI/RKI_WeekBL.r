@@ -49,7 +49,7 @@ for (i in BL[,1]) {
   )
   par(mfcol = c(2,1))
   
-  SQL = paste ('call CasesPerWeekBL21(',i,' );', sep ="")
+  SQL = paste ('call CasesPerWeekBL(',i,' );', sep ="")
 
   weekly <- sqlGetRKI(SQL = SQL)
   m <- length(weekly[,1])
@@ -57,7 +57,7 @@ for (i in BL[,1]) {
   reported <- weekly$Kw[m]
   y <- as.numeric(weekly$Cases[1:m]) 
   bp1 <- barplot( y # [fromto]
-         , ylim = limbounds(y)*1.1
+         , ylim = limbounds(y)*1.2
          , main = paste("Weekly cases from calendarweek", weekly$Kw[1], "until", reported) 
          , sub = ""
          , xlab = ""
@@ -72,17 +72,26 @@ for (i in BL[,1]) {
   text( bp1
       , y
       , round(y)
-      , cex = 3
+      , cex = 1.5
       , pos = 3
-      , offset = 1
-      , srt = 0
+      , offset = 3
+      , srt = 90
   )
-      
+  abline( h = y[m-1]
+          , col = "red"
+          , lty = 3
+  )
+  
+  abline( h = max(y)
+          , col = "red"
+          , lty = 3
+  )
+  
   grid()
 
   y <- as.numeric(weekly$Deaths[1:m])
   bp2 <- barplot( y # [fromto]
-         , ylim = limbounds(y)*1.1
+         , ylim = limbounds(y)*1.2
          , main = paste("Weekly deaths from calendarweek", weekly$Kw[1], "until", reported) 
          , sub = ""
          , xlab = ""
@@ -97,10 +106,16 @@ for (i in BL[,1]) {
   text( bp2
       , y 
       , round(y)
-      , cex = 3
+      , cex = 1.5
       , pos = 3
-      , offset = 1
-      , srt = 0
+      , offset = 2
+      , srt = 90
+)
+
+abline( h=y[m-1]
+        , col = "red"
+        , lty = 3
+        , lwd = 0.2
 )
 
 copyright()

@@ -39,7 +39,7 @@ dice <- function (n, t) {
   
 }
 
-dice(100, "Test mit 100 Würfen")
+dice(341, "Test mit 341 Würfen")
 dice(1000, "Spiel mit 1000 Würfen")
 
 dev.off()

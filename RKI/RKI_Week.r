@@ -10,6 +10,7 @@
 
 MyScriptName <-"RKI"
 
+fPNG <- "png/RKI_CasesDeathsWeek.png"
 
 # Reads the cumulative cases and death from rki.de
 # The Excel file is in a very poor format. Therefore we have to adjust the data.
@@ -38,7 +39,7 @@ m <- length(weekly[,1])
 reported <- weekly$Kw[m]
 
 
-png(  "png/RKI_CasesDeathsWeek.png"
+png(  fPNG
     , width = 1920
     , height = 1080
     )
@@ -73,7 +74,11 @@ text( bp1
       , offset = 3
       , srt = 90
 )
-      
+
+abline(h=y[m-1] , col = 'red')
+
+abline(h=max(y) , col = 'red')
+
 grid()
 
 y <- as.numeric(weekly$Deaths[1:m])
@@ -87,6 +92,10 @@ bp2 <- barplot( y # [fromto]
          , names.arg = weekly$Kw
          , las = 1
 )
+
+abline(h=y[m-1] , col = 'red' , lty = 3)
+abline(h=max(y) , col = 'red' , lty = 3)
+
 title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
 
 text( bp2

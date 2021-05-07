@@ -392,13 +392,13 @@ popd
 rm "$SQL"
 touch "$SQL"
 
-download_all
-dashboard
-bund
-bundeslaender
-Testungen
+# download_all
+# dashboard
+# bund
+# bundeslaender
+# Testungen
 Altersverteilung
 
 
 mysql --user=rscript --password=rscript < "$SQL"
-run_r
+# run_r

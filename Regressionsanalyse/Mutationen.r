@@ -13,6 +13,7 @@ MyScriptName <- "Mutationen"
 setwd("~/git/R-Example")
 
 source("lib/copyright.r")
+source("lib/myfunctions.r")
 source("common/ta_regressionanalysis.r")
 source("common/rki_sql.r")
 
@@ -23,20 +24,8 @@ library(gridExtra)
 library(grid)
 library(lubridate)
 
-png( paste( "png/RA_Mutationen"
-            , ".png"
-            , sep = ""
-)
-, width = 3840
-, height = 2160
-)
-
-par(  mar = c(10,5,10,5) 
-      , bg = rgb(0.95,0.95,0.95,1)
-      , mfcol = c(3,4))
 
 CI <- 0.95
-
 
 f_exp <- function (x,a,b) {
   
@@ -97,7 +86,7 @@ regression_analysis <- function (
                 )
               ) %/% 100 + 1 ) * 100
   )
-  
+
   plot(  NA # x[1:(l-goback)]
          , NA # y[1:(l-goback)]
          , main = ""
@@ -124,8 +113,6 @@ regression_analysis <- function (
     , line = -3
   )
 
-  copyright(c("TAr"))
-  
   lines ( x[1:(l-goback)]
           , y[1:(l-goback)]
           , col = "black"
@@ -145,7 +132,7 @@ regression_analysis <- function (
   grid()
 
 
-  lr <- ifelse (b[2] > 0 ,"topleft", "topright")
+  lr <- ifelse (b[2] > 0 ,"topleft", "bottomright")
   
   legend(
     lr
@@ -178,21 +165,46 @@ return (ra);
 
 daten <- read_ods( path='/home/thomas/git/R-Example/data/Mutation BW.ods' )
 
-l <- length(daten$Tag)
-x <- 0:(l-1)
 
+l <- length(daten$Tag)
+
+aa <- 1
+aa <- l - 28
+
+ee <- l
+
+goback <- 0
+
+png( paste( "png/RA_Mutationen-Tag-"
+            , aa
+            , '-'
+            , ee
+            , '-'
+            , goback
+            , ".png"
+            , sep = ""
+)
+, width = 3840
+, height = 2160
+)
+
+par(  mar = c(10,5,10,5) 
+      , bg = rgb(0.95,0.95,0.95,1)
+      , mfcol = c(3,4))
+
+x <- aa:ee
 y <- daten[,3]
 
+                  
 for ( i in c(3:12,14)) {
   
   ra <- regression_analysis(
-    x
-    , daten[,i]
-    , paste("Baden-Württemberg Alter" ,colnames(daten)[i])
-    , paste("Kumulierte Fälle VoC ab 08.02.2021; Tag 0 - ",l-1)
+    x - aa
+    , daten[aa:ee,i]
+    , paste("VoC: Baden-Württemberg Alter" ,colnames(daten)[i])
+    , paste("Kumulierte Fälle VoC ab 08.02.2021; Tag ",aa," - ",ee)
     , is_log = TRUE
-    , goback = 0
-
+    , goback = goback
     )
 
   ci <- confint(ra,level = CI)
@@ -204,35 +216,41 @@ for ( i in c(3:12,14)) {
 
 amtag <-daten[2:l,14] - daten[1:(l-1),14]
 
-xlim <- limbounds(x[1:(l-1)])
+xlim <- c(1,(l-1))
 ylim <- limbounds(amtag)
 
-plot(  x[1:(l-1)]
-       , amtag
-       , main = ""
-       , sub = ""
-       , xlab = "Tag x"
-       , ylab = "Anzahl"
-       , ylim = ylim
-       , type = "l"
-       , lwd = 3
-       , xlim = xlim
-       , col = "black"
-       , cex = 4
-       
+# plot(  1:(l-1)
+#        , amtag
+#        , main = ""
+#        , sub = ""
+#        , xlab = "Tag x"
+#        , ylab = "Anzahl"
+#        , ylim = ylim
+#        , type = "l"
+#        , lwd = 3
+#        , xlim = xlim
+#        , col = "black"
+#        , cex = 4
+#        
+# )
+
+ra <- regression_analysis(
+  1:(l-1)
+  , amtag
+  , paste("VoC: Baden-Württemberg Alter" ,colnames(daten)[i])
+  , paste("Tägliche Fälle VoC ab 08.02.2021; Tag ",aa," - ",ee)
+  , is_log = TRUE
+  , goback = goback
 )
 
-t <- title ( 
-  main = "Baden-Württemberg VoC"
-  , cex.main = 3
-)
-t <- title ( 
-  sub = "Tägliche Fallzahlen"
-  , cex.sub = 2
-  , line = -3
-)
+ci <- confint(ra,level = CI)
 
+print(f_exp(4,0,ra$coefficients[2]))
+print(f_exp(4,0,ci[2,]))
 
 grid()
+
+copyright(c("TAr"))
+
 
 dev.off()

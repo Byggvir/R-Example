@@ -60,17 +60,32 @@ reported <- weekly$Kw[m]
 
 weekly$Cases[weekly$Bundesland=='Ost'] <- weekly$Cases[weekly$Bundesland=='Ost'] / Bev[1,2] * 100000
 weekly$Cases[weekly$Bundesland=='West'] <- weekly$Cases[weekly$Bundesland=='West'] / Bev[2,2] * 100000
+
+lo <- length(weekly$Cases[weekly$Bundesland=='Ost'])
+lw <- length(weekly$Cases[weekly$Bundesland=='West'])
+
 # weekly$Cases[weekly$Bundesland=='Bund'] <- weekly$Cases[weekly$Bundesland=='Bund'] / (Bev[1,2]+Bev[2,2]) * 100000
 
 weekly$Deaths[weekly$Bundesland=='Ost'] <- weekly$Deaths[weekly$Bundesland=='Ost'] / Bev[1,2] * 100000
 weekly$Deaths[weekly$Bundesland=='West'] <- weekly$Deaths[weekly$Bundesland=='West'] / Bev[2,2] * 100000
 # weekly$Deaths[weekly$Bundesland=='Bund'] <- weekly$Deaths[weekly$Bundesland=='Bund'] / (Bev[1,2]+Bev[2,2]) * 100000
 
-
+wc <- c(  weekly$Cases[weekly$Bundesland=='Ost'][lo-1]
+        , weekly$Cases[weekly$Bundesland=='West'][lw-1] )
 p1 <- ggplot(weekly, aes(fill=Bundesland, y=Cases, x=Kw)) +
   geom_bar(position="dodge", stat="identity") +
+  geom_hline(  yintercept = wc
+             , linetype ="dashed"
+             , color = c("black","yellow")
+             , size=0.5) +
+  # geom_hline(yintercept=weekly$Cases[weekly$Bundesland=='Ost'][lo-1]
+  #            , linetype="dashed", 
+  #            color = "black", size=0.5) +
+  # geom_hline(yintercept=weekly$Cases[weekly$Bundesland=='West'][lw-1]
+  #            , linetype="dashed", 
+  #            color = "black", size=0.5) +
   scale_fill_viridis(discrete = T) +
-  ggtitle("Corona: Fälle Bundesländer Ost - West nach Kalenderwoche des Meldedatums") +
+  ggtitle("Corona: Inzidenz Bundesländer Ost - West nach Kalenderwoche des Meldedatums") +
   theme_ipsum() +
   xlab("Kalenderwoche") +
   ylab("Gemeldete Fälle pro 100.000 pro Woche")

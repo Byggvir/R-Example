@@ -27,8 +27,9 @@ library(Cairo)
 library(extrafont)
 extrafont::loadfonts()
 
+startdate <- "2020-03-15"
 theme_set(theme_bw())  # pre-set the bw theme.
-SQL = '
+SQL = paste('
 select 
   F.Meldedatum
   , weekday(F.Meldedatum) as WTag
@@ -43,10 +44,13 @@ join (
   ) as W 
 on 
   week(F.Meldedatum,3) = W.Kw
-where Meldedatum > "2020-03-15"
-and Meldedatum < adddate(curdate(),-weekday(curdate()))
-group by F.Meldedatum;
-'
+where Meldedatum >'
+,'"2020-05-31"'
+,'and Meldedatum < adddate(curdate(),-weekday(curdate()))
+group by F.Meldedatum;'
+, sep= ' '
+)
+
 
 data <- sqlGetRKI(SQL = SQL)
 print(nrow(data))
@@ -58,7 +62,7 @@ wt <- c("Mo","Di","Mi","Do","Fr","Sa","So")
 gg <- ggplot(data, aes(x=WTag, y=AnteilWoche)) + 
   geom_point() + 
   geom_boxplot(aes(x=WTag,y=AnteilWoche, group=WTag)) + 
-#  geom_smooth(method="loess", se=TRUE) +
+  # geom_smooth(method="loess", se=TRUE) +
   scale_x_continuous(breaks=0:6, labels=wt ) +
   theme_ipsum() +
   labs(
@@ -77,7 +81,19 @@ ggsave(plot = gg, file = paste('png/', MyScriptName,".png", sep="")
 for (i in 0:6) {
   print (paste ("Wochentag","=",wt[i]))
   print(quantile(data[data[,2]==i,3]))
-
+  
 }
+
+for (i in 0:6) {
+  print (paste ("Wochentag","=",wt[i]))
+  print( c(
+            mean(data[data[,2]==i,3])
+            , sd(data[data[,2]==i,3])
+         )
+  )
+  
+}
+
+
 setwd(wd)
 

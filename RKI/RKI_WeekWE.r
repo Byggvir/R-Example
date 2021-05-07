@@ -56,7 +56,7 @@ reported <- weekly$Kw[m]
 y <- as.numeric(weekly$Cases[1:m])
 
 bp1 <- barplot( y # [fromto]
-         , ylim = limbounds(y)*1.1
+         , ylim = limbounds(y)*1.2
          , main = paste("Wöchentliche Fälle von Kalenderwoche", weekly$Kw[1], "bis", reported) 
          , sub = ""
          , xlab = ""
@@ -65,6 +65,8 @@ bp1 <- barplot( y # [fromto]
          , names.arg = weekly$Kw
          , las = 1
 )
+
+abline( h = c(max(y),y[m-1]), col="red", lty = 3)
 
 title ( sub = BL[i], line = 3, cex.sub = 1.5 )
 
@@ -81,7 +83,7 @@ grid()
 
 y<-as.numeric(weekly$Deaths[1:m])
 bp2 <- barplot( y # [fromto]
-         , ylim = limbounds(y)*1.1
+         , ylim = limbounds(y)*1.2
          , main = paste("Wöchentliche Todesfälle von Kalenerwoche", weekly$Kw[1], "until", reported) 
          , sub = ""
          , xlab = ""
@@ -106,3 +108,4 @@ copyright()
 
 dev.off()
 }
+

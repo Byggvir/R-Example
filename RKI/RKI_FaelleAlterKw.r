@@ -57,7 +57,7 @@ single_plot <- function(x, AG, sumAG,ylim=c(0,20)) {
    plot(
       data[,'Kw']
       , data[,'Count']/CalWeekSum[,'Count'] * 100
-      , type = "b"
+      , type = "l"
       , lwd = 3
       , col = "black"
       , xlab = "Kalenderwoche"

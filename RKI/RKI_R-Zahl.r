@@ -55,7 +55,7 @@ rzahlen <- function ( data ) {
   
   
   lines( 
-    data[,1]
+      data[,1]
     , data[,11]
     , type = "l"
     , lwd = 5
@@ -67,7 +67,7 @@ rzahlen <- function ( data ) {
   abline (h=1.00, col="red")
 
   title (
-      main = "R-Rahlen in DEU nach RKI"
+      main = "R-Zahlen in DEU nach RKI"
     , cex.main = 4
     , line = 4
     
@@ -90,7 +90,9 @@ rzahlen <- function ( data ) {
   )
   legend( "topright"
     , legend = c("4-Tage-R","7-Tage-R")
-    , col = c("black","blue")     
+    , col = c("black","blue") 
+    , lwd = 5
+    , cex = 3
          )
   grid()
 
@@ -98,7 +100,7 @@ rzahlen <- function ( data ) {
 
 daten <- read_ods( path='/home/thomas/git/R-Example/data/Nowcasting_Zahlen.ods', sheet=3 )
 
-rzahlen(daten[5:396,])
+rzahlen(daten[6:419,])
 
 dev.off()
 
