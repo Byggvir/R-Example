@@ -35,12 +35,18 @@ LineColors <- rainbow(11,start=0,end=1)
 
 png(paste("png/RKI_CFR_nach_Kw_offset_", week_offset,".png", sep=""), width = 1920, height = 1080)
 
+# Two diagrams side by side
+
 par(   mar = c(10,6,10,6)
-     , mfrow = c(1,1)
+     , mfrow = c(1,2)
      )
-ylim <-c(0,40)
+
+# Plot a single line for one age group
 
 single_plot <- function(AgeGroup, AGText ) {
+  
+  # If Agegroup = -1 plot line over all age groups
+  # else plot a line for one age group
   
   if (AgeGroup == -1) {
     whereclause1 <- " "
@@ -51,9 +57,13 @@ single_plot <- function(AgeGroup, AGText ) {
     whereclause2 <- paste( "where AgeGroup = ", AgeGroup, " * 10" )
   }
   
+  # Get cases from database
+  
   SQL <- paste("select (Jahr-2020)*53 + Kw as Kw, sum(CumulatedCount) as Count from RKI_CasesByAge" , whereclause1 , "group by Jahr,Kw;")
   cases <- sqlGetRKI(SQL)
-
+  
+  # Get deaths from database
+  
   SQL <- paste("select (Jahr-2020)*53 + Kw as Kw, sum(Count) as Count from RKI_DeathsByAgeKw", whereclause2, "group by Jahr,Kw;")
   deaths <- sqlGetRKI(SQL)
   
@@ -79,35 +89,37 @@ single_plot <- function(AgeGroup, AGText ) {
  print(CFR*100)
  
  text( cases$Kw[l] - 1
-      , CFR[l]*100
-      , paste(round(CFR[l]*100,1),"% , max ",round(CFRMax*100,1),"%",sep='')
+      , CFR[l]*100 + 2
+      , paste(round(CFR[l]*100,1),"%\nmax ",round(CFRMax*100,1),"%",sep='')
       , cex = 2
       , adj = 1
-      , pos = 1
+      , pos = 2
       , col = LineColors[AgeGroup+2]
       )
 }
+
+ylim <-c(0,40)
 
 plot(
   NULL
   , xlab = "Kalenderwoche"
   , ylab = "CFR [%]"
-  , xlim = c(15,70)
+  , xlim = c(15,75)
   , ylim = ylim
-  , main = paste("CoViD-19: Rohe CFR nach Kw")
+  , main = paste("CoViD-19: Rohe CFR nach Kw und Altersgruppe")
   , sub = ""
-  , cex.main = 4
-  , cex.sub = 3
-  , cex.lab = 2
+  , cex.main = 3
+  , cex.sub = 1.5
+  , cex.lab = 1
   , axes = FALSE 
 )
 
 grid()
 
-title(sub = "Jeweils bis zur Kalenderwoche n kumulierte Fallzahlen", line = 8, cex.sub = 3)
+title(sub = "CFR auf Basis der bis zur Kalenderwoche n kumulierte Fallzahlen", line = 8, cex.sub = 2)
 options (digits = 3)
 
- for (a in 5:9) {
+ for (a in 6:9) {
   
   l <- a*10
   u <- l+9
@@ -123,15 +135,40 @@ options (digits = 3)
 
  }
 
+
 legend(
   "top"
-  , legend = paste("Altersgruppe", AgeGroups[6:10],sep=" ")
+  , legend = paste("Altersgruppe", AgeGroups[7:10],sep=" ")
   , col = LineColors[7:11]
   , lty = 1
   , lwd = 3
-  , cex = 2
+  , cex = 1
 )
 
+#--- Alle Altersgruppen ---
+
+ylim <-c(0,10)
+
+plot(
+  NULL
+  , xlab = "Kalenderwoche"
+  , ylab = "CFR [%]"
+  , xlim = c(15,75)
+  , ylim = ylim
+  , main = paste("CoViD-19: Rohe CFR nach Kw alle Altergruppen")
+  , sub = ""
+  , cex.main = 3
+  , cex.sub = 1.5
+  , cex.lab = 1
+  , axes = FALSE 
+)
+
+grid()
+
+title(sub = "CFR auf Basis der bis zur Kalenderwoche n kumulierte Fallzahlen", line = 8, cex.sub = 2)
+options (digits = 3)
+
+single_plot(-1,'Alle')
 
 copyright()
 

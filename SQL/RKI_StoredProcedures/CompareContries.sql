@@ -23,7 +23,7 @@ select
     , C.Region as Region
     , (case when WD.Altersgruppe = 100 then 90 else WD.Altersgruppe div 10 * 10 end ) as Altersgruppe
     , round(sum(WD.Anzahl),0) as OrigTodesfallzahl
-    , round(sum(WD.Anzahl / PSCC.Anzahl * PTCC.Anzahl),0) / @TBEV * 1e5 as VergleichsTodesfallzahl
+    , round(sum(WD.Anzahl / PSCC.Anzahl * PTCC.Anzahl) / @TBEV * 1e5,2) as VergleichsTodesfallzahl
     , round(sum(WDT.Anzahl),0) as Todesfallzahl
 from 
     WorldDeaths as WD
@@ -137,7 +137,7 @@ select
 --      WD.CountryCode as CountryCode
       C.Region as Region
 --    , round(sum(WD.Anzahl),0) as OrigTodesfallzahl
-    , round(sum(WD.Anzahl / PSCC.Anzahl * PTCC.Anzahl),0) / @TBEV * 100000 as VergleichsTodesfallzahl
+    , round(sum(WD.Anzahl / PSCC.Anzahl * PTCC.Anzahl) / @TBEV * 100000,1) as VergleichsTodesfallzahl
 --    , round(sum(WDT.Anzahl),0) as Todesfallzahl
 from 
     WorldDeaths as WD
@@ -172,8 +172,23 @@ group by
 
 end //
 
+create procedure GetRegion (CC INT)
+begin
+
+select
+    CountryCode as CountryCode
+    , Region as Region
+from 
+  WPP.WPP20191C
+where
+    CountryCode = CC
+    ;
+
+end //
+
 delimiter ;
 
 call CompareCountries (276);
 call Compare2Countries (276,752);
 call CompareCountriesSum(276);
+call GetRegion(840);

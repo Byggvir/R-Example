@@ -169,11 +169,11 @@ daten <- read_ods( path='/home/thomas/git/R-Example/data/Mutation BW.ods' )
 l <- length(daten$Tag)
 
 aa <- 1
-aa <- l - 28
+#aa <- l - 28
 
 ee <- l
 
-goback <- 0
+goback <- 43
 
 png( paste( "png/RA_Mutationen-Tag-"
             , aa

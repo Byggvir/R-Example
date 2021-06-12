@@ -16,10 +16,10 @@ AWKDIR="$(dirname $0)/awk"
 
 DASHURL="https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data"
 DASHURL2="https://download.byggvir.de/RKI/RKI-COVID19.csv.gz"
+NOWCASTURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx?__blob=publicationFile"
 
 KUMTABURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahlen_Kum_Tab.xlsx?__blob=publicationFile"
 TESTUNGENURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Testzahlen-gesamt.xlsx?__blob=publicationFile"
-ALTERSURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Altersverteilung.xlsx;jsessionid=2E107E192CA4296ACADEAC1F1666BCE0.internet102?__blob=publicationFile"
 
 [ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
 [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
@@ -30,14 +30,14 @@ echo -e "${blue}+---------${reset}\n\n"
 
 KDEST="$TEMP/rki.xlsx"
 TDEST="$TEMP/test.xlsx"
-ADEST="$TEMP/altersverteilung.xlsx"
 
 DASHDEST="$TEMP/RKI-COVID19.csv"
 DASHDESTA="$TEMP/A-RKI-COVID19.csv"
 DASHDESTB="$TEMP/RKI-COVID19.csv.gz"
 
+NOWCASTDEST="$TEMP/Nowcasting.xlsx"
+
 KCSV="$TEMP/rki"
-ACSV="$TEMP/alter"
 TCSV="$TEMP/test"
 
 SQL="$TEMP/rki.sql"
@@ -45,12 +45,18 @@ GIT="$HOME/git/R-Example/"
 
 function download_all {
 
-# Download table Fallzahlen_Kum_Tab and Testungen
+# Download der Tabellen
 
-[ ! -e "$ADEST" ] && curl --output "$ADEST" --url "$ALTERSURL"
+echo 'Download kumulative Tabelle'
 [ ! -e "$KDEST" ] && curl --output "$KDEST" --url "$KUMTABURL"
+
+echo 'Download Testungen'
 [ ! -e "$TDEST" ] && curl --output "$TDEST" --url "$TESTUNGENURL"
 
+echo 'Download Nowcasting'
+[ ! -e "$NOWCASTDEST" ] && curl --output "$NOWCASTDEST" --url "$NOWCASTURL"
+
+echo 'Download Dashboard'
 [ ! -e "$DASHDESTB" ] && curl --output "$DASHDESTB" --url "$DASHURL2"
 
 [   -e "$DASHDESTB" ] && gzip  --decompress "$DASHDESTB"
@@ -63,6 +69,7 @@ function download_all {
 > "$DASHDEST"
 
 head -n 1 "$DASHDEST"
+
 
 # ... convert tables into CSV files
 
@@ -88,7 +95,7 @@ echo -e "\n\n${blue}+---------"
 echo -e "| ${red}Importieren der bundesweiten Zahlen aus der kumulativen Tabelle in die Datenbank"
 echo -e "${blue}+---------${reset}\n\n"
 
-STARTDATE=$(sed '1,2d; 4,$d; s#,.*##; s#/#-#g' "${KCSV}2.csv")
+STARTDATE=$(sed '1,3d; 5,$d; s#,.*##; s#/#-#g' "${KCSV}1.csv")
 
 if [ $(date "+%w") -lt 6 ]
 then
@@ -109,7 +116,7 @@ SET autocommit=0;
 INSERT INTO neu VALUES (ADDDATE("$STARTDATE",-2),0,0);
 EOF1
 
-sed '1,2d; s#^[^,]*,##; s#,,#,#; :r s#,,#,0,#g; t r;' "${KCSV}2.csv" \
+sed '1,2d; s#^[^,]*,##; s#,,#,#; :r s#,,#,0,#g; t r;' "${KCSV}1.csv" \
 | awk -F ',' 'BEGIN {i=-1}; {if ($1>0) print("INSERT INTO neu VALUES (ADDDATE(\"'$STARTDATE'\"," i ")," $1 "," $3 ");" );i=i+1}'
 
 cat <<EOF2
@@ -166,7 +173,7 @@ SET autocommit=0;
 LOCK TABLE rkibland WRITE;
 EOF3
 
-cat "${TEMP}/rki3.csv" \
+cat "${TEMP}/rki2.csv" \
 | sed '1,2d;$d; s#,.*##;' \
 | awk -F ',' 'BEGIN {i=1;} { print ("INSERT INTO rkibland VALUES (" i ",\"" $1 "\");"); i=i+1}'
 
@@ -185,7 +192,7 @@ SET autocommit=0;
 LOCK TABLE rkiblcases WRITE;
 EOF5
 
-cat "${TEMP}/rki3.csv" \
+cat "${TEMP}/rki2.csv" \
 | sed '1,2d;$d; s#,*$##; s#^[^,]*,#-\n#; s#,#\n#g;' \
 | awk -F ',' 'BEGIN {i=-1;j=0;} { if ($1=="-") { i=0; j=j+1; v=0} else { v=$1 };print("INSERT INTO rkiblcases VALUES (" j ", ADDDATE(\"2020-05-06\"," i ")," v ");") ; i=i+1; }'
 
@@ -330,44 +337,6 @@ EOF
 
 }
 
-function Altersverteilung {
-
-(
-cat <<EOF
-
-USE COVID19;
-
-DROP TABLE IF EXISTS RKI_CasesByAge;
-
-CREATE TABLE IF NOT EXISTS RKI_CasesByAge (
-      Jahr INT
-    , Kw INT
-    , AgeGroup INT
-    , Count INT
-    , CumulatedCount INT
-    , PRIMARY KEY (Jahr, Kw, AgeGroup)
-);
-
-SET autocommit=0;
-
-LOCK TABLE RKI_CasesByAge WRITE;
-
-EOF
-# sed 's#^2014/10/01#"10 - 14"#; s#^2020/09/05#"5 - 9"#' \
-
-cat ${ACSV}0.csv \
-    | sed -n  --file "$SEDDIR/RKI_Alter.sed" \
-    | awk -F ',' -f  $AWKDIR/alter1.awk
-
-cat <<EOF
-
-COMMIT;
-UNLOCK TABLES;
- 
-EOF
-) >> "$SQL"
-
-}
 
 function run_r {
 
@@ -392,13 +361,11 @@ popd
 rm "$SQL"
 touch "$SQL"
 
-# download_all
-# dashboard
-# bund
-# bundeslaender
-# Testungen
-Altersverteilung
-
+download_all
+dashboard
+bund
+bundeslaender
+Testungen
 
 mysql --user=rscript --password=rscript < "$SQL"
-# run_r
+run_r

@@ -62,7 +62,7 @@ bp2 <- barplot(LetzteMeldung[,2]
         , ylim = limbounds(LetzteMeldung[,2]) * 1.1
 )
 
-title ( sub = paste( "Datum letzte Fallmeldung ans GA")
+title ( sub = paste( "Datum letzte Fallmeldung des GA ans RKI")
         , cex.sub = 2
 )
 

@@ -20,7 +20,7 @@ library(gridExtra)
 library(grid)
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
+# source("common/rki_download.r")
 source("lib/copyright.r")
 
 options(digits=3)

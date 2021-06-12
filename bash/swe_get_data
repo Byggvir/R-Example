@@ -1,7 +1,6 @@
 #!/bin/bash
 
 DEBUG=OFF
-
 # Color for output
 
 red=`tput setaf 1`
@@ -14,15 +13,24 @@ CC=752     # SWE Country_Code 752
 SEDDIR="$(dirname $0)/sed"
 AWKDIR="$(dirname $0)/awk"
 
+if [ -z "$1" ]
+then
+	DATE=$(date +%F --date="yesterday")
+else 
+	DATE="$1"
+fi 
+
 # List of download URL
 
 [ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
 [ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
 
-DATE=$(date +%F --date="yesterday -1 day")
 FOHMURL="https://raw.githubusercontent.com/truthly/c19/master/files/$DATE.xlsx"
 FOHMDEST="$TEMP/swe.xlsx"
 FOHMCSV="$TEMP/swe"
+
+
+echo -e "-- $DATE"
 
 function download {
 
@@ -30,9 +38,15 @@ function download {
 
 [ ! -e "$FOHMDEST" ] && curl --output "$FOHMDEST" --url "$FOHMURL"
 
-if [ $? -eq 0 ] 
+grep '404: Not Found' "$FOHMDEST"
+
+if [ $? -ne 0 ] 
 then
- ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$FOHMDEST" "${FOHMCSV}%n.csv"
+    ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$FOHMDEST" "${FOHMCSV}%n.csv"
+    return 0
+else
+    rm -f "$FOHMDEST"
+    return 1
 fi
 
 }
@@ -49,4 +63,4 @@ function import {
 }
 
 download
-import
+[ $? -eq 0 ] && import

@@ -32,8 +32,10 @@ dice <- function (n, t) {
       , col = "black"
       
   )
-  abline ( h = ( 1/6 - 1.96 * s ) * 100 )
-  abline ( h = ( 1/6 + 1.96 * s ) * 100 )
+  abline ( h = ( 1/6 - 1.95996398454005 * s ) * 100, col='green')
+  abline ( h = ( 1/6 + 1.95996398454005 * s ) * 100, col='green')
+  abline ( h = ( 1/6 - 2.5758293035489 * s ) * 100, col='red')
+  abline ( h = ( 1/6 + 2.5758293035489 * s ) * 100, col='red' )
   
   rm (bp)
   

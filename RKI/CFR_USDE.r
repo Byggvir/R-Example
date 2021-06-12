@@ -15,7 +15,6 @@ MyScriptName <-"CFR_USDE"
 require(data.table)
 
 setwd("~/git/R-Example")
-source("common/rki_download.r")
 source("common/rki_sql.r")
 source("lib/copyright.r")
 source("lib/myfunctions.r")

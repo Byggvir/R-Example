@@ -66,7 +66,7 @@ LOCK TABLE RKI_CasesByAge WRITE;
 EOF
 # sed 's#^2014/10/01#"10 - 14"#; s#^2020/09/05#"5 - 9"#' \
 
-cat "${ACSV}1.csv" \
+cat "${ACSV}0.csv" \
     | sed -n  --file "$SEDDIR/RKI_Alter.sed" \
     | awk -F ',' -f  "$AWKDIR/alter1.awk"
 

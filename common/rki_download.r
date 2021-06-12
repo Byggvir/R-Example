@@ -100,7 +100,7 @@ where t1.cases > t2.cases;'
 }
 
 # Einlesen der Daten aus den aufbereiteten kummulierten Fällen des RKI,
-# die mittels Batch Job heruntergelden und aufbereitet wurden.
+# die mittels Batch Job heruntergeldaen und aufbereitet wurden.
 
 # Hier: Tägliche Fälle.
 

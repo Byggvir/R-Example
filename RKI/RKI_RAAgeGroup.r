@@ -48,9 +48,8 @@ regression_analysis_kw <- function (
 ) {
   
   zr <- data[,1] >= StartRegAKw & data[,1] <= EndRegAKw
-
   FromTo <- as.numeric(data$Kw[zr] - StartRegAKw)
-  
+
   logdata <- log(data$Count[zr])
 
   ra1 <- lm(logdata ~ FromTo)
@@ -191,14 +190,14 @@ regression_analysis_kw <- function (
   dev.off()
 }
 
-SQL <- 'call MinMaxCasesPerWeekAgeGroup(20,55);'
+SQL <- 'call MinMaxCasesPerWeekAgeGroup(60,72);'
 AgeGroups <- sqlGetRKI(SQL = SQL)
 
 sw <- 10
-ew <- 55
-srw <- 30
-erw <- 51
-pw <- 63
+ew <- 72
+srw <- 65
+erw <- 72
+pw <- 80
 
 
 for (i in 1:length(AgeGroups[,1])) {
@@ -217,8 +216,8 @@ where
   regression_analysis_kw(
     StartKw = sw
     , EndKw = ew
-    , StartRegAKw = AgeGroups[i,3]
-    , EndRegAKw = AgeGroups[i,5]
+    , StartRegAKw = srw #AgeGroups[i,3]
+    , EndRegAKw = erw # AgeGroups[i,5]
     , PrognoseKw = pw
     , data = weekly
     , AG = AgeGroups[i,1]

@@ -85,13 +85,13 @@ table <- tableGrob(
 
 padding <- unit(0.5,"line")
 
-table <- gtable_add_rows(table, 
+table <- gtable_add_rows(table,
                          heights = grobHeight(title) + padding,
                          pos = 0)
-table <- gtable_add_rows(table, 
+table <- gtable_add_rows(table,
                          heights = grobHeight(footnote)+ padding)
 table <- gtable_add_grob(table, list(title,footnote),
-                         t=c(1, nrow(table)), l=c(1,2), 
+                         t=c(1, nrow(table)), l=c(1,2),
                          r=ncol(table))
 grid.draw(table)
 

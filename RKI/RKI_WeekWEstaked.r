@@ -108,3 +108,4 @@ ggsave(plot = gg, file = paste('png/', MyScriptName,".png", sep="")
        , width = 29.7, height = 21, units = "cm", dpi = 150)
 
 summary(warnings())
+

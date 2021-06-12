@@ -14,7 +14,7 @@ select
     sum(A.CumulatedCount) as Cases,
     C.Deaths as Deaths,
     round(C.Deaths
-    / sum(A.CumulatedCount)*100,1) as CFR
+    / sum(A.CumulatedCount)*100,3) as CFR
     
 from RKI_CasesByAge as A 
 join ( 

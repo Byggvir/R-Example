@@ -15,23 +15,29 @@ MyScriptName <-"SEIR"
 
 library(data.table)
 
+options( 
+  digits = 7
+  , scipen = 999
+  , Outdec = "."
+  , max.print = 3000
+)
+
 setwd("~/git/R-Example")
 
-pEI <- 1/3 # probability to get infectious after being exposed
-pIR <- 1/7 # probability to recover when infectious
+pEI <- 1/4 # probability to get infectious after being exposed
+pIR <- 1/10 # probability to recover when infectious
 
-Tn <- 1000 # Number of iterations (days)
+Tn <- 200 # Number of iterations (days)
 
 Population <- 83200000 # Population at start
 
-R0 <- 2 * pIR # Reproduction value at start (persons / day)
+R0 <- 3 * pIR # Reproduction value at start (persons / day)
 
 png(filename="png/SEIR.png"
   , width = 1920
   , height = 1080
   )
 
-options ( digits = 4 )
 
 SEIR <- data.table(
     S = c( Population - 100 , rep(0,Tn-1))

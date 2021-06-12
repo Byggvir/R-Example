@@ -62,4 +62,3 @@ end //
 delimiter ;
 
 call CompareCountryDEU (276);
-;

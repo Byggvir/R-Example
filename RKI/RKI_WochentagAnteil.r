@@ -84,12 +84,13 @@ for (i in 0:6) {
   
 }
 
+options(digits=4)
+
 for (i in 0:6) {
-  print (paste ("Wochentag","=",wt[i]))
-  print( c(
-            mean(data[data[,2]==i,3])
-            , sd(data[data[,2]==i,3])
-         )
+  print (paste ("Wochentag","=",wt[i+1]))
+  m <- mean(data[data[,2]==i,3])
+  s <- sd(data[data[,2]==i,3])
+  print( c(m,s, m-1.96*s,m+1.96*s)
   )
   
 }
