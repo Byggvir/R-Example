@@ -3,7 +3,7 @@
 #
 # Script: RKI.r
 #
-# last Change: 2021-01-22
+# last Change: 2021-06-25
 #
 # (c) 2020 by Thomas Arend, Rheinbach
 # E-Mail: thomas@arend-rhb.de
@@ -48,7 +48,8 @@ diagram <- function (
     from rki as t1 
     inner join rki as t2 
     on t1.date=adddate(t2.date,1)
-    where t1.cases > t2.cases;'
+    where t1.cases > t2.cases
+    and t1.date >= "2020-02-24";'
   , main = "CoViD-19 DE: Tägliche vom RKI gemeldete Fälle bis"
   , N = 1
 ) {
@@ -77,7 +78,7 @@ barplot( as.numeric(daily$incCases[1:m]) # [fromto]
          , main = "" 
          , sub = ""
          , xlab=""
-         , col=c(rep("lightblue",6),"red") 
+         , col=c(rep("lightblue",5),"red","lightblue")
          , ylab="Anzahl"
          #, names.arg = Tage # [fromto]
          , las = 2
@@ -102,7 +103,7 @@ barplot( as.numeric(daily$incDeaths[1:m]) # [fromto]
          , main = ""
          , sub = ""
          , xlab=""
-         , col=c(rep("lightblue",6),"red") 
+         , col=c(rep("lightblue",5),"red","lightblue") 
          , ylab="Anzahl"
          #, names.arg = Tage # [fromto]
          , las = 2
@@ -127,7 +128,7 @@ dev.off()
 
 }
 
-daily <- sqlGetRKI('select Meldedatum as Date,count(AnzahlFall) as incCases, count(AnzahlTodesfall) as incDeaths from RKIFaelle where Meldedatum >="2020-02-24" group by Meldedatum;')
+# daily <- sqlGetRKI('select Meldedatum as Date,count(AnzahlFall) as incCases, count(AnzahlTodesfall) as incDeaths from RKIFaelle where Meldedatum >="2020-02-24" group by Meldedatum;')
 
 diagram( main = "CoViD-19 DE: Tägliche vom RKI gemeldete"
           , N = "A" )

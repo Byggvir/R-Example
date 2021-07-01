@@ -60,7 +60,7 @@ p1 <- ggplot(alt, aes(fill=Region, y=VergleichsTodesfallzahl, x=as.numeric(Alter
             position = position_dodge(width=9), size=2)+
   scale_fill_brewer(palette="Paired")+
   ggtitle("Corona: Todesfallzahlen pro 100k Einw. (Alters-standardisiert auf DEU) >= 50 Jahre"  
-  , subtitle="Stand DE: 16.02.2021") +
+  , subtitle= paste("Stand DE:", heute) ) +
   theme_minimal() +
   xlab("Altersgruppe") +
   ylab("Todesfälle")

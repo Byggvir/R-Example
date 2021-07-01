@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# Sigmoid - Exponential
+
 setwd("~/git/R-Example")
 
 source("lib/copyright.r")

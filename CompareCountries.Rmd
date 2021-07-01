@@ -1,16 +1,22 @@
 ---
 title: "Compare Countries"
 author: "Thomas Arend"
-date: "9.6.2021"
+date: 19.06.2021
 output: html_document
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE)
 ```
 
 ## R Markdown
+```{r echo=FALSE, include=FALSE}
+today <- Sys.Date()
+heute <- format(today, "%d.%m.%Y")
+```
 
-```{r echo = FALSE, include=TRUE,}
+Stand: `r heute `
+
+```{r echo = FALSE, include=TRUE}
 source('RKI/RKI_DEUSWE.r')
 ```
+

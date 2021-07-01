@@ -73,7 +73,6 @@ head -n 1 "$DASHDEST"
 
 # ... convert tables into CSV files
 
-ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$ADEST" "${ACSV}%n.csv"
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$KDEST" "${KCSV}%n.csv"
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$TDEST" "${TCSV}%n.csv"
 

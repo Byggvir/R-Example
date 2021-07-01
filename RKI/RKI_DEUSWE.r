@@ -46,7 +46,7 @@ today <- Sys.Date()
 heute <- format(today, "%d %b %Y")
 
 CC1 <- 752;
-CC2 <- 840;
+CC2 <- 276;
 
 Region1 <- sqlGetRKI(SQL = paste('call GetRegion(', CC1, ');'))
 Region2 <- sqlGetRKI(SQL = paste('call GetRegion(', CC2, ');'))
@@ -66,7 +66,7 @@ p1 <- ggplot(alt, aes(fill=Region, y=VergleichsTodesfallzahl, x=Altersgruppe)) +
             position = position_dodge(width=10), size=3.5)+
   scale_fill_brewer(palette="Paired")+
   ggtitle(paste("Corona: Vergleich Todesfallzahlen", Region1[1,2], "(Referenz) -", Region2[1,2] ," >= 50 Jahre")
-  , subtitle="Stand: 09.06.2021") +
+  , subtitle= paste("Stand:", heute) ) +
   theme_minimal() +
   xlab("10er-Altersband") +
   ylab("Todesfälle")
