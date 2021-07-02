@@ -30,36 +30,19 @@ png(filename = paste("png/",MyScriptName, ".png" , sep ="")
     , height = 1080
     )
 
-par(mar=c(10,8,12,8), mfcol = c(2,1) )
+par(mar=c(10,8,12,8), mfcol = c(3,1) )
 
 options(big.mark = ".", decimal.mark=",")
 
-CFR <- sqlGetRKI('select * from SterbeFaelleKw where AgeGroup <100 ;')
-Cases <- sqlGetRKI('select Kw, (AgeGroup div 10)*10 as Agegroup, sum(Count) from RKIAlter group by kw,AgeGroup div 10;')
-Deaths <- sqlGetRKI('select * from SterbeFaelleKw where AgeGroup <100 ;')
+Cases <- sqlGetRKI('select (AgeGroup div 10)*10 as Agegroup, sum(Count) as Count from RKI_CasesByAge group by AgeGroup div 10;')
+Deaths <- sqlGetRKI('select AgeGroup, sum(Count) as Count from(select (AgeGroup div 10) * 10 as Agegroup, Sex, max(Count) as Count from RKI_DeathsByAgeKw group by AgeGroup div 10, Sex) as B group by B.AgeGroup;')
+P <- sqlGetRKI('select (Altersgruppe div 10)*10 as AgeGroup, sum(Anzahl) as Count from WPP.WPP20191 where CountryCode=276 and Jahr=2019 group by Altersgruppe div 10;')
+P[10,2] <- sum(P[10:11,2])
+Population <- P[1:10,]
 
-Kw <- max(Cases[,"Kw"])
+ylim <- limbounds(Deaths$Count / Population$Count * 100000)*1.2
 
-Population <- read.csv("data/DEPopulationAge.csv", sep=";")
-Population$ageband <- Population[,"age"] %/% 10
-
-PopAgeBand <- aggregate(both~ageband, FUN=sum, data=Population)
-
-CFRyear <- data.frame(
-      Deaths = c( CFR$Male[1:8]+CFR$Female[1:8], sum(CFR$Male[9:11]+CFR$Female[9:11]) )
-    , Cases = c( CFR$Cases[1:8], sum(CFR$Cases[9:11]) )
-    , Population = PopAgeBand [,"both"]
-)
-
-deaths <- data.frame (
-    age = Population$age
-  , ageband = Population$ageband
-  , deaths = CFRyear$Deaths[Population$ageband+1]
-)
-
-ylim <- limbounds(CFRyear$Deaths / CFRyear$Population * 100000)
-
-bp <- barplot( CFRyear$Deaths / CFRyear$Population * 100000
+bp <- barplot( Deaths$Count / Population$Count * 100000
                , col = "lightgrey"
                , xlab="Altersgruppe"
                , ylab="Anzahl"
@@ -70,15 +53,15 @@ bp <- barplot( CFRyear$Deaths / CFRyear$Population * 100000
                , cex.names = 2
                , cex.main = 3
                , cex.lab = 3
-               , names.arg = c("0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80+")
+               , names.arg = c("0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80-89", "90+")
                
 )
 
 grid()
 
 text( x = bp 
-      , y = CFRyear$Deaths / CFRyear$Population * 100000
-      , labels = paste(round(CFRyear$Deaths / CFRyear$Population * 100000,1),"(",CFRyear$Deaths,")")
+      , y = Deaths$Count / Population$Count * 100000
+      , labels = paste(round(Deaths$Count / Population$Count * 100000,1),"(",Deaths$Count,")")
       , pos = 3
       , cex = 2
       , col = "black"
@@ -86,11 +69,11 @@ text( x = bp
 )
 
 text( 0
-      , 150
+      , ylim[2]*0.8
       , paste( "Durchschnit: ~", 
           prettyNum(
             round(
-              sum(CFRyear$Deaths)/sum(CFRyear$Population)*100000
+              sum(Deaths$Count)/sum(Population$Count)*100000
               ),
             big.mark="." ,decimal.mark = ","
             )
@@ -99,16 +82,16 @@ text( 0
       , adj = 0
 )
 
-mtext( paste( "Gestorbene gem. RKI vom", heute )
+mtext( paste( "Gestorbene gem. RKI Stand", heute, sep=" " )
        , side = 1
        , adj = 1
        , cex = 2
        , line = 5
 )
 
-ylim <- limbounds(CFRyear$Cases / CFRyear$Population * 100000)
+ylim <- limbounds( Cases$Count / Population$Count * 100000)
 
-bp2 <- barplot( CFRyear$Cases / CFRyear$Population * 100000
+bp2 <- barplot( Cases$Count / Population$Count * 100000
                , col = "lightblue"
                , xlab = "Altersgruppe"
                , ylab = "Anzahl"
@@ -119,12 +102,12 @@ bp2 <- barplot( CFRyear$Cases / CFRyear$Population * 100000
                , cex.names = 2
                , cex.main = 3
                , cex.lab = 3
-               , names.arg = c("0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80+")
+               , names.arg = c("0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80-89", "90+")
             
 )     
 text( x = bp2 
-      , y = CFRyear$Cases / CFRyear$Population * 100000
-      , labels = paste(round(CFRyear$Cases / CFRyear$Population * 100000,1),"\n(",round(CFRyear$Cases,0),")")
+      , y = Cases$Count / Population$Count * 100000
+      , labels = paste(round(Cases$Count / Population$Count * 100000,1),"\n(",round(Cases$Count,0),")")
       , pos = 1
       , cex = 2
       , col = "black"
@@ -135,7 +118,7 @@ text( 0
       , paste( "Durchschnit: ~", 
                prettyNum(
                  round(
-                   sum(CFRyear$Cases)/sum(CFRyear$Population)*100000,0
+                   sum(Cases$Count)/sum(Population$Count)*100000,0
                  ),
                  big.mark="." ,decimal.mark = ","
                )
@@ -151,13 +134,65 @@ mtext( paste( "Stand:" , heute )
        , cex = 2
        , line = 1
        )
-mtext( paste( "Fälle gem. RKI der ", Kw, ". Kalenderwoche" , sep = "" )
+mtext( paste( "Fälle gem. RKI Stand", heute , sep = " " )
       , side = 1
       , adj = 1
       , cex = 2
       , line = 5
       )
 
+ylim <- limbounds( Deaths$Count / Cases$Count * 100)*1.2
+
+bp2 <- barplot( Deaths$Count / Cases$Count * 100
+                , col = "lightblue"
+                , xlab = "Altersgruppe"
+                , ylab = "%"
+                , ylim = ylim
+                , main = "CoViD19 DEU: rohe CFR"
+                , sub = ""
+                , cex.axis = 2
+                , cex.names = 2
+                , cex.main = 3
+                , cex.lab = 3
+                , names.arg = c("0-9","10-19","20-29","30-39","40-49","50-59","60-69","70-79","80-89", "90+")
+                
+)     
+text( x = bp2 
+      , y = Deaths$Count / Cases$Count * 100
+      , labels = paste(round(Deaths$Count / Cases$Count * 100 ,3),"% \n(",round(Deaths$Count,0),")")
+      , pos = 3
+      , cex = 2
+      , col = "black"
+      
+)
+text( 0
+      , ylim[2]*0.8
+      , paste( "Durchschnit: ~", 
+               prettyNum(
+                 round(
+                   sum(Deaths$Count)/sum(Cases$Count)*100,2
+                 ),
+                 big.mark="." ,decimal.mark = ","
+               )
+               , "%"
+               , sep = "" )
+      , cex = 3
+      , adj = 0
+)
+
+
+mtext( paste( "Stand:" , heute )
+       , side = 3
+       , adj = 1
+       , cex = 2
+       , line = 1
+)
+mtext( paste( "Fälle gem. RKI Stand", heute , sep = " " )
+       , side = 1
+       , adj = 1
+       , cex = 2
+       , line = 5
+)
 copyright()
 
 dev.off()
