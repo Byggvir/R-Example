@@ -58,7 +58,7 @@ bp1 <- barplot(NeueFaelle[,3]
         , las = 1
         , xlab = ""
         , ylab = ""
-        , ylim = limbounds(NeueFaelle[,3])
+        , ylim = limbounds(NeueFaelle[,3]*1.2)
 )
 
 s <- sum(NeueFaelle[,3], na.rm = TRUE)
@@ -105,7 +105,7 @@ bp2 <- barplot(NeueFaelle[,3]
         , las = 1
         , xlab = ""
         , ylab = ""
-        , ylim = limbounds(NeueFaelle[,3])
+        , ylim = limbounds(NeueFaelle[,3]*1.2)
 )
 
 s <- sum(NeueFaelle[,3], na.rm = TRUE)

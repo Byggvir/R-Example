@@ -1,0 +1,74 @@
+ #!/bin/bash
+
+DEBUG=OFF
+
+# Color for output
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+blue=`tput setaf 4`
+reset=`tput sgr0`
+
+# List of download URL
+
+NLURL="https://data.rivm.nl/covid-19/COVID-19_casus_landelijk.csv"
+
+[ "$DEBUG" = "ON" ] && TEMP="/tmp/rki" || TEMP="/tmp/rki-$(date '+%F')"
+[ ! -d  "${TEMP}" ] && mkdir "${TEMP}"
+
+NLDEST="$TEMP/NL.csv"
+
+# echo -e "\n\n${blue}+---------"
+# echo -e "| ${red}Tempoary file in: $TEMP"
+# echo -e "${blue}+---------${reset}\n\n"
+
+function download {
+
+# Download dashboard table
+
+[ ! -e $NLDEST ] && curl  --url "$NLURL" \
+| awk -F ';' '{if ($9=="") { WoD=0; } else { WoD=$9; } ; print( $4 ";" $5 ";" $8 ";" WoD );}' \
+| tr '-' ';' \
+| sed 's#^90+#90;100#' \
+> "$NLDEST"
+
+}
+
+function dashboard {
+
+# Importieren der Zahlen aus der Tabelle für das RKI Dashboard
+
+#     echo -e "\n\n${blue}+---------"
+#     echo -e "| ${red}Importieren der Tabelle für das Dashboard RKI in die Datenbank"
+#     echo -e "${blue}+---------${reset}\n\n" 
+
+( cat <<EOF
+USE COVID19;
+
+DROP TABLE IF EXISTS NLFaelle;
+
+CREATE TABLE IF NOT EXISTS NLFaelle (
+      AgegroupFrom INTEGER
+    , AgeGroupTo INTEGER
+    , Sex CHAR (8)
+    , Deceased CHAR (8)
+    , Week_of_death INTEGER 
+    )
+    ;
+
+ALTER TABLE NLFaelle ADD INDEX(Sex);
+ALTER TABLE NLFaelle ADD INDEX(AgegroupFrom);
+ALTER TABLE NLFaelle ADD INDEX(Deceased);
+ALTER TABLE NLFaelle ADD INDEX(Week_of_death);
+
+LOAD DATA LOCAL INFILE '$NLDEST' 
+    INTO TABLE NLFaelle 
+    FIELDS TERMINATED BY ';' 
+    IGNORE 1 ROWS;
+
+EOF
+) 
+}
+
+download
+dashboard

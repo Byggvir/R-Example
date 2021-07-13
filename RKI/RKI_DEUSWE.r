@@ -76,7 +76,7 @@ p2 <- ggplot(jung, aes(fill=Region, y=VergleichsTodesfallzahl, x=Altersgruppe)) 
   geom_text(aes(label=VergleichsTodesfallzahl), vjust=-0.1, color="black",
             position = position_dodge(width=10), size=4)+
   scale_fill_brewer(palette="Paired")+
-  ggtitle(paste("Corona: Vergleich Todesfallzahlen", Region1[1,2], "(Referenz) -", Region2[1,2] , "  < 50 Jahre")) +
+  ggtitle(paste("Corona: Standardisierte Todesfallzahlen", Region1[1,2], "(Referenz) -", Region2[1,2] , "  < 50 Jahre")) +
   theme_minimal() +
   xlab("10er-Altersband") +
   ylab("Todesfälle")

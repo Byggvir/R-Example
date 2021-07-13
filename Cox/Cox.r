@@ -1,7 +1,10 @@
 #!/usr/bin/r
 #
-#
+
 # Script: Cox.r
+# Thomas Arend
+# (c) 2020 
+# GnuPL 3.0
 #
 # Stand: 2020-10-21
 # (c) 2020 by Thomas Arend, Rheinbach
@@ -9,11 +12,6 @@
 #
 
 MyScriptName <-"Cox"
-
-
-# Thomas Arend
-# (c) 2020 
-# GnuPL 3.0
 
 
 # Simulation of the survival times for a Cox regression example

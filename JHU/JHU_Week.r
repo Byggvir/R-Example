@@ -51,6 +51,13 @@ heute <- format(today, "%d %b %Y")
 
 reported <- weekly$Kw[m]
 
+labs <- weekly$Kw
+j20 <- weekly$Kw < 54
+j21 <- weekly$Kw > 53
+
+labs[labs>53] <- labs[j21] - 53
+labs[j20] <- paste(labs[j20],20,sep='/')
+labs[j21] <- paste(labs[j21],21,sep='/')
 
 bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
          , ylim = limbounds(as.numeric(weekly$Cases[1:m]))
@@ -59,7 +66,7 @@ bp1 <- barplot( as.numeric(weekly$Cases[1:m]) # [fromto]
          , xlab = ""
          , col = "lightblue"
          , ylab = "Anzahl"
-         , names.arg = weekly$Kw
+         , names.arg = labs
          , las = 1
 )
 
@@ -68,7 +75,7 @@ title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
 text( bp1
       , as.numeric(weekly$Cases[1:m])
       , round(as.numeric(weekly$Cases[1:m]))
-      , cex = 2
+      , cex = 1
       , pos = 3
       , offset = 3
       , srt = 90
@@ -83,7 +90,7 @@ bp2 <- barplot( as.numeric(weekly$Deaths[1:m]) # [fromto]
          , xlab = ""
          , col = "lightblue" 
          , ylab = "Anzahl"
-         , names.arg = weekly$Kw
+         , names.arg = labs
          , las = 1
 )
 title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
@@ -91,7 +98,7 @@ title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
 text( bp2
       , as.numeric(weekly$Deaths[1:m]) 
       , round(as.numeric(weekly$Deaths[1:m]))
-      , cex = 2
+      , cex = 1
       , pos = 3
       , offset = 3
       , srt = 90

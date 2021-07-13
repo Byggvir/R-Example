@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 # Regressionsanalyse
+
 MyScriptName <- 'Delta-2'
 setwd("~/git/R-Example")
 
@@ -10,7 +11,7 @@ f <- function (y) {
   
 }
 
-s <- function (x,a,b) {
+sigmoid <- function (x,a,b) {
   
   return ( 1/(1+exp(a+b*x)))
   
@@ -28,30 +29,13 @@ library(gridExtra)
 library(grid)
 library(lubridate)
 
-# KW16	4440		34
-# KW17	3537		55
-# KW18	4279		89
-# KW19	3491		101
-# KW20	3616		119
-# KW21	2574		102
-# KW22	1892		177
-# KW23	1040		238
-# KW24	338		226
+data <- read_ods(path='data/VOC_VOI_Tabelle.ods',sheet=1)
+
+s <- rowSums(data) - data[,1]
 
 df <- data.frame(
-    x = 14:24
-  , y = c(   0.1
-           , 0.1
-           , 0.7
-           , 1.4
-           , 1.8
-           , 2.6
-           , 3.0
-           , 3.6
-           , 7.9
-           , 17.0
-           , 36.7
-           )/100
+    x = data[14:25,1]
+  , y = data[14:25,3]/s[14:25]
 )
 
 CI <- 0.95
@@ -70,17 +54,18 @@ print(b[2])
 xlim <- c(df$x[1],40)
 ylim <- c(0,1)
 
-png( paste( "png/RASigmoid"
+png( paste( "png/"
+            , MyScriptName
             , ".png"
             , sep = ""
 )
 , width = 1920
 , height = 1080
 )
-
 par(  mar = c(10,10,10,10) 
       , bg = rgb(0.95,0.95,0.95,1)
 )
+
 plot(   df$x
         , df$y
         , type = "l"
@@ -98,7 +83,7 @@ plot(   df$x
 
 par( new=TRUE )
 
-curve(  s(x,a[3],b[1])
+curve(  sigmoid(x,a[3],b[1])
       , from=xlim[1]
       , to=xlim[2]
       , lty = 2
@@ -117,7 +102,7 @@ curve(  s(x,a[3],b[1])
 
 par( new=TRUE )
 
-curve(  s(x,a[2],b[2])
+curve(  sigmoid(x,a[2],b[2])
         , from=xlim[1]
         , to=xlim[2]
         , lty = 2
@@ -136,7 +121,7 @@ curve(  s(x,a[2],b[2])
 
 par( new=TRUE )
 
-curve(  s(x,a[1],b[3])
+curve(  sigmoid(x,a[1],b[3])
         , from=xlim[1]
         , to=xlim[2]
         , lty = 2
@@ -163,3 +148,68 @@ abline(
 grid()
 dev.off()
 
+png( paste( "png/"
+            , MyScriptName
+            , "-Sequenzierungen.png"
+            , sep = ""
+)
+, width = 1920
+, height = 1080
+)
+par(  mar = c(10,10,10,10) 
+      , bg = rgb(0.95,0.95,0.95,1)
+)
+
+pal1 <- rgb(c(0,1),c(1,0),0,1)
+pal2 <- rgb(c(0,1),c(1,0),0,0.1)
+
+xlim <- limbounds(data[,1])
+ylim <- c(0,100)
+plot( NA
+  , main = "VOC in DE"
+  , xlab = "Kalenderwochen 2021"
+  , ylab = "Anteil [%]"
+  , xlim = xlim
+  , ylim = ylim
+  , cex.main = 3
+  , cex.sub = 2
+)
+
+title(
+      sub="Prozentualer Anteil der VOC Alfa und Delta"
+    , cex.sub = 2
+    , line = +5
+)
+rgb
+
+for ( i in 2:3) {
+  
+  sigma <- sqrt(data[,i]*(s-data[,i])/s)/s
+  print(1.96*sigma)
+  polygon( c(data[,1],rev(data[,1]))
+         , c((data[,i]/s + 1.96*sigma),rev(data[,i]/s - 1.96*sigma))*100
+         , col = pal2[i-1]
+  )
+  
+  lines(
+      data[,1]
+    , data[,i]/s*100
+    , type = "l"
+    , lwd = 3
+    , col = pal1[i-1]
+
+    )
+
+}
+cols <- colnames(data)
+
+legend( "bottomleft"
+       , legend = cols[2:3]
+       , pal[1:2]
+       , lwd = 2
+       , lty = 1
+       , inset = 2
+       )
+grid()
+
+dev.off()

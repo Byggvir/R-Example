@@ -10,7 +10,7 @@
 
 MyScriptName <-"RKI"
 
-fPNG <- "png/RKI_CasesDeathsWeek.png"
+fPNG <- "png/RKI_Week_Bund.png"
 
 # Reads the cumulative cases and death from rki.de
 # The Excel file is in a very poor format. Therefore we have to adjust the data.
@@ -53,6 +53,15 @@ heute <- format(today, "%d %b %Y")
 
 y <- as.numeric(weekly$Cases[1:m])
 
+labs <- weekly$Kw
+j20 <- weekly$Kw < 54
+j21 <- weekly$Kw > 53
+
+labs[labs>53] <- labs[j21] - 53
+labs[j20] <- paste(labs[j20],20,sep='/')
+labs[j21] <- paste(labs[j21],21,sep='/')
+
+
 bp1 <- barplot( y # [fromto]
          , ylim = limbounds(y)*1.1
          , main = paste("Wöchentliche Fälle von Kalenderwoche", weekly$Kw[1], "bis", reported) 
@@ -60,8 +69,8 @@ bp1 <- barplot( y # [fromto]
          , xlab = ""
          , col = "lightblue"
          , ylab = "Anzahl"
-         , names.arg = weekly$Kw
-         , las = 1
+         , names.arg = labs
+         , las = 2
 )
 
 title ( sub = paste("Source: rki.de; Created:", heute ), line = 3)
@@ -89,8 +98,8 @@ bp2 <- barplot( y # [fromto]
          , xlab = ""
          , col = "lightblue" 
          , ylab = "Anzahl"
-         , names.arg = weekly$Kw
-         , las = 1
+         , names.arg = labs
+         , las = 2
 )
 
 abline(h=y[m-1] , col = 'red' , lty = 3)

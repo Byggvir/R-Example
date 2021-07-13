@@ -60,7 +60,47 @@ select
 from RKIFaelle
 group by Meldedatum;
 '
-SQLWTag <- "select weekday(Meldedatum) as WTag, sum(AnzahlFall) / (select sum(AnzahlFall) /7  from RKIFaelle) as AnteilWoche from RKIFaelle group by WTag;"
+SQLWTag <- 
+  paste('
+select 
+ WTag
+ , avg(AnteilAnWoche) as AnteilAnWoche
+ , avg(AnteilAnWoche) * 7 as KorFaktor
+ , stddev(AnteilAnWoche) as StdAbweichung
+ from (
+select 
+  F.Meldedatum
+  , weekday(F.Meldedatum) as WTag
+  , sum(F.AnzahlFall) / W.FallWoche as AnteilAnWoche
+from RKIFaelle F 
+join ( 
+  select 
+    week(Meldedatum,3) as Kw
+    , sum(AnzahlFall) as FallWoche
+  from RKIFaelle 
+  where Meldedatum >'
+        , '"2020-05-03"'
+        , 'and Meldedatum < adddate("'
+        , today
+        , '",-weekday("'
+        , today
+        , '"))
+  group by Kw 
+  ) as W 
+on 
+  week(F.Meldedatum,3) = W.Kw
+where Meldedatum >'
+        , '"2020-05-03"'
+        , 'and Meldedatum < adddate("'
+        , FromUntil[2]
+        , '",-weekday("'
+        , FromUntil[2]
+        , '"))
+group by F.Meldedatum
+) as T 
+group by WTag;'
+        , sep= ' '
+  )
 
 Kor <- sqlGetRKI(SQLWTag)  
 
@@ -111,11 +151,11 @@ regression_analysis <- function (
     Date = (Tage + StartRegADate)
     , WTag = Wochentage[wday(Tage + StartRegADate, week_start = 1)]
     , assumed = round(exp(a[2] + b[2] * Tage)
-    * Kor[wday(Tage + StartRegADate, week_start = 1),2])
+    * Kor[wday(Tage + StartRegADate, week_start = 1),3])
     , lower = round(exp(a[1] + b[1] * Tage)
-    * Kor[wday(Tage + StartRegADate, week_start = 1),2])
+    * Kor[wday(Tage + StartRegADate, week_start = 1),3])
     , upper = round(exp(a[3] + b[3] * Tage)
-    * Kor[wday(Tage + StartRegADate, week_start = 1),2])
+    * Kor[wday(Tage + StartRegADate, week_start = 1),3])
   )
 
   print(PrognoseTab)
@@ -216,6 +256,7 @@ regression_analysis <- function (
 
   grid()
   
+  
   plotregression(a, b, xlim= c(0, as.numeric(PrognoseDate - StartRegADate)), ylim = ylim )
   
   lr <- ifelse (b[2] > 0 ,"topleft", "topright")
@@ -293,8 +334,8 @@ regression_analysis <- function (
 eDate <- rkidata$Meldedatum[length(rkidata$Meldedatum)-1]
 
 for (k in c(0,7,14)) {
-for (j in c(14)) {
-for (i in c(20,34)) {
+for (j in c(7)) {
+for (i in c(13,20,34)) {
     
   regression_analysis (
       StartDate = rkidata$Meldedatum[1]

@@ -16,7 +16,8 @@ AWKDIR="$(dirname $0)/awk"
 
 DASHURL="https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data"
 DASHURL2="https://download.byggvir.de/RKI/RKI-COVID19.csv.gz"
-NOWCASTURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx?__blob=publicationFile"
+NOWCASTURL="https://raw.githubusercontent.com/robert-koch-institut/SARS-CoV-2-Nowcasting_und_-R-Schaetzung/main/Nowcast_R_aktuell.csv"
+KASPURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Klinische_Aspekte.xlsx?__blob=publicationFile"
 
 KUMTABURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Fallzahlen_Kum_Tab.xlsx?__blob=publicationFile"
 TESTUNGENURL="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Daten/Testzahlen-gesamt.xlsx?__blob=publicationFile"
@@ -30,15 +31,17 @@ echo -e "${blue}+---------${reset}\n\n"
 
 KDEST="$TEMP/rki.xlsx"
 TDEST="$TEMP/test.xlsx"
+ADEST="$TEMP/klinik.xlsx"
 
 DASHDEST="$TEMP/RKI-COVID19.csv"
 DASHDESTA="$TEMP/A-RKI-COVID19.csv"
 DASHDESTB="$TEMP/RKI-COVID19.csv.gz"
 
-NOWCASTDEST="$TEMP/Nowcasting.xlsx"
+NOWCASTDEST="$TEMP/Nowcasting.csv"
 
 KCSV="$TEMP/rki"
 TCSV="$TEMP/test"
+ACSV="$TEMP/klinik"
 
 SQL="$TEMP/rki.sql"
 GIT="$HOME/git/R-Example/"
@@ -52,6 +55,9 @@ echo 'Download kumulative Tabelle'
 
 echo 'Download Testungen'
 [ ! -e "$TDEST" ] && curl --output "$TDEST" --url "$TESTUNGENURL"
+
+echo 'Download Testungen'
+[ ! -e "$ADEST" ] && curl --output "$ADEST" --url "$KASPURL"
 
 echo 'Download Nowcasting'
 [ ! -e "$NOWCASTDEST" ] && curl --output "$NOWCASTDEST" --url "$NOWCASTURL"
@@ -75,6 +81,7 @@ head -n 1 "$DASHDEST"
 
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$KDEST" "${KCSV}%n.csv"
 ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$TDEST" "${TCSV}%n.csv"
+ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$ADEST" "${ACSV}%n.csv"
 
 }
 
@@ -115,7 +122,7 @@ SET autocommit=0;
 INSERT INTO neu VALUES (ADDDATE("$STARTDATE",-2),0,0);
 EOF1
 
-sed '1,2d; s#^[^,]*,##; s#,,#,#; :r s#,,#,0,#g; t r;' "${KCSV}1.csv" \
+sed '1,3d; s#^[^,]*,##; s#,,#,#; :r s#,,#,0,#g; t r;' "${KCSV}1.csv" \
 | awk -F ',' 'BEGIN {i=-1}; {if ($1>0) print("INSERT INTO neu VALUES (ADDDATE(\"'$STARTDATE'\"," i ")," $1 "," $3 ");" );i=i+1}'
 
 cat <<EOF2
@@ -349,7 +356,7 @@ sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
         echo -e "\n\n${blue}+---------"
         echo -e "| ${red}${r}"
         echo -e "${blue}+---------${reset}\n\n"
-        Rscript $r
+        Rscript $r 2>/dev/null
 #         read
 #         reset
      done
@@ -361,10 +368,10 @@ rm "$SQL"
 touch "$SQL"
 
 download_all
-dashboard
 bund
 bundeslaender
 Testungen
+dashboard
 
 mysql --user=rscript --password=rscript < "$SQL"
 run_r

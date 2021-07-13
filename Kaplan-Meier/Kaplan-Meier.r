@@ -26,8 +26,6 @@ library("ggplot2")
 
 if(!exists("survivals", mode="function")) source("common/Survival.r")
 
-png("Kaplan-Meier.png",width=1920,height=1080)
-
 n <-50    # Number of patients 
 d <-14      # Maximum time of observation / end of study
 
@@ -44,23 +42,33 @@ print(pats)
 
 fit <- survfit(Surv(time, status) ~ sex, data = pats)
 
-ggsurvplot(fit
-        , pval = TRUE
-        , conf.int = TRUE
-        , risk.table = TRUE
-        , risk.table.col = "strata"
-        , break.time.by = 7
-        , ncensor.plot = TRUE
-        , linetype = "strata"
-        , surv.median.line = "hv"
-        , ggtheme = theme_light()
-        , palette = c("#E7B800", "#2E9FDF")
-        , legend.labs = 
-            c("Male", "Female")
-        , xlim = c(1,10)
-        , fun = "event"
-        )
-        
-dev.off()
+surfp <- ggsurvplot(fit
+        , data = pats
+        , main = "Survival curve",
+        font.main = c(16, "bold", "darkblue"),
+        font.x = c(14, "bold.italic", "red"),
+        font.y = c(14, "bold.italic", "darkred"),
+        font.tickslab = c(12, "plain", "darkgreen"))
+
+        # , pval = TRUE
+        # , conf.int = TRUE
+        # , risk.table = TRUE
+        # , risk.table.col = "strata"
+        # , break.time.by = 7
+        # , ncensor.plot = TRUE
+        # , linetype = "strata"
+        # , surv.median.line = "hv"
+        # # , ggtheme = theme_light()
+        # , palette = c("#E7B800", "#2E9FDF")
+        # , legend.labs =
+        #     c("Male", "Female")
+        # , xlim = c(1,10)
+        # , fun = "event"
+        # )
+
+ggsave( plot = print(surfp), file = 'png/Kaplan-Meier.png'
+       , type = "cairo-png"
+       , bg = "white"
+       , width = 29.7, height = 21, units = "cm", dpi = 150)
 
 print(summary(fit))

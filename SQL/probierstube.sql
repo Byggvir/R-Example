@@ -1,0 +1,21 @@
+USE COVID19;
+
+delimiter //
+
+CREATE OR REPLACE TABLE t1 (a INT);
+
+FOR i IN REVERSE 4..12
+    DO
+    INSERT INTO t1 VALUES (i);
+END FOR;
+
+CREATE OR REPLACE TABLE t2 (a INT);
+
+FOR i IN 1..53
+    DO
+    INSERT INTO t2 VALUES (i);
+END FOR;
+
+//
+
+delimiter ;

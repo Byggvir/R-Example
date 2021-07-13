@@ -29,6 +29,9 @@ library(plyr)
 library(gridExtra)
 library(viridis)
 library(hrbrthemes)
+library(Cairo)
+library(extrafont)
+extrafont::loadfonts()
 
 # Stacked
 

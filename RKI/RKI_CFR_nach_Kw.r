@@ -88,10 +88,10 @@ single_plot <- function(AgeGroup, AGText ) {
  print(CFRMax*100)
  print(CFR*100)
  
- text( cases$Kw[l] - 1
+ text( cases$Kw[l] - 2
       , CFR[l]*100 + 2
       , paste(round(CFR[l]*100,1),"%\nmax ",round(CFRMax*100,1),"%",sep='')
-      , cex = 2
+      , cex = 1.5
       , adj = 1
       , pos = 2
       , col = LineColors[AgeGroup+2]

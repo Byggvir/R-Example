@@ -36,25 +36,22 @@ options(
   )
 
 diagram <- function (
-  SQL = ' select 
+  SQL = 'select 
     t1.date as Date
-    , (@i:=@i+1) as Day
-    , WEEK(t1.date,3) as Kw
-    , WEEKDAY(t1.date) as WTag
-    , t1.cases as Cases
-    , t1.deaths as Deaths
     , t1.cases-t2.cases as incCases
     , t1.deaths-t2.deaths as incDeaths
     from rki as t1 
     inner join rki as t2 
     on t1.date=adddate(t2.date,1)
     where t1.cases > t2.cases
-    and t1.date >= "2020-02-24";'
+    and t1.date >= "2020-02-24"
+    ;
+  '
   , main = "CoViD-19 DE: Tägliche vom RKI gemeldete Fälle bis"
   , N = 1
 ) {
   
-daily <- sqlGetRKI(SQL = SQL)
+daily <- sqlGetRKI(SQL = SQL, prepare = 'set @i:=0;')
 
 m <- length(daily[,1])
 
@@ -78,7 +75,7 @@ barplot( as.numeric(daily$incCases[1:m]) # [fromto]
          , main = "" 
          , sub = ""
          , xlab=""
-         , col=c(rep("lightblue",5),"red","lightblue")
+         , col=c(rep("lightblue",6),"red")
          , ylab="Anzahl"
          #, names.arg = Tage # [fromto]
          , las = 2
@@ -103,7 +100,7 @@ barplot( as.numeric(daily$incDeaths[1:m]) # [fromto]
          , main = ""
          , sub = ""
          , xlab=""
-         , col=c(rep("lightblue",5),"red","lightblue") 
+         , col=c(rep("lightblue",6),"red") 
          , ylab="Anzahl"
          #, names.arg = Tage # [fromto]
          , las = 2
@@ -126,13 +123,15 @@ copyright()
 
 dev.off()
 
+return (daily)
+
 }
 
 # daily <- sqlGetRKI('select Meldedatum as Date,count(AnzahlFall) as incCases, count(AnzahlTodesfall) as incDeaths from RKIFaelle where Meldedatum >="2020-02-24" group by Meldedatum;')
 
-diagram( main = "CoViD-19 DE: Tägliche vom RKI gemeldete"
-          , N = "A" )
+daily <- diagram( main = "CoViD-19 DE: Tägliche vom RKI gemeldete" 
+                  , N = "A" )
 
-diagram( SQL = 'select Meldedatum as Date,sum(AnzahlFall) as incCases, sum(AnzahlTodesfall) as incDeaths from RKIFaelle where Meldedatum >="2020-02-24" group by Meldedatum;'
+daily <- diagram( SQL = 'select Meldedatum as Date,sum(AnzahlFall) as incCases, sum(AnzahlTodesfall) as incDeaths from RKIFaelle where Meldedatum >="2020-02-24" group by Meldedatum;'
           , main = "CoViD-19 DE: Tägliche beim Gesundheitsamt gemeldete"
           , N = "B" )

@@ -71,6 +71,14 @@ Tage <- daily$date
 sel <- daily$wday != 6
 Tage[sel] <- NA
 
+labs <- kwCases$kw
+j20 <- kwCases$kw < 54
+j21 <- kwCases$kw > 53
+
+labs[labs>53] <- labs[j21] - 53
+labs[j20] <- paste(labs[j20],20,sep='/')
+labs[j21] <- paste(labs[j21],21,sep='/')
+
 ylim <- limbounds (daily$incCases)
 barplot( daily$incCases
     , ylim=ylim
@@ -115,7 +123,7 @@ kwPlotC <- barplot(  kwCases$incCases
                      , ylab="Count"
                      , ylim = ylim
                      , col = "lightblue"
-                     , names.arg = kwCases$kw
+                     , names.arg = labs
 )
 text( kwPlotC
       , kwCases$incCases
@@ -134,7 +142,7 @@ kwPlotD <- barplot( kwDeaths$incDeaths
                     , ylab="Count"
                     , ylim = ylim
                     , col = "lightblue"
-                    , names.arg = kwCases$kw
+                    , names.arg = labs
 )
 
 text( kwPlotD

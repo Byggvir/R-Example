@@ -29,27 +29,27 @@ extrafont::loadfonts()
 
 startdate <- "2020-03-15"
 theme_set(theme_bw())  # pre-set the bw theme.
-SQL = paste('
-select 
-  F.Meldedatum
-  , weekday(F.Meldedatum) as WTag
-  , sum(F.AnzahlFall) / W.FallWoche * 100 as AnteilWoche
-from RKIFaelle F 
-join ( 
-  select 
-    week(Meldedatum,3) as Kw
-    , sum(AnzahlFall) as FallWoche
-  from RKIFaelle 
-  group by Kw 
-  ) as W 
-on 
-  week(F.Meldedatum,3) = W.Kw
-where Meldedatum >'
-,'"2020-05-31"'
-,'and Meldedatum < adddate(curdate(),-weekday(curdate()))
-group by F.Meldedatum;'
+SQL = paste('select' 
+, 'F.Meldedatum'
+, ', weekday(F.Meldedatum) as WTag'
+, ', sum(F.AnzahlFall) / W.FallWoche * 100 as AnteilWoche'
+, 'from RKIFaelle F' 
+, 'join (' 
+,  'select' 
+, 'week(Meldedatum,3) as Kw'
+, ', sum(AnzahlFall) as FallWoche'
+, 'from RKIFaelle' 
+, 'group by Kw'
+, ') as W' 
+, 'on'
+, 'week(F.Meldedatum,3) = W.Kw'
+, 'where Meldedatum >'
+, '"2020-05-31"'
+, 'and Meldedatum < adddate(curdate(),-weekday(curdate()))'
+, 'group by F.Meldedatum;'
 , sep= ' '
 )
+
 
 
 data <- sqlGetRKI(SQL = SQL)
@@ -95,6 +95,4 @@ for (i in 0:6) {
   
 }
 
-
 setwd(wd)
-

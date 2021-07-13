@@ -12,4 +12,4 @@ install.packages("scales")
 install.packages("stringr")
 install.packages("tidyverse")
 install.packages("utils")
-
+install.packages("ggfortify")

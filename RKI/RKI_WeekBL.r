@@ -53,7 +53,15 @@ for (i in BL[,1]) {
 
   weekly <- sqlGetRKI(SQL = SQL)
   m <- length(weekly[,1])
-
+  
+  labs <- weekly$Kw
+  j20 <- weekly$Kw < 54
+  j21 <- weekly$Kw > 53
+  
+  labs[labs>53] <- labs[j21] - 53
+  labs[j20] <- paste(labs[j20],20,sep='/')
+  labs[j21] <- paste(labs[j21],21,sep='/')
+  
   reported <- weekly$Kw[m]
   y <- as.numeric(weekly$Cases[1:m]) 
   bp1 <- barplot( y # [fromto]
@@ -63,8 +71,8 @@ for (i in BL[,1]) {
          , xlab = ""
          , col = "lightblue"
          , ylab = "Anzahl"
-         , names.arg = weekly$Kw
-         , las = 1
+         , names.arg = labs
+         , las = 2
   )
 
   title ( sub = BL[i,2], line = 3, cex.sub = 1.5 )
@@ -97,8 +105,8 @@ for (i in BL[,1]) {
          , xlab = ""
          , col = "lightblue" 
          , ylab = "Anzahl"
-         , names.arg = weekly$Kw
-         , las = 1
+         , names.arg = labs
+         , las = 2
   )
 
   title ( sub = BL[i,2], line = 3, cex.sub=1.5)

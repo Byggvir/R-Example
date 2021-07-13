@@ -50,7 +50,7 @@ library(lubridate)
 # KW24	338		226
 
 df <- data.frame(
-    x = 14:24
+    x = 14:25
   , y = c(   0.1
            , 0.1
            , 0.7
@@ -62,6 +62,7 @@ df <- data.frame(
            , 7.9
            , 17.0
            , 36.7
+           , 59.4
            )/100
 )
 
@@ -165,7 +166,7 @@ curve(  s(x,a[1],b[3])
         , cex.main = 5      
 )
 
-abline(v=26, , lwd= 5,  lty=2, col="grey")
+abline(v=26, lwd= 5,  lty=2, col="grey")
 grid()
 dev.off()
 

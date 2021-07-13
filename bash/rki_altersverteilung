@@ -26,7 +26,7 @@ ADEST="$TEMP/altersverteilung.xlsx"
 
 ACSV="$TEMP/alter"
 
-SQL="$TEMP/rki.sql"
+SQL="$TEMP/rki-alter.sql"
 GIT="$HOME/git/R-Example/"
 
 function download_all {
@@ -37,7 +37,7 @@ function download_all {
 
 # ... convert tables into CSV files
 
-ssconvert  -S --export-type=Gnumeric_stf:stf_csv "$ADEST" "${ACSV}%n.csv"
+ssconvert  -S --export-type=Gnumeric_stf:stf_csv -O 'sheet=Fallzahlen' "$ADEST" "${ACSV}%n.csv"
 
 }
 
