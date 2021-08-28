@@ -41,7 +41,7 @@ rzahlen <- function ( data ) {
   ylim <- c(0,2)
   
   plot( 
-         data[,1]
+         as.Date(data[,1])
        , data[,8]
        , main = ""
        , sub = ""
@@ -50,18 +50,9 @@ rzahlen <- function ( data ) {
        , ylim = ylim
        , type = "l"
        , lwd = 5
-       , col = "black"
+       , col = "blue"
   )
-  
-  
-  lines( 
-      data[,1]
-    , data[,11]
-    , type = "l"
-    , lwd = 5
-    , col = "blue"
-  )
-  
+
   abline (h=0.75, col="green")
   abline (h=0.90, col="orange")
   abline (h=1.00, col="red")
@@ -73,7 +64,7 @@ rzahlen <- function ( data ) {
     
   )
   title (
-    sub = "4- und 7-Tage-R"
+    sub = "7-Tage-R"
   , cex.sub = 3
   , line = 8
   
@@ -89,8 +80,8 @@ rzahlen <- function ( data ) {
     
   )
   legend( "topright"
-    , legend = c("4-Tage-R","7-Tage-R")
-    , col = c("black","blue") 
+    , legend = c("7-Tage-R")
+    , col = c("blue") 
     , lwd = 5
     , cex = 3
          )
@@ -98,9 +89,9 @@ rzahlen <- function ( data ) {
 
 }
 
-daten <- read_ods( path='/home/thomas/git/R-Example/data/Nowcasting_Zahlen.ods', sheet=3 )
+daten <- read.csv( file='data/Nowcasting.csv')
 
-rzahlen(daten[6:419,])
+rzahlen(daten[5:nrow(daten),])
 
 dev.off()
 

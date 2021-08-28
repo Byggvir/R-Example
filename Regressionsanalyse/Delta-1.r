@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 # Regressionsanalyse
+
 MyScriptName <- 'Delta-1'
 setwd("~/git/R-Example")
 
@@ -10,9 +11,31 @@ f <- function (y) {
   
 }
 
-s <- function (x,a,b) {
-  
+sigmoid <- function (x,a=0,b=1) {
+
   return ( 1/(1+exp(a+b*x)))
+  
+}
+plotsigmoid <- function (a, b, col, xlim, ylim) {
+  
+  par( new=TRUE )
+  
+  curve(  sigmoid(x,a,b)
+          , from=xlim[1]
+          , to=xlim[2]
+          , lty = 2
+          , lwd = 5
+          , xlim = xlim
+          , ylim = ylim
+          , col = col
+          , xlab = ""
+          , ylab = ""
+          , xaxt = "n"
+          , yaxt = "n"
+          , cex.axis = 2
+          , cex.lab = 3
+          , cex.main = 5      
+  )
   
 }
 
@@ -27,146 +50,146 @@ library(REST)
 library(gridExtra)
 library(grid)
 library(lubridate)
-# 
-# 15 	 89,0 		 1,9  	0,3  	0,1 
-# 16 	 91,1 		 0,9 	 0,4  	0,7 
-# 17 	 90,4 		 0,7 	 1,0  	1,4 
-# 18 	 87,1 		 2,5  	0,9  	1,8 
-# 19 	 89,0 		 1,3  	0,4  	2,6 
-# 20 	 91,2 		 0,7 	 0,8  	3,0 
-# 21 	 90,9 		 0,6 	 0,8  	3,6 
-# 22 	 84,5 		 0,4  	0,9  	7,9 
-# 23 	 74,4 		 0,4 	 1,2  	17,0 
-# 24 	 54,9 		 0,6 	 1,3  	36,7 
 
-# KW16	4440		34
-# KW17	3537		55
-# KW18	4279		89
-# KW19	3491		101
-# KW20	3616		119
-# KW21	2574		102
-# KW22	1892		177
-# KW23	1040		238
-# KW24	338		226
+voc <- read_ods(path='data/VOC_VOI_Tabelle.ods',sheet=1)
 
-df <- data.frame(
-    x = 14:25
-  , y = c(   0.1
-           , 0.1
-           , 0.7
-           , 1.4
-           , 1.8
-           , 2.6
-           , 3.0
-           , 3.6
-           , 7.9
-           , 17.0
-           , 36.7
-           , 59.4
-           )/100
-)
+sw <- 21
 
-CI <- 0.95
-
-ra <- lm(f(y) ~ x, data=df)
-print(ra)  
-
-ci <- confint(ra,level = CI)
-
-a <- c( ci[1,1], ra$coefficients[1] , ci[1,2])
-b <- c( ci[2,1], ra$coefficients[2] , ci[2,2])
-
-print(a[2])
-print(b[2])
-
-xlim <- c(df$x[1],40)
-ylim <- c(0,1)
+n <- nrow(voc)
+s <- rowSums(voc) - voc[,1]
 
 png( paste( "png/"
             , MyScriptName
             , ".png"
             , sep = ""
 )
-, width = 1920
-, height = 1080
+, width = 3840
+, height = 2160
 )
 
-par(  mar = c(10,10,10,10) 
-      , bg = rgb(0.95,0.95,0.95,1)
+par(
+    mar = c(10,10,10,10) 
+  , bg = rgb(0.95,0.95,0.95,1)
+  #, mfrow = c(4,3)
 )
-plot(   df$x
-        , df$y
+
+CI <- 0.95
+for ( sw in 14 ){
+for ( m in n) {
+  
+  df <- data.frame(
+      x = voc[sw:m,1]
+    , y = voc[sw:m,4]/s[sw:m]
+  )
+
+  xlim <- c(df$x[1],40)
+  ylim <- c(0,1)
+
+  ra <- lm(f(y) ~ x, data=df)
+  ci <- confint(ra,level = CI)
+
+  a <- c( ci[1,1], ra$coefficients[1] , ci[1,2])
+  b <- c( ci[2,1], ra$coefficients[2] , ci[2,2])
+
+  plot(   voc[1:m,1]
+        , voc[1:m,4]/s[1:m]
         , type = "l"
         , lwd = 5
         , col = "blue"
         , xlim = xlim
         , ylim = ylim
-        , main = "Anteil der Delta-Variante in DEU"
+        , main = ""
+        , sub = ""
         , xlab = "Kalenderwoche 2021"
         , ylab = "Anteil"
         , cex.axis = 2
-        , cex.lab = 3
+        , cex.lab = 1.5
+  )
+  title ( main = "Anteil der Delta-Variante in DEU"
         , cex.main = 5
-        )
+        , cex.sub = 3
+  )
+  title (   sub = paste("Regression von Kw", sw, "bis", m)
+          , cex.sub = 2
+          , line = 6
+  )
+  
+  legend( "topleft"
+          , title = "Sigmoid 1/(1+e^(a+b*t))"
+          , legend = c(
+              paste ("a = ", round(ra$coefficients[1],2), " [CI95 ",round(ci[1,1],2)," / ",round(ci[1,2],2),']', sep = '')
+            , paste ("b = ", round(ra$coefficients[2],2), " [CI95 ",round(ci[2,1],2)," / ",round(ci[2,2],2),']', sep = '')
+          )
+          , cex = 2
+          , inset = 0.05
+  )
+  legend( "bottomright"
+          , title = "Linien"
+          , legend = c(   "Untere Grenze CI 95%"
+                        , "Obere Grenze Ci 95%"
+                        , "Mittlerer Verlauf"
+                        , "Realer Verlauf"
+            )
+          , col = c("green","red","black","blue")
+          , lty = 1
+          , lwd = 2
+          , cex = 2
+          , inset = 0.05
+  )
 
-par( new=TRUE )
+  lines(  
+      voc[m:n,1]
+    , voc[m:n,4]/s[m:n]
+    , type = "l"
+    , lty = 3
+    , lwd = 5
+    , col = "blue"
+    )
 
-curve(  s(x,a[3],b[1])
-      , from=xlim[1]
-      , to=xlim[2]
-      , lty = 2
-      , lwd = 5
-      , xlim = xlim
-      , ylim = ylim
-      , col = "green"
-      , xlab = ""
-      , ylab = ""
-      , xaxt = "n"
-      , yaxt = "n"
-      , cex.axis = 2
-      , cex.lab = 3
-      , cex.main = 5      
-      )
+  plotsigmoid(
+      a[3]
+    , b[1]
+    , col = "green"
+    , xlim
+    , ylim
+    )
 
-par( new=TRUE )
+  plotsigmoid(
+      a[2]
+    , b[2]
+    , col = "black"
+    , xlim
+    , ylim
+  )
 
-curve(  s(x,a[2],b[2])
-        , from=xlim[1]
-        , to=xlim[2]
-        , lty = 2
-        , lwd = 5
-        , xlim = xlim
-        , ylim = ylim
-        , col = "black"
-        , xlab = ""
-        , ylab = ""
-        , xaxt = "n"
-        , yaxt = "n"
-        , cex.axis = 2
-        , cex.lab = 3
-        , cex.main = 5      
-)
+  plotsigmoid(
+      a[1]
+    , b[3]
+    , col = "red"
+    , xlim
+    , ylim
+  )
 
-par( new=TRUE )
+  kw <- isoweek(Sys.Date())
 
-curve(  s(x,a[1],b[3])
-        , from=xlim[1]
-        , to=xlim[2]
-        , lty = 2
-        , lwd = 5
-        , xlim = xlim
-        , ylim = ylim
-        , col = "red"
-        , xlab = ""
-        , ylab = ""
-        , xaxt = "n"
-        , yaxt = "n"
-        , cex.axis = 2
-        , cex.lab = 3
-        , cex.main = 5      
-)
+  abline(
+      v = kw
+    , lwd = 5
+    , lty = 2
+    , col = "grey"
+  )
+  
+  text( 
+    35
+    , 0.5
+    , labels = paste ("R-Delta / R-Alpha\n", round(exp(-4/7*b[2]),2), " [CI95% ", round(exp(-4/7*b[3]),2)," - ",round(exp(-4/7*b[1]),2),"]", sep='')
+    , cex = 6
+  ) 
+  
+  
+  grid()
 
-abline(v=26, lwd= 5,  lty=2, col="grey")
-grid()
+} # m
+
+} # sw
 dev.off()
-

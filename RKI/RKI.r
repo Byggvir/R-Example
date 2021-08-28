@@ -129,7 +129,7 @@ return (daily)
 
 # daily <- sqlGetRKI('select Meldedatum as Date,count(AnzahlFall) as incCases, count(AnzahlTodesfall) as incDeaths from RKIFaelle where Meldedatum >="2020-02-24" group by Meldedatum;')
 
-daily <- diagram( main = "CoViD-19 DE: Tägliche vom RKI gemeldete" 
+daily <- diagram( main = "CoViD-19 DE: Tägliche vom RKI gemeldete"
                   , N = "A" )
 
 daily <- diagram( SQL = 'select Meldedatum as Date,sum(AnzahlFall) as incCases, sum(AnzahlTodesfall) as incDeaths from RKIFaelle where Meldedatum >="2020-02-24" group by Meldedatum;'

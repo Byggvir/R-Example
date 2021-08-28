@@ -39,7 +39,7 @@ reganalysis <- function (data, zr,  main = "Wöchentliche Fälle DE" ) {
   
   z <- length(zr)
   
-  pylim <- c(min(data$Count[zr]),max(data$Count[zr]))
+  pylim <- c(0,max(data$Count[zr]))
   
   ra1 <- lm(data$Count[zr] ~ data$Kw[zr])
   ra2 <- lm(log(data$Count[zr]) ~ data$Kw[zr])
@@ -91,7 +91,7 @@ reganalysis <- function (data, zr,  main = "Wöchentliche Fälle DE" ) {
   
   )
 
-  legend ( "left"
+  legend ( "bottom"
            , inset = 0.02
            , legend = c(  paste("f(x)=" , round(ra1$coefficients[1],2),"+", round(ra1$coefficients[2],2), "* (x-7)")
                         , paste("f(x)= exp^(" ,round(ra2$coefficients[1],2),"+", round(ra2$coefficients[2],2), "* (x-7) )" )
@@ -111,14 +111,15 @@ par (   mar = c(10,10,10,10)
       , mfcol = c(1,2)
 )
 
-zeitraum <- 26:44
+zeitraum <- 79:82 - 8
 weekly <- aggregate(as.numeric(incCases) ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <-  c("Kw","Count")
+
 reganalysis(weekly, zeitraum, main = "Wöchentliche Fälle DE" )
 
 rm(weekly)
 
-zeitraum <- 26:47
+zeitraum <- 79:82 - 8
 weekly <- aggregate(as.numeric(incDeaths) ~ Kw, FUN = sum, data = daily)
 colnames(weekly) <- c("Kw","Count")
 reganalysis(weekly, zeitraum, main = "Wöchentliche Sterbefälle DE")

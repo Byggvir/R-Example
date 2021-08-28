@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 #
 #
-# Script: RKI_RegressionAnalysis.r
+# Script: RKI_RegressionAnalysisV2.r
 #
-# Stand: 2020-10-21
+# Stand: 2021-08-03
 # (c) 2020 by Thomas Arend, Rheinbach
 # E-Mail: thomas@arend-rhb.de
 #
@@ -21,8 +21,23 @@ library(lubridate)
 library(ggplot2)
 library(viridis)
 library(hrbrthemes)
+library(tidyverse)
 
-setwd("~/git/R-Example/")
+if (rstudioapi::isAvailable()){
+  
+  # When called in RStudio
+  SD <- unlist(str_split(dirname(rstudioapi::getSourceEditorContext()$path),'/'))
+  
+} else {
+  
+  #  When called from command line 
+  SD = (function() return( if(length(sys.parents())==1) getwd() else dirname(sys.frame(1)$ofile) ))()
+  SD <- unlist(str_split(SD,'/'))
+  
+}
+
+WD <- paste(SD[1:(length(SD)-1)],collapse='/')
+setwd(WD)
 
 source("lib/copyright.r")
 source("common/rki_sql.r")
@@ -76,4 +91,6 @@ ggsave(plot = gg, file = paste('png/Landkreise-', From_Kw,"-",To_Kw,".png", sep=
 
 # Main program
 
-  LandkreisePlus(9,80)
+kw <- isoweek(Sys.Date()) + 52
+  
+LandkreisePlus(9,kw)

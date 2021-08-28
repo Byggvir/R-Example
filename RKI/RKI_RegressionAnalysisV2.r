@@ -27,8 +27,6 @@ heute <- format(today, "%d %b %Y")
 
 Wochentage <- c("Mo","Di","Mi","Do","Fr","Sa","So")
 
-LookBack <- 20
-
 args = commandArgs(trailingOnly=TRUE)
 
 if (length(args) == 0) {
@@ -167,7 +165,7 @@ where
     , upper = round(exp(a[3] + b[3] * sTage) * Kor[wday(Tage, week_start = 1),3])
   )
   
- # print(PrognoseTab)
+  print(PrognoseTab)
   
   png( paste( "png/RKI_Prognose-V2"
               , "_"
@@ -209,7 +207,7 @@ where
   )
   copyright(c("RKI","TA"))
   
-  zr <- data$Day >= DaysBack
+  zr <- data$Day <= DaysBack
   
   lines ( data$Meldedatum[zr]
           , data$AnzahlFall[zr]
@@ -300,9 +298,9 @@ where
     , inset = 0.02
     , title = paste( "Tägliche Steigerung CI  ",  CI * 100, "%", sep="")
     , legend = c( 
-          paste(round((exp(ci[2,1])-1)*100,2),"% / R =",round((exp(4*ci[2,1])),2))
-        , paste(round((exp(ra$coefficients[2])-1)*100,2),"% / R =", round((exp(4*ra$coefficients[2])),2))
-        , paste(round((exp(ci[2,2])-1)*100,2),"% / R =",round((exp(4*ci[2,2])),2)))
+          paste(round((exp(ci[2,1])-1)*100,2),"% / R =",round((exp(7*ci[2,1])),2))
+        , paste(round((exp(ra$coefficients[2])-1)*100,2),"% / R =", round((exp(7*ra$coefficients[2])),2))
+        , paste(round((exp(ci[2,2])-1)*100,2),"% / R =",round((exp(7*ci[2,2])),2)))
     , col = c(
         "green"
       , "orange"
@@ -313,15 +311,16 @@ where
     , cex = 3)
 
   dev.off()
+  return(ra)
   
 }
 
 # Wann <- as.Date("2020-04-01")
 
-for (j in c(35)) {
-for (i in c(20,34)) {
+for (j in c(21)) {
+for (i in c(13,20,27,34)) {
     
-  regression_analysis (
+  ra <- regression_analysis (
       ThisDate = ThisDay
     , DaysBack = i
     , DaysAhead = j

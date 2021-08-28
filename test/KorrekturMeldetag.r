@@ -47,9 +47,9 @@ SQLWTag <-
   paste(
   'select' 
 , 'WTag'
-, ' , avg(AnteilAnWoche) as AnteilAnWoche'
-, ' , avg(AnteilAnWoche) * 7 as KorFaktor'
-, ' , stddev(AnteilAnWoche) as StdAbweichung'
+, ', avg(AnteilAnWoche) as AnteilAnWoche'
+, ', avg(AnteilAnWoche) * 7 as KorFaktor'
+, ', stddev(AnteilAnWoche) as StdAbweichung'
 , ' from ('
 , 'select' 
 , 'F.Meldedatum'
@@ -84,7 +84,6 @@ SQLWTag <-
 , 'group by WTag;'
 , sep= ' '
   )
-
 
 Kor <- sqlGetRKI(SQLWTag)  
 

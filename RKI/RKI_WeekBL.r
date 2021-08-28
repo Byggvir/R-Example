@@ -11,11 +11,6 @@
 MyScriptName <-"RKI"
 PNG <- "png/RKI_Week_"
 
-# Reads the cumulative cases and death from rki.de
-# The Excel file is in a very poor format. Therefore we have to adjust the data.
-# The weekly cases and deaths are in the second worksheet. We need only column 2 and 5.
-# The date  in column one is one day ahead in time.
-
 require(data.table)
 
 setwd("~/git/R-Example")
@@ -75,7 +70,7 @@ for (i in BL[,1]) {
          , las = 2
   )
 
-  title ( sub = BL[i,2], line = 3, cex.sub = 1.5 )
+  title ( sub = BL[i,2], line = 4, cex.sub = 1.5 )
 
   text( bp1
       , y
@@ -109,7 +104,7 @@ for (i in BL[,1]) {
          , las = 2
   )
 
-  title ( sub = BL[i,2], line = 3, cex.sub=1.5)
+  title ( sub = BL[i,2], line = 4, cex.sub=1.5)
 
   text( bp2
       , y 

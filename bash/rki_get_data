@@ -316,20 +316,10 @@ CREATE TABLE Bundesland (
     , Bundesland CHAR(32)
     , INDEX (Bundesland));
     
-DROP TABLE IF EXISTS Landkreis;
-
-CREATE TABLE Landkreis ( 
-    IdLandkreis INT PRIMARY KEY
-    , Landkreis CHAR(64)
-    , INDEX (Landkreis));
-    
 INSERT INTO Bundesland
 SELECT DISTINCT IdBundesland, Bundesland
 FROM RKIFaelle;
 
-INSERT INTO Landkreis
-SELECT DISTINCT IdLandkreis, Landkreis
-FROM RKIFaelle;
 
 ALTER TABLE RKIFaelle DROP COLUMN Bundesland;
 ALTER TABLE RKIFaelle DROP COLUMN Landkreis;
@@ -348,9 +338,7 @@ function run_r {
 
 pushd $HOME/git/R-Example/
 
-sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
-
-    pushd RKI
+  pushd RKI
     for r in *.r
     do
         echo -e "\n\n${blue}+---------"
@@ -361,7 +349,9 @@ sudo mv /tmp/RKI_nach_{Tag,Kw}.csv data/
 #         reset
      done
     popd
+
 popd
+
 }
 
 rm "$SQL"
@@ -370,8 +360,8 @@ touch "$SQL"
 download_all
 bund
 bundeslaender
-Testungen
-dashboard
+# Testungen
+#dashboard
 
 mysql --user=rscript --password=rscript < "$SQL"
 run_r

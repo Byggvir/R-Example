@@ -78,13 +78,13 @@ CREATE PROCEDURE CasesPerDayBL (IdBL INT)
 BEGIN
 
    SELECT 
-      IdBundesland AS BL
+      IdLandkreis div 1000 AS BL
     , Meldedatum AS Kw
     , sum(AnzahlFall) AS Cases
     , sum(AnzahlTodesfall) AS Deaths
     FROM RKIFaelle
-    WHERE IdBundesland = IdBL
-    GROUP BY IdBundesland, Meldedatum ;
+    WHERE IdLandkreis DIV 1000 = IdBL
+    GROUP BY IdBL, Meldedatum ;
 end
 //
 

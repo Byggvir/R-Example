@@ -46,7 +46,7 @@ begin
   SET @MD := (select max(Meldedatum) from RKIFaelle);
   INSERT INTO rki SELECT
     @MD 
-    ,  max(case when F.Outcome ='Cases' then F.Counts else 0 end )
+    , max(case when F.Outcome ='Cases' then F.Counts else 0 end )
     , max(case when F.Outcome ='Deaths' then F.Counts else 0 end )    
   FROM (
     SELECT

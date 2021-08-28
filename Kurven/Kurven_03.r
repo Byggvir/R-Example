@@ -2,7 +2,23 @@
 
 # Sigmoid - Exponential
 
-setwd("~/git/R-Example")
+library(tidyverse)
+
+if (rstudioapi::isAvailable()){
+  
+  # When called in RStudio
+  SD <- unlist(str_split(dirname(rstudioapi::getSourceEditorContext()$path),'/'))
+  
+} else {
+  
+  #  When called from command line 
+  SD = (function() return( if(length(sys.parents())==1) getwd() else dirname(sys.frame(1)$ofile) ))()
+  SD <- unlist(str_split(SD,'/'))
+  
+}
+
+WD <- paste(SD[1:(length(SD)-1)],collapse='/')
+setwd(WD)
 
 source("lib/copyright.r")
 

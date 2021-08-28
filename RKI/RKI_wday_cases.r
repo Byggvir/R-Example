@@ -95,7 +95,7 @@ plot( 0:6
     , UpDown[1:7,"Down"]
     , type="b"
     , col=c("green")
-    , ylim=c(0,40)
+    , ylim=c(0,80)
     , xaxt="n"
     , xlab="Wochentag"
     , ylab="Anzahl"

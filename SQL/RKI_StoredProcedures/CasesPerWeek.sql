@@ -70,14 +70,14 @@ CREATE PROCEDURE CasesPerWeekBL (IdBL INT)
 BEGIN
 
    SELECT 
-      IdBundesland AS BL
+      IdLandkreis div 1000 AS BL
     , ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
     , sum(AnzahlFall) AS Cases
     , sum(AnzahlTodesfall) AS Deaths
     FROM RKIFaelle
-    WHERE IdBundesland = IdBL
+    WHERE IdLandkreis div 1000 = IdBL
     and ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 8
-    GROUP BY IdBundesland, ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) ;
+    GROUP BY BL, ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) ;
 end
 //
 
@@ -87,15 +87,15 @@ CREATE PROCEDURE CasesPerWeekBL21 (IdBL INT)
 BEGIN
 
    SELECT 
-      IdBundesland AS BL
+      IdLandkreis div 1000 AS BL
     , week(Meldedatum,3) AS Kw
     , sum(AnzahlFall) AS Cases
     , sum(AnzahlTodesfall) AS Deaths
     FROM RKIFaelle
-    WHERE IdBundesland = IdBL
+    WHERE IdLandkreis div 1000 = IdBL
     and Meldedatum > "2021-01-03"
     and week(Meldedatum,3)
-    GROUP BY IdBundesland, Kw ;
+    GROUP BY IdBL, Kw ;
 end
 //
 
@@ -110,7 +110,7 @@ BEGIN
     , sum(AnzahlFall) AS Cases
     , sum(AnzahlTodesfall) AS Deaths
     FROM RKIFaelle
-    WHERE is_westbl(IdBundesland,West)
+    WHERE is_westbl(IdLandkreis div 1000,West)
     and  ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 8
     GROUP BY  ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) 
     ;
@@ -124,13 +124,13 @@ BEGIN
 
     SELECT 
         ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
-        , BLWestEast(IdBundesland) AS Bundesland
+        , BLWestEast(IdLandkreis div 1000) AS Bundesland
         , sum(AnzahlFall) AS Cases
         , sum(AnzahlTodesfall) AS Deaths
         , round(sum(AnzahlTodesfall) / sum(AnzahlFall)*100,1) AS CFR
     FROM RKIFaelle
     WHERE ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) > 9
-    GROUP BY BLWestEast(IdBundesland), Kw
+    GROUP BY BLWestEast(IdLandkreis div 1000), Kw
 --     UNION
 --     SELECT 
 --         ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
@@ -156,7 +156,7 @@ BEGIN
     
     CREATE TEMPORARY TABLE cpw ( IdBundesland INT, Kw INT, Cases BIGINT, Deaths BIGINT, PRIMARY KEY (IdBundesland,Kw) )
         SELECT 
-            IdBundesland AS IdBundesland
+            IdLandkreis div 1000 AS IdBundesland
             , ( case when Meldedatum > "2021-01-03" then 53+week(Meldedatum,3) else week(Meldedatum,3) end ) AS Kw
             , sum(AnzahlFall) AS Cases
             , sum(AnzahlTodesfall) AS Deaths

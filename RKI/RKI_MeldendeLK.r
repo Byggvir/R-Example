@@ -29,7 +29,7 @@ png( paste( "png/", MyScriptName, heute, ".png", sep = "")
     , width = 1920
     , height = 1080)
 par ( mar = c(10,10,10,10)
-      , mfcol = c(2,1)
+      , mfcol = c(1,1)
 )
 
 # ---- Erstes Diagramm
@@ -68,7 +68,7 @@ title ( sub = paste( "Datum letzte Fallmeldung des GA ans RKI")
 
 text( bp2
       , LetzteMeldung[,2] 
-      , LetzteMeldung[,2]
+      , paste( LetzteMeldung[,2], "\n" , round(LetzteMeldung[,2]/4.12,1) , "%" , sep ='')
       , cex = 2
       , adj = 0.5
       , pos = 3
